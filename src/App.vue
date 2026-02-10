@@ -1,21 +1,21 @@
 <template>
-  <div class="flex h-screen bg-gray-50 font-sans text-gray-900">
+  <div class="flex h-screen bg-gray-50 font-sans text-gray-900 dark:bg-gray-900 dark:text-gray-100">
     <!-- Main Content -->
     <div class="flex-1 flex flex-col h-full overflow-hidden">
       <!-- Header with Navigation -->
-      <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 sm:px-6 z-20 shadow-sm sticky top-0">
+      <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 sm:px-6 z-20 shadow-sm sticky top-0 dark:bg-gray-800 dark:border-gray-700">
         
         <!-- Logo & Branding -->
         <div class="flex items-center">
           <LayoutDashboard class="w-6 h-6 text-indigo-600 mr-3 hidden sm:block" />
-          <h1 class="text-xl font-bold text-gray-800 tracking-tight">Campaign Admin</h1>
+          <h1 class="text-xl font-bold text-gray-800 tracking-tight dark:text-gray-100">Campaign Admin</h1>
         </div>
 
         <!-- Top Navigation Links -->
         <nav class="hidden md:flex items-center space-x-1 ml-8">
             <button 
               @click="switchTab('dashboard')" 
-              :class="activeTab === 'dashboard' ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'"
+              :class="activeTab === 'dashboard' ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-200' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-200'"
               class="px-3 py-2 text-sm font-medium rounded-md transition-colors flex items-center"
             >
               <LayoutGrid class="w-4 h-4 mr-2" />
@@ -23,13 +23,13 @@
             </button>
             <button 
               @click="switchTab('announcement')" 
-              :class="activeTab === 'announcement' ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'"
+              :class="activeTab === 'announcement' ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-200' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-200'"
               class="px-3 py-2 text-sm font-medium rounded-md transition-colors flex items-center"
             >
               <Megaphone class="w-4 h-4 mr-2" />
               Announcement
               <span 
-                :class="config.announcementBar.active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'"
+                :class="config.announcementBar.active ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-200' : 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400'"
                 class="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium"
               >
                 {{ config.announcementBar.active ? 'ON' : 'OFF' }}
@@ -37,13 +37,13 @@
             </button>
             <button 
               @click="switchTab('promo')" 
-              :class="activeTab === 'promo' ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'"
+              :class="activeTab === 'promo' ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-200' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-200'"
               class="px-3 py-2 text-sm font-medium rounded-md transition-colors flex items-center"
             >
               <Gift class="w-4 h-4 mr-2" />
               Promo Card
               <span 
-                :class="config.promoCard.active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'"
+                :class="config.promoCard.active ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-200' : 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400'"
                 class="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium"
               >
                 {{ config.promoCard.active ? 'ON' : 'OFF' }}
@@ -53,6 +53,15 @@
         
         <!-- Right Side Actions -->
         <div class="flex items-center space-x-4">
+          <!-- Dark Mode Toggle -->
+          <button 
+            @click="toggleDarkMode"
+            class="p-2 rounded-lg text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700 transition-colors"
+            title="Toggle dark mode"
+          >
+            <Sun v-if="isDarkMode" class="w-5 h-5" />
+            <Moon v-else class="w-5 h-5" />
+          </button>
           <div v-if="hasChanges" class="text-sm text-yellow-600 font-medium flex items-center animate-pulse hidden sm:flex">
             <span class="w-2 h-2 bg-yellow-400 rounded-full mr-2"></span>
             Unsaved changes
@@ -70,7 +79,7 @@
       </header>
 
       <!-- Scrollable Content -->
-      <main class="flex-1 overflow-y-auto bg-gray-50 p-6">
+      <main class="flex-1 overflow-y-auto bg-gray-50 p-6 dark:bg-gray-900">
         <div class="max-w-6xl mx-auto space-y-8 pb-12">
 
           <!-- Dashboard Overview -->
@@ -78,72 +87,72 @@
             <!-- Announcement Bar Summary Card -->
             <div 
               @click="switchTab('announcement')" 
-              class="bg-white rounded-lg border border-gray-200 shadow-sm p-6 cursor-pointer hover:shadow-md hover:border-indigo-200 transition-all group"
+              class="bg-white rounded-lg border border-gray-200 shadow-sm p-6 cursor-pointer hover:shadow-md hover:border-indigo-200 transition-all group dark:bg-gray-800 dark:border-gray-700 dark:hover:border-indigo-500"
             >
               <div class="flex items-center justify-between mb-4">
                 <div class="flex items-center">
                   <div class="p-2 bg-indigo-100 rounded-lg mr-3">
                     <Megaphone class="w-5 h-5 text-indigo-600" />
                   </div>
-                  <h3 class="text-base font-semibold text-gray-900">Announcement Bar</h3>
+                  <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100">Announcement Bar</h3>
                 </div>
                 <span 
-                  :class="config.announcementBar.active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'"
+                  :class="config.announcementBar.active ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-200' : 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400'"
                   class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium"
                 >
                   {{ config.announcementBar.active ? 'Active' : 'Inactive' }}
                 </span>
               </div>
-              <p class="text-sm text-gray-500 mb-3 line-clamp-2">{{ config.announcementBar.text || 'No announcement text set' }}</p>
+              <p class="text-sm text-gray-500 mb-3 line-clamp-2 dark:text-gray-400">{{ config.announcementBar.text || 'No announcement text set' }}</p>
               <div class="flex items-center text-xs text-gray-400">
                 <Calendar class="w-3.5 h-3.5 mr-1" />
                 <span v-if="config.announcementBar.startDate">{{ config.announcementBar.startDate }} → {{ config.announcementBar.endDate || '...' }}</span>
                 <span v-else>No schedule set</span>
               </div>
-              <div class="mt-3 text-xs text-indigo-600 font-medium opacity-0 group-hover:opacity-100 transition-opacity">Click to edit →</div>
+              <div class="mt-3 text-xs text-indigo-600 font-medium opacity-0 group-hover:opacity-100 transition-opacity dark:text-indigo-400">Click to edit →</div>
             </div>
 
             <!-- Promo Card Summary Card -->
             <div 
               @click="switchTab('promo')" 
-              class="bg-white rounded-lg border border-gray-200 shadow-sm p-6 cursor-pointer hover:shadow-md hover:border-pink-200 transition-all group"
+              class="bg-white rounded-lg border border-gray-200 shadow-sm p-6 cursor-pointer hover:shadow-md hover:border-pink-200 transition-all group dark:bg-gray-800 dark:border-gray-700 dark:hover:border-pink-500"
             >
               <div class="flex items-center justify-between mb-4">
                 <div class="flex items-center">
                   <div class="p-2 bg-pink-100 rounded-lg mr-3">
                     <Gift class="w-5 h-5 text-pink-600" />
                   </div>
-                  <h3 class="text-base font-semibold text-gray-900">Promo Card</h3>
+                  <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100">Promo Card</h3>
                 </div>
                 <span 
-                  :class="config.promoCard.active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'"
+                  :class="config.promoCard.active ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-200' : 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400'"
                   class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium"
                 >
                   {{ config.promoCard.active ? 'Active' : 'Inactive' }}
                 </span>
               </div>
-              <p class="text-sm text-gray-500 mb-1 font-medium">{{ config.promoCard.title || 'No title set' }}</p>
-              <p class="text-sm text-gray-400 mb-3 line-clamp-2">{{ config.promoCard.description || 'No description set' }}</p>
+              <p class="text-sm text-gray-500 mb-1 font-medium dark:text-gray-400">{{ config.promoCard.title || 'No title set' }}</p>
+              <p class="text-sm text-gray-400 mb-3 line-clamp-2 dark:text-gray-500">{{ config.promoCard.description || 'No description set' }}</p>
               <div class="flex items-center text-xs text-gray-400">
                 <Calendar class="w-3.5 h-3.5 mr-1" />
                 <span v-if="config.promoCard.startDate">{{ config.promoCard.startDate }} → {{ config.promoCard.endDate || '...' }}</span>
                 <span v-else>No schedule set</span>
               </div>
-              <div class="mt-3 text-xs text-pink-600 font-medium opacity-0 group-hover:opacity-100 transition-opacity">Click to edit →</div>
+              <div class="mt-3 text-xs text-pink-600 font-medium opacity-0 group-hover:opacity-100 transition-opacity dark:text-pink-400">Click to edit →</div>
             </div>
           </div>
 
 
           <!-- Announcement Bar Section -->
-          <section v-if="activeTab === 'announcement'" id="announcement" class="bg-white shadow rounded-lg border border-gray-200 overflow-hidden">
-            <div class="px-6 py-5 border-b border-gray-200 bg-gray-50/50 flex items-center justify-between">
+          <section v-if="activeTab === 'announcement'" id="announcement" class="bg-white shadow rounded-lg border border-gray-200 overflow-hidden dark:bg-gray-800 dark:border-gray-700">
+            <div class="px-6 py-5 border-b border-gray-200 bg-gray-50/50 flex items-center justify-between dark:border-gray-700 dark:bg-gray-700/50">
               <div class="flex items-center">
                 <div class="p-2 bg-indigo-100 rounded-lg mr-4">
                   <Megaphone class="w-5 h-5 text-indigo-600" />
                 </div>
                 <div>
-                  <h3 class="text-lg leading-6 font-medium text-gray-900">Announcement Bar</h3>
-                  <p class="mt-1 max-w-2xl text-sm text-gray-500">Top banner for site-wide alerts.</p>
+                  <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-gray-100">Announcement Bar</h3>
+                  <p class="mt-1 max-w-2xl text-sm text-gray-500 dark:text-gray-400">Top banner for site-wide alerts.</p>
                 </div>
               </div>
               
@@ -180,14 +189,14 @@
 
             <div class="p-6 space-y-6">
               <div>
-                <label for="announcement-text" class="block text-sm font-medium text-gray-700">Announcement Text</label>
+                <label for="announcement-text" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Announcement Text</label>
                 <div class="mt-1">
                   <textarea 
                     id="announcement-text" 
                     rows="2" 
                     v-model="config.announcementBar.text"
                     @input="markChanged"
-                    class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md p-3 border" 
+                    class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md p-3 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400" 
                     placeholder="🎉 Winter Sale is fully live! Keep shopping."
                   ></textarea>
                 </div>
@@ -195,31 +204,31 @@
 
               <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
                 <div>
-                  <label class="block text-sm font-medium text-gray-700">Start Date</label>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Start Date</label>
                   <div class="mt-1 relative rounded-md shadow-sm">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Calendar class="h-5 w-5 text-gray-400" />
+                      <Calendar class="h-5 w-5 text-gray-400 dark:text-gray-500" />
                     </div>
                     <input 
                       type="date" 
                       v-model="config.announcementBar.startDate"
                       @input="markChanged"
-                      class="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md p-2.5 border" 
+                      class="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md p-2.5 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100" 
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label class="block text-sm font-medium text-gray-700">End Date</label>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">End Date</label>
                   <div class="mt-1 relative rounded-md shadow-sm">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Calendar class="h-5 w-5 text-gray-400" />
+                      <Calendar class="h-5 w-5 text-gray-400 dark:text-gray-500" />
                     </div>
                     <input 
                       type="date" 
                       v-model="config.announcementBar.endDate"
                       @input="markChanged"
-                      class="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md p-2.5 border" 
+                      class="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md p-2.5 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100" 
                     />
                   </div>
                 </div>
@@ -227,24 +236,24 @@
 
               <!-- Colors -->
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Style Customization</label>
+                <label class="block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300">Style Customization</label>
                 <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
                   <div class="relative rounded-md shadow-sm">
-                    <input type="color" v-model="config.announcementBar.style.backgroundColor" @input="markChanged" class="h-10 w-full rounded border border-gray-300 cursor-pointer" />
-                    <div class="mt-1 text-xs text-center text-gray-500">Background</div>
+                    <input type="color" v-model="config.announcementBar.style.backgroundColor" @input="markChanged" class="h-10 w-full rounded border border-gray-300 cursor-pointer dark:border-gray-600" />
+                    <div class="mt-1 text-xs text-center text-gray-500 dark:text-gray-400">Background</div>
                   </div>
                   <div class="relative rounded-md shadow-sm">
-                    <input type="color" v-model="config.announcementBar.style.textColor" @input="markChanged" class="h-10 w-full rounded border border-gray-300 cursor-pointer" />
-                    <div class="mt-1 text-xs text-center text-gray-500">Text</div>
+                    <input type="color" v-model="config.announcementBar.style.textColor" @input="markChanged" class="h-10 w-full rounded border border-gray-300 cursor-pointer dark:border-gray-600" />
+                    <div class="mt-1 text-xs text-center text-gray-500 dark:text-gray-400">Text</div>
                   </div>
                 </div>
               </div>
             </div>
             
             <!-- Live Preview Area Inline -->
-             <div class="bg-gray-100 p-4 border-t border-gray-200">
-               <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Preview</h4>
-               <div class="w-full bg-white border border-gray-300 rounded shadow-sm overflow-hidden transform transition-all">
+             <div class="bg-gray-100 p-4 border-t border-gray-200 dark:bg-gray-700 dark:border-gray-600">
+               <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 dark:text-gray-400">Preview</h4>
+               <div class="w-full bg-white border border-gray-300 rounded shadow-sm overflow-hidden transform transition-all dark:bg-gray-800 dark:border-gray-600">
                   <!-- Navbar Mockup -->
                    <div 
                     v-if="config.announcementBar.active"
@@ -254,7 +263,7 @@
                      {{ config.announcementBar.text || 'Announcement Text Preview' }}
                    </div>
                    <!-- Website Header Mock -->
-                   <div class="h-12 bg-white flex items-center justify-between px-4 border-b border-gray-100">
+                   <div class="h-12 bg-white flex items-center justify-between px-4 border-b border-gray-100 dark:bg-gray-900 dark:border-gray-700">
                       <div class="w-24 h-4 bg-gray-200 rounded"></div>
                       <div class="flex space-x-2">
                         <div class="w-12 h-4 bg-gray-100 rounded"></div>
@@ -266,15 +275,15 @@
           </section>
 
           <!-- Promo Card Section -->
-          <section v-if="activeTab === 'promo'" id="promo" class="bg-white shadow rounded-lg border border-gray-200 overflow-hidden">
-             <div class="px-6 py-5 border-b border-gray-200 bg-gray-50/50 flex items-center justify-between">
+          <section v-if="activeTab === 'promo'" id="promo" class="bg-white shadow rounded-lg border border-gray-200 overflow-hidden dark:bg-gray-800 dark:border-gray-700">
+             <div class="px-6 py-5 border-b border-gray-200 bg-gray-50/50 flex items-center justify-between dark:border-gray-700 dark:bg-gray-700/50">
               <div class="flex items-center">
                 <div class="p-2 bg-pink-100 rounded-lg mr-4">
                   <Gift class="w-5 h-5 text-pink-600" />
                 </div>
                 <div>
-                  <h3 class="text-lg leading-6 font-medium text-gray-900">Promo Card</h3>
-                  <p class="mt-1 max-w-2xl text-sm text-gray-500">Floating widget for special offers or lead gen.</p>
+                  <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-gray-100">Promo Card</h3>
+                  <p class="mt-1 max-w-2xl text-sm text-gray-500 dark:text-gray-400">Floating widget for special offers or lead gen.</p>
                 </div>
               </div>
                <!-- Toggle Switch -->
@@ -291,53 +300,53 @@
               <!-- Form Side -->
               <div class="space-y-6">
                  <div>
-                  <label class="block text-sm font-medium text-gray-700">Title</label>
-                  <input type="text" v-model="config.promoCard.title" @input="markChanged" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md p-2.5 border" placeholder="Get 20% OFF" />
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Title</label>
+                  <input type="text" v-model="config.promoCard.title" @input="markChanged" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md p-2.5 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100" placeholder="Get 20% OFF" />
                  </div>
                  
                  <div>
-                  <label class="block text-sm font-medium text-gray-700">Description</label>
-                  <textarea rows="2" v-model="config.promoCard.description" @input="markChanged" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md p-2.5 border" placeholder="Sign up for our newsletter today!"></textarea>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
+                  <textarea rows="2" v-model="config.promoCard.description" @input="markChanged" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md p-2.5 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400" placeholder="Sign up for our newsletter today!"></textarea>
                  </div>
 
                  <div class="grid grid-cols-2 gap-4">
                     <div>
-                      <label class="block text-sm font-medium text-gray-700">Button Text</label>
-                      <input type="text" v-model="config.promoCard.buttonText" @input="markChanged" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2.5 border" />
+                      <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Button Text</label>
+                      <input type="text" v-model="config.promoCard.buttonText" @input="markChanged" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2.5 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100" />
                     </div>
                     <div>
-                      <label class="block text-sm font-medium text-gray-700">Button URL</label>
-                      <input type="text" v-model="config.promoCard.buttonUrl" @input="markChanged" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2.5 border" />
+                      <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Button URL</label>
+                      <input type="text" v-model="config.promoCard.buttonUrl" @input="markChanged" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2.5 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100" />
                     </div>
                  </div>
 
                  <div>
-                    <label class="block text-sm font-medium text-gray-700">Image URL</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Image URL</label>
                     <div class="mt-1 flex rounded-md shadow-sm">
-                      <span class="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">http://</span>
-                      <input type="text" v-model="config.promoCard.imageUrl" @input="markChanged" class="focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-none rounded-r-md sm:text-sm border-gray-300 p-2.5 border" placeholder="www.example.com/image.jpg" />
+                      <span class="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm dark:border-gray-600 dark:bg-gray-600 dark:text-gray-300">http://</span>
+                      <input type="text" v-model="config.promoCard.imageUrl" @input="markChanged" class="focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-none rounded-r-md sm:text-sm border-gray-300 p-2.5 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100" placeholder="www.example.com/image.jpg" />
                     </div>
                  </div>
                   
                   <!-- Dates -->
                   <div class="grid grid-cols-2 gap-4">
                      <div>
-                        <label class="block text-sm font-medium text-gray-700">Start Date</label>
-                         <input type="date" v-model="config.promoCard.startDate" @input="markChanged" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2.5 border" />
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Start Date</label>
+                         <input type="date" v-model="config.promoCard.startDate" @input="markChanged" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2.5 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100" />
                      </div>
                       <div>
-                        <label class="block text-sm font-medium text-gray-700">End Date</label>
-                         <input type="date" v-model="config.promoCard.endDate" @input="markChanged" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2.5 border" />
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">End Date</label>
+                         <input type="date" v-model="config.promoCard.endDate" @input="markChanged" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2.5 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100" />
                      </div>
                   </div>
 
                  <!-- Styling -->
-                 <div class="border-t border-gray-200 pt-4">
-                    <h4 class="text-sm font-medium text-gray-900 mb-3">Card Appearance</h4>
+                 <div class="border-t border-gray-200 pt-4 dark:border-gray-600">
+                    <h4 class="text-sm font-medium text-gray-900 mb-3 dark:text-gray-100">Card Appearance</h4>
                     <div class="grid grid-cols-2 gap-4">
                        <div>
-                          <label class="block text-xs text-gray-500 mb-1">Position</label>
-                          <select v-model="config.promoCard.style.position" @change="markChanged" class="block w-full text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md p-2 border">
+                          <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">Position</label>
+                          <select v-model="config.promoCard.style.position" @change="markChanged" class="block w-full text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md p-2 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
                             <option value="bottom-right">Bottom Right</option>
                             <option value="bottom-left">Bottom Left</option>
                             <option value="top-right">Top Right</option>
@@ -346,12 +355,12 @@
                        </div>
                        <div class="flex items-end space-x-2">
                           <div class="flex-1">
-                             <label class="block text-xs text-gray-500 mb-1">Bg Color</label>
-                             <input type="color" v-model="config.promoCard.style.backgroundColor" @input="markChanged" class="h-9 w-full rounded border border-gray-300 cursor-pointer" />
+                             <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">Bg Color</label>
+                             <input type="color" v-model="config.promoCard.style.backgroundColor" @input="markChanged" class="h-9 w-full rounded border border-gray-300 cursor-pointer dark:border-gray-600" />
                           </div>
                            <div class="flex-1">
-                             <label class="block text-xs text-gray-500 mb-1">Text Color</label>
-                             <input type="color" v-model="config.promoCard.style.textColor" @input="markChanged" class="h-9 w-full rounded border border-gray-300 cursor-pointer" />
+                             <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">Text Color</label>
+                             <input type="color" v-model="config.promoCard.style.textColor" @input="markChanged" class="h-9 w-full rounded border border-gray-300 cursor-pointer dark:border-gray-600" />
                           </div>
                        </div>
                     </div>
@@ -360,8 +369,8 @@
               </div>
 
               <!-- Preview Side -->
-              <div class="bg-gray-100 rounded-lg p-4 flex items-center justify-center relative min-h-[400px] border border-gray-200 bg-[url('https://lib.shadcn.com/placeholder.svg')] bg-center bg-no-repeat bg-contain">
-                 <div class="absolute inset-0 flex items-center justify-center text-gray-400 text-sm font-medium pointer-events-none">Website Content Area</div>
+              <div class="bg-gray-100 rounded-lg p-4 flex items-center justify-center relative min-h-[400px] border border-gray-200 bg-[url('https://lib.shadcn.com/placeholder.svg')] bg-center bg-no-repeat bg-contain dark:bg-gray-700 dark:border-gray-600">
+                 <div class="absolute inset-0 flex items-center justify-center text-gray-400 text-sm font-medium pointer-events-none dark:text-gray-500">Website Content Area</div>
                  
                  <!-- The Actual Card Preview -->
                  <div 
@@ -382,7 +391,7 @@
                     <img 
                       v-if="config.promoCard.imageUrl" 
                       :src="config.promoCard.imageUrl" 
-                      class="w-full h-32 object-cover rounded-lg mb-4 bg-gray-200"
+                      class="w-full h-32 object-cover rounded-lg mb-4 bg-gray-200 dark:bg-gray-600"
                       alt="Promo"
                     />
                     
@@ -401,15 +410,15 @@
           </section>
 
           <!-- Raw Data (Collapsed) -->
-          <details class="group bg-white rounded-lg border border-gray-200 shadow-sm">
+          <details class="group bg-white rounded-lg border border-gray-200 shadow-sm dark:bg-gray-800 dark:border-gray-700">
              <summary class="flex items-center justify-between p-4 cursor-pointer">
-                <h3 class="text-sm font-medium text-gray-700 font-mono flex items-center">
+                <h3 class="text-sm font-medium text-gray-700 font-mono flex items-center dark:text-gray-300">
                    <Code class="w-4 h-4 mr-2" />
                    JSON Configuration
                 </h3>
-                <ChevronDown class="w-4 h-4 text-gray-400 group-open:rotate-180 transition-transform" />
+                <ChevronDown class="w-4 h-4 text-gray-400 group-open:rotate-180 transition-transform dark:text-gray-500" />
              </summary>
-             <div class="p-4 bg-gray-50 border-t border-gray-200 font-mono text-xs overflow-x-auto text-gray-600">
+             <div class="p-4 bg-gray-50 border-t border-gray-200 font-mono text-xs overflow-x-auto text-gray-600 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300">
                <pre>{{ JSON.stringify(config, null, 2) }}</pre>
              </div>
           </details>
@@ -445,7 +454,9 @@ import {
   X, 
   CheckCircle,
   Code,
-  ChevronDown
+  ChevronDown,
+  Sun,
+  Moon
 } from 'lucide-vue-next'
 
 const route = useRoute()
@@ -455,6 +466,7 @@ const config = ref<CampaignConfig>(defaultConfig)
 const hasChanges = ref(false)
 const showToast = ref(false)
 const toastMessage = ref('')
+const isDarkMode = ref(false)
 
 // Sync activeTab with current route
 watch(() => route.path, (newPath) => {
@@ -464,9 +476,35 @@ watch(() => route.path, (newPath) => {
   }
 }, { immediate: true })
 
+// Initialize dark mode from localStorage or system preference
 onMounted(() => {
   config.value = loadConfig()
+  
+  // Check for saved dark mode preference or system preference
+  const savedDarkMode = localStorage.getItem('darkMode')
+  if (savedDarkMode !== null) {
+    isDarkMode.value = savedDarkMode === 'true'
+  } else {
+    isDarkMode.value = window.matchMedia('(prefers-color-scheme: dark)').matches
+  }
+  
+  // Apply dark mode class to html element
+  updateDarkModeClass()
 })
+
+function toggleDarkMode() {
+  isDarkMode.value = !isDarkMode.value
+  localStorage.setItem('darkMode', isDarkMode.value.toString())
+  updateDarkModeClass()
+}
+
+function updateDarkModeClass() {
+  if (isDarkMode.value) {
+    document.documentElement.classList.add('dark')
+  } else {
+    document.documentElement.classList.remove('dark')
+  }
+}
 
 function markChanged() {
   hasChanges.value = true
