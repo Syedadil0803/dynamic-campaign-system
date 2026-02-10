@@ -15,9 +15,8 @@ export interface CampaignConfig {
     active: boolean;
     title: string;
     description: string;
-    buttonText: string;
-    buttonUrl: string;
-    imageUrl: string;
+    buttonText?: string;
+    buttonUrl?: string;
     startDate: string;
     endDate: string;
     style: {
@@ -51,9 +50,7 @@ export const defaultConfig: CampaignConfig = {
     active: false,
     title: '',
     description: '',
-    buttonText: 'Get Started',
     buttonUrl: '',
-    imageUrl: '',
     startDate: '',
     endDate: '',
     style: {

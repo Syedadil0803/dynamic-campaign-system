@@ -339,17 +339,7 @@
                   </div>
                 </div>
 
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Image URL</label>
-                  <div class="mt-1 flex rounded-md shadow-sm">
-                    <span
-                      class="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm dark:border-gray-600 dark:bg-gray-600 dark:text-gray-300">http://</span>
-                    <input type="text" v-model="config.promoCard.imageUrl" @input="markChanged"
-                      class="focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-none rounded-r-md sm:text-sm border-gray-300 p-2.5 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
-                      placeholder="www.example.com/image.jpg" />
-                  </div>
-                </div>
-
+                
                 <!-- Dates -->
                 <div class="grid grid-cols-2 gap-4">
                   <div>
@@ -374,8 +364,6 @@
                         class="block w-full text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md p-2 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
                         <option value="bottom-right">Bottom Right</option>
                         <option value="bottom-left">Bottom Left</option>
-                        <option value="top-right">Top Right</option>
-                        <option value="top-left">Top Left</option>
                       </select>
                     </div>
                     <div class="flex items-end space-x-2">
@@ -427,16 +415,13 @@
                     <X class="w-4 h-4" />
                   </button>
 
-                  <img v-if="config.promoCard.imageUrl" :src="config.promoCard.imageUrl"
-                    class="w-full h-32 object-cover rounded-lg mb-4 bg-gray-200 dark:bg-gray-600" alt="Promo" />
-
                   <h3 class="text-lg font-bold mb-1">{{ config.promoCard.title || 'Title' }}</h3>
                   <p class="text-sm opacity-90 mb-4">{{ config.promoCard.description || 'Description text goes here.' }}
                   </p>
 
-                  <button class="w-full py-2 px-4 rounded-lg text-sm font-semibold transition-transform active:scale-95"
+                  <button v-if="config.promoCard.buttonText" class="w-full py-2 px-4 rounded-lg text-sm font-semibold transition-transform active:scale-95"
                     :style="{ backgroundColor: config.promoCard.style.buttonColor, color: config.promoCard.style.buttonTextColor }">
-                    {{ config.promoCard.buttonText || 'Click Here' }}
+                    {{ config.promoCard.buttonText }}
                   </button>
                 </div>
               </div>
