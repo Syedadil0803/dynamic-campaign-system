@@ -3,15 +3,12 @@ export interface CampaignConfig {
   lastUpdated: string;
   announcementBar: {
     active: boolean;
-    text: string;
-    linkUrl: string;
-    linkText: string;
+    announcements: string[];
     startDate: string;
     endDate: string;
     style: {
       backgroundColor: string;
       textColor: string;
-      linkColor: string;
     };
   };
   promoCard: {
@@ -38,15 +35,16 @@ export const defaultConfig: CampaignConfig = {
   lastUpdated: new Date().toISOString(),
   announcementBar: {
     active: false,
-    text: '',
-    linkUrl: '',
-    linkText: 'Learn More',
+    announcements: [
+      '🎉 Winter Sale is fully live! Keep shopping.',
+      'Get 5% off on orders above ₹999 and 10% off on orders above ₹1999',
+      'Win Loyalty Points & Encash discounts on each order'
+    ],
     startDate: '',
     endDate: '',
     style: {
       backgroundColor: '#dc2626',
       textColor: '#ffffff',
-      linkColor: '#fef08a',
     },
   },
   promoCard: {
