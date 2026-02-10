@@ -1,55 +1,59 @@
 <template>
   <div class="flex h-screen bg-gray-50 font-sans text-gray-900">
-    <!-- Sidebar -->
-    <aside class="w-64 bg-white border-r border-gray-200 flex flex-col fixed h-full z-10 hidden md:flex">
-      <div class="h-16 flex items-center px-6 border-b border-gray-100">
-        <LayoutDashboard class="w-6 h-6 text-indigo-600 mr-3" />
-        <span class="text-lg font-bold text-gray-800 tracking-tight">Campaign Admin</span>
-      </div>
-
-      <nav class="flex-1 overflow-y-auto py-6 space-y-1 px-3">
-        <a href="#" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg bg-indigo-50 text-indigo-700 transition-colors">
-          <LayoutGrid class="w-5 h-5 mr-3" />
-          Dashboard
-        </a>
-        <div class="pt-4 pb-2 px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">
-          Campaigns
-        </div>
-        <a href="#announcement" class="flex items-center px-3 py-2 text-sm font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors group">
-          <Megaphone class="w-5 h-5 mr-3 text-gray-400 group-hover:text-gray-500" />
-          Announcement Bar
-          <span :class="config.announcementBar.active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'" class="ml-auto inline-flex items-center px-2 py-0.5 rounded text-xs font-medium">
-            {{ config.announcementBar.active ? 'ON' : 'OFF' }}
-          </span>
-        </a>
-        <a href="#promo" class="flex items-center px-3 py-2 text-sm font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors group">
-          <Gift class="w-5 h-5 mr-3 text-gray-400 group-hover:text-gray-500" />
-          Promo Card
-          <span :class="config.promoCard.active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'" class="ml-auto inline-flex items-center px-2 py-0.5 rounded text-xs font-medium">
-            {{ config.promoCard.active ? 'ON' : 'OFF' }}
-          </span>
-        </a>
-      </nav>
-
-      <div class="p-4 border-t border-gray-100">
-        <div class="flex items-center px-3 py-2 text-sm font-medium text-gray-600">
-          <User class="w-5 h-5 mr-3 text-gray-400" />
-          <span>Admin User</span>
-        </div>
-      </div>
-    </aside>
-
     <!-- Main Content -->
-    <div class="flex-1 flex flex-col md:pl-64 h-full overflow-hidden">
-      <!-- Header -->
-      <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 z-20 shadow-sm sticky top-0">
-        <div class="flex items-center md:hidden">
-          <Menu class="w-6 h-6 text-gray-500" />
-        </div>
-        <h1 class="text-xl font-semibold text-gray-800 hidden md:block">Campaign Dashboard</h1>
+    <div class="flex-1 flex flex-col h-full overflow-hidden">
+      <!-- Header with Navigation -->
+      <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 sm:px-6 z-20 shadow-sm sticky top-0">
         
+        <!-- Logo & Branding -->
+        <div class="flex items-center">
+          <LayoutDashboard class="w-6 h-6 text-indigo-600 mr-3 hidden sm:block" />
+          <h1 class="text-xl font-bold text-gray-800 tracking-tight">Campaign Admin</h1>
+        </div>
+
+        <!-- Top Navigation Links -->
+        <nav class="hidden md:flex items-center space-x-1 ml-8">
+            <button 
+              @click="switchTab('dashboard')" 
+              :class="activeTab === 'dashboard' ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'"
+              class="px-3 py-2 text-sm font-medium rounded-md transition-colors flex items-center"
+            >
+              <LayoutGrid class="w-4 h-4 mr-2" />
+              Dashboard
+            </button>
+            <button 
+              @click="switchTab('announcement')" 
+              :class="activeTab === 'announcement' ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'"
+              class="px-3 py-2 text-sm font-medium rounded-md transition-colors flex items-center"
+            >
+              <Megaphone class="w-4 h-4 mr-2" />
+              Announcement
+              <span 
+                :class="config.announcementBar.active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'"
+                class="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium"
+              >
+                {{ config.announcementBar.active ? 'ON' : 'OFF' }}
+              </span>
+            </button>
+            <button 
+              @click="switchTab('promo')" 
+              :class="activeTab === 'promo' ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'"
+              class="px-3 py-2 text-sm font-medium rounded-md transition-colors flex items-center"
+            >
+              <Gift class="w-4 h-4 mr-2" />
+              Promo Card
+              <span 
+                :class="config.promoCard.active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'"
+                class="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium"
+              >
+                {{ config.promoCard.active ? 'ON' : 'OFF' }}
+              </span>
+            </button>
+        </nav>
+        
+        <!-- Right Side Actions -->
         <div class="flex items-center space-x-4">
-          <div v-if="hasChanges" class="text-sm text-yellow-600 font-medium flex items-center animate-pulse">
+          <div v-if="hasChanges" class="text-sm text-yellow-600 font-medium flex items-center animate-pulse hidden sm:flex">
             <span class="w-2 h-2 bg-yellow-400 rounded-full mr-2"></span>
             Unsaved changes
           </div>
@@ -59,7 +63,8 @@
             class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
           >
             <Save class="w-4 h-4 mr-2" />
-            {{ hasChanges ? 'Save Changes' : 'Saved' }}
+            <span class="hidden sm:inline">{{ hasChanges ? 'Save Changes' : 'Saved' }}</span>
+            <span class="sm:hidden">Save</span>
           </button>
         </div>
       </header>
@@ -67,20 +72,70 @@
       <!-- Scrollable Content -->
       <main class="flex-1 overflow-y-auto bg-gray-50 p-6">
         <div class="max-w-6xl mx-auto space-y-8 pb-12">
-          
-          <!-- Quick Stats / Overview Check -->
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-             <div class="bg-white overflow-hidden shadow rounded-lg px-4 py-5 sm:p-6 border border-gray-100">
-                <dt class="text-sm font-medium text-gray-500 truncate mb-1">Active Campaigns</dt>
-                <dd class="mt-1 text-3xl font-semibold text-gray-900">
-                  {{ (config.announcementBar.active ? 1 : 0) + (config.promoCard.active ? 1 : 0) }}
-                </dd>
-             </div>
-             <!-- Add more stats if needed -->
+
+          <!-- Dashboard Overview -->
+          <div v-if="activeTab === 'dashboard'" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Announcement Bar Summary Card -->
+            <div 
+              @click="switchTab('announcement')" 
+              class="bg-white rounded-lg border border-gray-200 shadow-sm p-6 cursor-pointer hover:shadow-md hover:border-indigo-200 transition-all group"
+            >
+              <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center">
+                  <div class="p-2 bg-indigo-100 rounded-lg mr-3">
+                    <Megaphone class="w-5 h-5 text-indigo-600" />
+                  </div>
+                  <h3 class="text-base font-semibold text-gray-900">Announcement Bar</h3>
+                </div>
+                <span 
+                  :class="config.announcementBar.active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'"
+                  class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium"
+                >
+                  {{ config.announcementBar.active ? 'Active' : 'Inactive' }}
+                </span>
+              </div>
+              <p class="text-sm text-gray-500 mb-3 line-clamp-2">{{ config.announcementBar.text || 'No announcement text set' }}</p>
+              <div class="flex items-center text-xs text-gray-400">
+                <Calendar class="w-3.5 h-3.5 mr-1" />
+                <span v-if="config.announcementBar.startDate">{{ config.announcementBar.startDate }} → {{ config.announcementBar.endDate || '...' }}</span>
+                <span v-else>No schedule set</span>
+              </div>
+              <div class="mt-3 text-xs text-indigo-600 font-medium opacity-0 group-hover:opacity-100 transition-opacity">Click to edit →</div>
+            </div>
+
+            <!-- Promo Card Summary Card -->
+            <div 
+              @click="switchTab('promo')" 
+              class="bg-white rounded-lg border border-gray-200 shadow-sm p-6 cursor-pointer hover:shadow-md hover:border-pink-200 transition-all group"
+            >
+              <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center">
+                  <div class="p-2 bg-pink-100 rounded-lg mr-3">
+                    <Gift class="w-5 h-5 text-pink-600" />
+                  </div>
+                  <h3 class="text-base font-semibold text-gray-900">Promo Card</h3>
+                </div>
+                <span 
+                  :class="config.promoCard.active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'"
+                  class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium"
+                >
+                  {{ config.promoCard.active ? 'Active' : 'Inactive' }}
+                </span>
+              </div>
+              <p class="text-sm text-gray-500 mb-1 font-medium">{{ config.promoCard.title || 'No title set' }}</p>
+              <p class="text-sm text-gray-400 mb-3 line-clamp-2">{{ config.promoCard.description || 'No description set' }}</p>
+              <div class="flex items-center text-xs text-gray-400">
+                <Calendar class="w-3.5 h-3.5 mr-1" />
+                <span v-if="config.promoCard.startDate">{{ config.promoCard.startDate }} → {{ config.promoCard.endDate || '...' }}</span>
+                <span v-else>No schedule set</span>
+              </div>
+              <div class="mt-3 text-xs text-pink-600 font-medium opacity-0 group-hover:opacity-100 transition-opacity">Click to edit →</div>
+            </div>
           </div>
 
+
           <!-- Announcement Bar Section -->
-          <section id="announcement" class="bg-white shadow rounded-lg border border-gray-200 overflow-hidden">
+          <section v-if="activeTab === 'announcement'" id="announcement" class="bg-white shadow rounded-lg border border-gray-200 overflow-hidden">
             <div class="px-6 py-5 border-b border-gray-200 bg-gray-50/50 flex items-center justify-between">
               <div class="flex items-center">
                 <div class="p-2 bg-indigo-100 rounded-lg mr-4">
@@ -211,7 +266,7 @@
           </section>
 
           <!-- Promo Card Section -->
-          <section id="promo" class="bg-white shadow rounded-lg border border-gray-200 overflow-hidden">
+          <section v-if="activeTab === 'promo'" id="promo" class="bg-white shadow rounded-lg border border-gray-200 overflow-hidden">
              <div class="px-6 py-5 border-b border-gray-200 bg-gray-50/50 flex items-center justify-between">
               <div class="flex items-center">
                 <div class="p-2 bg-pink-100 rounded-lg mr-4">
@@ -375,7 +430,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { loadConfig, saveConfig } from './services/campaignService'
 import type { CampaignConfig } from './types/campaign'
 import { defaultConfig } from './types/campaign'
@@ -383,10 +439,8 @@ import {
   LayoutDashboard, 
   Megaphone, 
   Gift, 
-  User, 
   LayoutGrid, 
   Save, 
-  Menu, 
   Calendar, 
   X, 
   CheckCircle,
@@ -394,10 +448,21 @@ import {
   ChevronDown
 } from 'lucide-vue-next'
 
+const route = useRoute()
+const router = useRouter()
+const activeTab = ref<'dashboard' | 'announcement' | 'promo'>('dashboard')
 const config = ref<CampaignConfig>(defaultConfig)
 const hasChanges = ref(false)
 const showToast = ref(false)
 const toastMessage = ref('')
+
+// Sync activeTab with current route
+watch(() => route.path, (newPath) => {
+  const tab = newPath.replace('/', '') as 'dashboard' | 'announcement' | 'promo'
+  if (['dashboard', 'announcement', 'promo'].includes(tab)) {
+    activeTab.value = tab
+  }
+}, { immediate: true })
 
 onMounted(() => {
   config.value = loadConfig()
@@ -415,6 +480,11 @@ function handleSave() {
   } else {
     toast('Failed to save settings')
   }
+}
+
+function switchTab(tab: 'dashboard' | 'announcement' | 'promo') {
+  activeTab.value = tab
+  router.push(`/${tab}`)
 }
 
 function toggleCampaign(type: 'announcementBar' | 'promoCard') {
