@@ -216,7 +216,7 @@
                     </button>
                   </div>
                 </div>
-                
+
                 <!-- Single Date Fields for All Announcements -->
                 <div class="border-t pt-4">
                   <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Schedule</label>
@@ -339,7 +339,7 @@
                   </div>
                 </div>
 
-                
+
                 <!-- Dates -->
                 <div class="grid grid-cols-2 gap-4">
                   <div>
@@ -419,7 +419,8 @@
                   <p class="text-sm opacity-90 mb-4">{{ config.promoCard.description || 'Description text goes here.' }}
                   </p>
 
-                  <button v-if="config.promoCard.buttonText" class="w-full py-2 px-4 rounded-lg text-sm font-semibold transition-transform active:scale-95"
+                  <button v-if="config.promoCard.buttonText"
+                    class="w-full py-2 px-4 rounded-lg text-sm font-semibold transition-transform active:scale-95"
                     :style="{ backgroundColor: config.promoCard.style.buttonColor, color: config.promoCard.style.buttonTextColor }">
                     {{ config.promoCard.buttonText }}
                   </button>
@@ -498,8 +499,8 @@ watch(() => route.path, (newPath) => {
 }, { immediate: true })
 
 // Initialize dark mode from localStorage or system preference
-onMounted(() => {
-  config.value = loadConfig()
+onMounted(async () => {
+  config.value = await loadConfig()
 
   // Check for saved dark mode preference or system preference
   const savedDarkMode = localStorage.getItem('darkMode')
@@ -531,8 +532,8 @@ function markChanged() {
   hasChanges.value = true
 }
 
-function handleSave() {
-  const success = saveConfig(config.value)
+async function handleSave() {
+  const success = await saveConfig(config.value)
   if (success) {
     hasChanges.value = false
     toast('Settings saved successfully')
@@ -577,12 +578,12 @@ function removeAnnouncement(index: number) {
 function getActiveAnnouncements() {
   const now = new Date()
   const { startDate, endDate } = config.value.announcementBar
-  
+
   // If no dates are set, show all announcements
   if (!startDate && !endDate) {
     return config.value.announcementBar.announcements
   }
-  
+
   // If both start and end dates are set, check if current date is within range
   if (startDate && endDate) {
     const start = new Date(startDate)
@@ -591,7 +592,7 @@ function getActiveAnnouncements() {
       return config.value.announcementBar.announcements
     }
   }
-  
+
   // If only start date is set, check if current date is after start date
   if (startDate && !endDate) {
     const start = new Date(startDate)
@@ -599,7 +600,7 @@ function getActiveAnnouncements() {
       return config.value.announcementBar.announcements
     }
   }
-  
+
   return []
 }
 </script>
