@@ -8,18 +8,17 @@ interface Env {
 
 const CONFIG_KEY = 'campaign-config.json';
 
-// CORS headers - allow your domain in production, localhost for development
-const corsHeaders = {
-  'Access-Control-Allow-Origin': 
-    request.headers.get('origin') === 'http://localhost:5173' 
-      ? 'http://localhost:5173'
-      : 'https://admin.aairavx.com',
-  'Access-Control-Allow-Methods': 'GET, PUT, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
-};
-
 export default {
-  async fetch(request: Request, env: Env): Promise<Response> => {
+  async fetch(request: Request, env: Env): Promise<Response> {
+    // CORS headers - allow your domain in production, localhost for development
+    const corsHeaders = {
+      'Access-Control-Allow-Origin':
+        request.headers.get('origin') === 'http://localhost:5173'
+          ? 'http://localhost:5173'
+          : 'https://admin.aairavx.com',
+      'Access-Control-Allow-Methods': 'GET, PUT, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+    };
     const url = new URL(request.url);
 
     // Handle CORS preflight
