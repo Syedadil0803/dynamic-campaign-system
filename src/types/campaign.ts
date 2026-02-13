@@ -4,12 +4,17 @@ export interface GradientStyle {
   endColor: string;
 }
 
+export interface Announcement {
+  text: string;
+  url?: string;
+}
+
 export interface CampaignConfig {
   version: string;
   lastUpdated: string;
   announcementBar: {
     active: boolean;
-    announcements: string[];
+    announcements: Announcement[];
     startDate: string;
     endDate: string;
     style: {
@@ -41,9 +46,9 @@ export const defaultConfig: CampaignConfig = {
   announcementBar: {
     active: false,
     announcements: [
-      '🎉 Winter Sale is fully live! Keep shopping.',
-      'Get 5% off on orders above ₹999 and 10% off on orders above ₹1999',
-      'Win Loyalty Points & Encash discounts on each order'
+      { text: '🎉 Winter Sale is fully live! Keep shopping.' },
+      { text: 'Get 5% off on orders above ₹999 and 10% off on orders above ₹1999' },
+      { text: 'Win Loyalty Points & Encash discounts on each order' }
     ],
     startDate: '',
     endDate: '',
@@ -60,7 +65,6 @@ export const defaultConfig: CampaignConfig = {
     active: false,
     title: '',
     description: '',
-    buttonUrl: '',
     startDate: '',
     endDate: '',
     style: {

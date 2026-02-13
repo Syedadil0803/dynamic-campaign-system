@@ -163,26 +163,8 @@
               <button @click="toggleCampaign('announcementBar')"
                 :class="config.announcementBar.active ? 'bg-indigo-600' : 'bg-gray-200'"
                 class="relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                <span class="sr-only">Use setting</span>
                 <span :class="config.announcementBar.active ? 'translate-x-5' : 'translate-x-0'"
-                  class="pointer-events-none relative inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200">
-                  <span
-                    :class="config.announcementBar.active ? 'opacity-0 ease-out duration-100' : 'opacity-100 ease-in duration-200'"
-                    class="absolute inset-0 h-full w-full flex items-center justify-center transition-opacity">
-                    <svg class="h-3 w-3 text-gray-400" fill="none" viewBox="0 0 12 12">
-                      <path d="M4 8l2-2m0 0l2-2M6 6L4 4m2 2l2 2" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                  </span>
-                  <span
-                    :class="config.announcementBar.active ? 'opacity-100 ease-in duration-200' : 'opacity-0 ease-out duration-100'"
-                    class="absolute inset-0 h-full w-full flex items-center justify-center transition-opacity">
-                    <svg class="h-3 w-3 text-indigo-600" fill="currentColor" viewBox="0 0 12 12">
-                      <path
-                        d="M3.707 5.293a1 1 0 00-1.414 1.414l1.414-1.414zM5 8l-.707.707a1 1 0 001.414 0L5 8zm4.707-3.293a1 1 0 00-1.414-1.414l1.414 1.414zm-7.414 2l2 2 1.414-1.414-2-2-1.414 1.414zm3.414 2l4-4-1.414-1.414-4 4 1.414 1.414z" />
-                    </svg>
-                  </span>
-                </span>
+                  class="pointer-events-none relative inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200"></span>
               </button>
             </div>
 
@@ -208,10 +190,22 @@
                   Announcements</label>
                 <div class="flex flex-wrap gap-2 mb-4">
                   <div v-for="(announcement, index) in config.announcementBar.announcements" :key="index"
-                    class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200">
-                    {{ announcement }}
+                    class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200 group relative"
+                    :class="{ 'ring-2 ring-indigo-500': selectedAnnouncementIndex === index }">
+                    <span @click="selectAnnouncement(index)" class="cursor-pointer flex-1">
+                      {{ announcement.text }}
+                      <a v-if="announcement.url" :href="announcement.url" target="_blank" 
+                         class="ml-1 text-xs underline hover:no-underline"
+                         @click.stop>
+                        🔗
+                      </a>
+                    </span>
+                    
+                    <!-- Delete Button -->
                     <button @click="removeAnnouncement(index)"
-                      class="ml-2 text-indigo-600 hover:text-indigo-800 dark:text-indigo-300 dark:hover:text-indigo-100">
+                      class="ml-2 text-indigo-600 hover:text-indigo-800 dark:text-indigo-300 dark:hover:text-indigo-100 opacity-0 group-hover:opacity-100 transition-opacity"
+                      title="Remove"
+                      @click.stop>
                       <X class="w-3 h-3" />
                     </button>
                   </div>
@@ -235,36 +229,68 @@
                 </div>
               </div>
 
-              <!-- Colors -->
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300">Style
-                  Customization</label>
-                
-                <!-- Background Type Selector -->
-                <div class="mb-4">
-                  <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">Background Type</label>
-                  <select v-model="config.announcementBar.style.background.type" @change="markChanged"
-                    class="block w-full text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md p-2 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
-                    <option value="solid">Solid</option>
-                    <option value="radial">Gradient</option>
-                  </select>
+              <!-- Style and URL Sections Side by Side -->
+              <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Style Customization -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300">Style
+                    Customization</label>
+                  
+                  <!-- Background Type Selector -->
+                  <div class="mb-4">
+                    <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">Background Type</label>
+                    <select v-model="config.announcementBar.style.background.type" @change="markChanged"
+                      class="block w-full text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md p-2 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
+                      <option value="solid">Solid</option>
+                      <option value="radial">Gradient</option>
+                    </select>
+                  </div>
+
+                  <div class="grid grid-cols-2 gap-4">
+                    <div class="relative rounded-md shadow-sm">
+                      <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">Start Color</label>
+                      <input type="color" v-model="config.announcementBar.style.background.startColor" @input="markChanged"
+                        class="h-10 w-full rounded border border-gray-300 cursor-pointer dark:border-gray-600" />
+                    </div>
+                    <div class="relative rounded-md shadow-sm" v-if="config.announcementBar.style.background.type !== 'solid'">
+                      <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">End Color</label>
+                      <input type="color" v-model="config.announcementBar.style.background.endColor" @input="markChanged"
+                        class="h-10 w-full rounded border border-gray-300 cursor-pointer dark:border-gray-600" />
+                    </div>
+                    <div class="relative rounded-md shadow-sm">
+                      <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">Text Color</label>
+                      <input type="color" v-model="config.announcementBar.style.textColor" @input="markChanged"
+                        class="h-10 w-full rounded border border-gray-300 cursor-pointer dark:border-gray-600" />
+                    </div>
+                  </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
-                  <div class="relative rounded-md shadow-sm">
-                    <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">Start Color</label>
-                    <input type="color" v-model="config.announcementBar.style.background.startColor" @input="markChanged"
-                      class="h-10 w-full rounded border border-gray-300 cursor-pointer dark:border-gray-600" />
+                <!-- URL Management -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300">Link
+                    Management</label>
+                  
+                  <!-- URL Field (shows when announcement is selected) -->
+                  <div v-if="selectedAnnouncementIndex !== null" class="mb-4">
+                    <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">
+                      Link URL for "{{ getSelectedAnnouncementText() }}"
+                    </label>
+                    <input type="url" v-model="selectedAnnouncementUrl" @input="updateSelectedAnnouncementUrl"
+                      class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2.5 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
+                      placeholder="https://example.com (optional)" />
+                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                      This URL will apply only to the selected announcement above.
+                    </p>
                   </div>
-                  <div class="relative rounded-md shadow-sm" v-if="config.announcementBar.style.background.type !== 'solid'">
-                    <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">End Color</label>
-                    <input type="color" v-model="config.announcementBar.style.background.endColor" @input="markChanged"
-                      class="h-10 w-full rounded border border-gray-300 cursor-pointer dark:border-gray-600" />
-                  </div>
-                  <div class="relative rounded-md shadow-sm">
-                    <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">Text Color</label>
-                    <input type="color" v-model="config.announcementBar.style.textColor" @input="markChanged"
-                      class="h-10 w-full rounded border border-gray-300 cursor-pointer dark:border-gray-600" />
+
+                  <!-- Empty state when no announcement selected -->
+                  <div v-else class="text-center py-8 px-4 border-2 border-dashed border-gray-300 rounded-lg">
+                    <div class="text-gray-400">
+                      <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                      </svg>
+                      <p class="mt-2 text-sm">Click an announcement to add or edit its URL</p>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -281,9 +307,14 @@
                   class="py-2.5 px-4 text-center text-sm font-medium transition-colors duration-300 overflow-hidden"
                   :style="{ background: getBackgroundStyle(config.announcementBar.style.background), color: config.announcementBar.style.textColor }">
                   <div class="animate-scroll-left">
-                    <span v-for="announcement in getActiveAnnouncements()" :key="announcement"
+                    <span v-for="announcement in getActiveAnnouncements()" :key="announcement.text"
                       class="inline-block px-4">
-                      {{ announcement }}
+                      <a v-if="announcement.url" :href="announcement.url" target="_blank" 
+                         class="underline hover:no-underline transition-all"
+                         :style="{ color: config.announcementBar.style.textColor }">
+                        {{ announcement.text }}
+                      </a>
+                      <span v-else>{{ announcement.text }}</span>
                     </span>
                   </div>
                 </div>
@@ -509,7 +540,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { loadConfig, saveConfig } from './services/campaignService'
 import type { CampaignConfig } from './types/campaign'
@@ -538,6 +569,8 @@ const showToast = ref(false)
 const toastMessage = ref('')
 const isDarkMode = ref(false)
 const newAnnouncementText = ref('')
+const selectedAnnouncementIndex = ref<number | null>(null)
+const selectedAnnouncementUrl = ref('')
 
 // Sync activeTab with current route
 watch(() => route.path, (newPath) => {
@@ -550,6 +583,9 @@ watch(() => route.path, (newPath) => {
 // Initialize dark mode from localStorage or system preference
 onMounted(async () => {
   config.value = await loadConfig()
+  
+  // Migrate old string announcements to new Announcement objects
+  migrateAnnouncements(config.value)
 
   // Check for saved dark mode preference or system preference
   const savedDarkMode = localStorage.getItem('darkMode')
@@ -613,7 +649,15 @@ function toast(message: string) {
 function addAnnouncement() {
   const text = newAnnouncementText.value?.trim()
   if (text) {
-    config.value.announcementBar.announcements.push(text)
+    // If an announcement is selected, update it instead of adding new
+    if (selectedAnnouncementIndex.value !== null) {
+      config.value.announcementBar.announcements[selectedAnnouncementIndex.value].text = text
+      selectedAnnouncementIndex.value = null
+      selectedAnnouncementUrl.value = ''
+    } else {
+      // Add new announcement
+      config.value.announcementBar.announcements.push({ text })
+    }
     newAnnouncementText.value = ''
     markChanged()
   }
@@ -621,7 +665,64 @@ function addAnnouncement() {
 
 function removeAnnouncement(index: number) {
   config.value.announcementBar.announcements.splice(index, 1)
+  
+  // Clear selection if the deleted announcement was selected
+  if (selectedAnnouncementIndex.value === index) {
+    selectedAnnouncementIndex.value = null
+    selectedAnnouncementUrl.value = ''
+  } else if (selectedAnnouncementIndex.value !== null && selectedAnnouncementIndex.value > index) {
+    // Adjust selection index if an announcement before the selected one was deleted
+    selectedAnnouncementIndex.value = selectedAnnouncementIndex.value - 1
+  }
+  
   markChanged()
+}
+
+function selectAnnouncement(index: number) {
+  selectedAnnouncementIndex.value = index
+  selectedAnnouncementUrl.value = config.value.announcementBar.announcements[index].url || ''
+  
+  // Put the announcement text in the input bar for editing
+  newAnnouncementText.value = config.value.announcementBar.announcements[index].text
+  
+  // Focus the input field
+  nextTick(() => {
+    const inputElement = document.querySelector('#announcement-text') as HTMLInputElement
+    if (inputElement) {
+      inputElement.focus()
+      inputElement.select()
+    }
+  })
+}
+
+function getSelectedAnnouncementText() {
+  if (selectedAnnouncementIndex.value !== null) {
+    return config.value.announcementBar.announcements[selectedAnnouncementIndex.value].text
+  }
+  return ''
+}
+
+function updateSelectedAnnouncementUrl() {
+  if (selectedAnnouncementIndex.value !== null) {
+    config.value.announcementBar.announcements[selectedAnnouncementIndex.value].url = selectedAnnouncementUrl.value
+    markChanged()
+  }
+}
+
+function migrateAnnouncements(config: any) {
+  // Convert old string announcements to new Announcement objects
+  if (config.announcementBar?.announcements && Array.isArray(config.announcementBar.announcements)) {
+    const hasOldFormat = config.announcementBar.announcements.some((item: any) => typeof item === 'string')
+    if (hasOldFormat) {
+      config.announcementBar.announcements = config.announcementBar.announcements.map((item: any) => {
+        if (typeof item === 'string') {
+          return { text: item }
+        }
+        return item
+      })
+      markChanged() // Mark as changed so migration gets saved
+    }
+  }
 }
 
 function getBackgroundStyle(background: any) {
