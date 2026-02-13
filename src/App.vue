@@ -45,7 +45,7 @@
         </nav>
 
         <!-- Right Side Actions -->
-        <div class="flex items-center space-x-4">
+        <div class="flex items-center space-x-3">
           <!-- Dark Mode Toggle -->
           <button @click="toggleDarkMode"
             class="p-2 rounded-lg text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700 transition-colors"
@@ -63,6 +63,13 @@
             <Save class="w-4 h-4 mr-2" />
             <span class="hidden sm:inline">{{ hasChanges ? 'Save Changes' : 'Saved' }}</span>
             <span class="sm:hidden">Save</span>
+          </button>
+          <!-- Logout Button -->
+          <button @click="handleLogout"
+            class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-gray-500 hover:bg-red-50 hover:text-red-600 dark:text-gray-400 dark:hover:bg-red-900/30 dark:hover:text-red-400 transition-colors text-sm font-medium"
+            title="Logout">
+            <LogOut class="w-4 h-4" />
+            <span class="hidden sm:inline">Logout</span>
           </button>
         </div>
       </header>
@@ -365,11 +372,11 @@
               <div
                 class="w-full bg-white border border-gray-300 rounded shadow-sm overflow-hidden transform transition-all dark:bg-gray-800 dark:border-gray-600">
                 <!-- Scrolling Announcement Bar -->
-                <div v-if="config.announcementBar.active && getActiveAnnouncements().length > 0"
+                <div v-if="config.announcementBar.active && config.announcementBar.announcements.length > 0"
                   class="h-10 px-4 text-center text-sm font-medium transition-colors duration-300 overflow-hidden flex items-center justify-center"
                   :style="{ background: getBackgroundStyle(config.announcementBar.style.background), color: config.announcementBar.style.textColor }">
                   <div class="animate-scroll-left">
-                    <span v-for="announcement in getActiveAnnouncements()" :key="announcement.text"
+                    <span v-for="announcement in config.announcementBar.announcements" :key="announcement.text"
                       class="inline-block px-4">
                       <a v-if="announcement.url" :href="announcement.url" target="_blank"
                         class="underline hover:no-underline transition-all"
@@ -599,8 +606,9 @@
 
     <!-- Toast Notification -->
     <div v-if="showToast"
-      class="fixed bottom-6 right-6 bg-gray-900 text-white px-6 py-3 rounded-lg shadow-lg flex items-center space-x-3 z-50 animate-bounce-in">
-      <CheckCircle class="w-5 h-5 text-green-400" />
+      class="fixed top-6 left-6 bg-gray-900 text-white px-6 py-3 rounded-lg shadow-lg flex items-center space-x-3 z-50 animate-bounce-in">
+      <CheckCircle v-if="!toastIsError" class="w-5 h-5 text-green-400" />
+      <AlertCircle v-else class="w-5 h-5 text-red-400" />
       <span class="font-medium">{{ toastMessage }}</span>
     </div>
   </div>
@@ -621,10 +629,12 @@ import {
   Calendar,
   X,
   CheckCircle,
+  AlertCircle,
   Code,
   ChevronDown,
   Sun,
-  Moon
+  Moon,
+  LogOut
 } from 'lucide-vue-next'
 
 const route = useRoute()
@@ -634,6 +644,7 @@ const config = ref<CampaignConfig>(defaultConfig)
 const hasChanges = ref(false)
 const showToast = ref(false)
 const toastMessage = ref('')
+const toastIsError = ref(false)
 const isDarkMode = ref(false)
 const newAnnouncementText = ref('')
 const selectedAnnouncementIndex = ref<number | null>(null)
@@ -701,8 +712,17 @@ async function handleSave() {
     hasChanges.value = false
     toast('Settings saved successfully')
   } else {
-    toast('Failed to save settings')
+    toast('Failed to save settings', true)
   }
+}
+
+function handleLogout() {
+  if (hasChanges.value) {
+    if (!confirm('You have unsaved changes. Are you sure you want to logout?')) {
+      return
+    }
+  }
+  window.location.href = '/'
 }
 
 function switchTab(tab: 'dashboard' | 'announcement' | 'promo') {
@@ -715,8 +735,9 @@ function toggleCampaign(type: 'announcementBar' | 'promoCard') {
   markChanged()
 }
 
-function toast(message: string) {
+function toast(message: string, isError = false) {
   toastMessage.value = message
+  toastIsError.value = isError
   showToast.value = true
   setTimeout(() => {
     showToast.value = false
@@ -1007,34 +1028,8 @@ function getBackgroundStyle(background: any) {
   return background.startColor
 }
 
-function getActiveAnnouncements() {
-  const now = new Date()
-  const { startDate, endDate } = config.value.announcementBar
 
-  // If no dates are set, show all announcements
-  if (!startDate && !endDate) {
-    return config.value.announcementBar.announcements
-  }
 
-  // If both start and end dates are set, check if current date is within range
-  if (startDate && endDate) {
-    const start = new Date(startDate)
-    const end = new Date(endDate)
-    if (now >= start && now <= end) {
-      return config.value.announcementBar.announcements
-    }
-  }
-
-  // If only start date is set, check if current date is after start date
-  if (startDate && !endDate) {
-    const start = new Date(startDate)
-    if (now >= start) {
-      return config.value.announcementBar.announcements
-    }
-  }
-
-  return []
-}
 </script>
 
 <style scoped>
