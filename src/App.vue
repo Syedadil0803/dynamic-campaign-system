@@ -99,9 +99,9 @@
               <p class="text-sm text-gray-500 mb-3 line-clamp-2 dark:text-gray-400">
                 <span v-if="config.announcementBar.announcements.length === 0">No announcements set</span>
                 <span v-else-if="config.announcementBar.announcements.length === 1">{{
-                  config.announcementBar.announcements[0] }}</span>
-                <span v-else>{{ config.announcementBar.announcements[0] }} • {{
-                  config.announcementBar.announcements[1] }}</span>
+                  config.announcementBar.announcements[0].text }}</span>
+                <span v-else>{{ config.announcementBar.announcements[0].text }} • {{
+                  config.announcementBar.announcements[1].text }}</span>
               </p>
               <div class="flex items-center text-xs text-gray-400">
                 <div class="w-3.5 h-3.5 mr-1">
