@@ -1,3 +1,9 @@
+export interface GradientStyle {
+  type: 'solid' | 'radial';
+  startColor: string;
+  endColor: string;
+}
+
 export interface CampaignConfig {
   version: string;
   lastUpdated: string;
@@ -7,7 +13,7 @@ export interface CampaignConfig {
     startDate: string;
     endDate: string;
     style: {
-      backgroundColor: string;
+      background: GradientStyle;
       textColor: string;
     };
   };
@@ -21,7 +27,7 @@ export interface CampaignConfig {
     endDate: string;
     style: {
       position: 'bottom-left' | 'bottom-right' | 'top-left' | 'top-right';
-      backgroundColor: string;
+      background: GradientStyle;
       textColor: string;
       buttonColor: string;
       buttonTextColor: string;
@@ -42,7 +48,11 @@ export const defaultConfig: CampaignConfig = {
     startDate: '',
     endDate: '',
     style: {
-      backgroundColor: '#dc2626',
+      background: {
+        type: 'solid',
+        startColor: '#dc2626',
+        endColor: '#dc2626',
+      },
       textColor: '#ffffff',
     },
   },
@@ -55,7 +65,11 @@ export const defaultConfig: CampaignConfig = {
     endDate: '',
     style: {
       position: 'bottom-right',
-      backgroundColor: '#ffffff',
+      background: {
+        type: 'solid',
+        startColor: '#ffffff',
+        endColor: '#ffffff',
+      },
       textColor: '#111827',
       buttonColor: '#6366f1',
       buttonTextColor: '#ffffff',
