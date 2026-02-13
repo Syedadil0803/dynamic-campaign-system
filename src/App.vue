@@ -171,12 +171,68 @@
             <div class="p-6 space-y-6">
               <!-- Announcement Input -->
               <div class="mb-6">
-                <label for="announcement-text"
-                  class="block text-sm font-medium text-gray-700 dark:text-gray-300">Announcement Text</label>
+                <div class="flex items-center justify-between mb-2">
+                  <label for="announcement-text" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Announcement Text
+                  </label>
+
+                  <!-- Rich Text Toggle - Only show when editing an existing announcement -->
+                  <div v-if="selectedAnnouncementIndex !== null" class="flex items-center gap-2">
+                    <span class="text-xs text-gray-500">Rich Text</span>
+                    <button @click="toggleRichText"
+                      :class="selectedAnnouncementRichText ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700'"
+                      class="px-2 py-0.5 text-xs rounded-md border-0 focus:ring-2 focus:ring-indigo-500 transition-colors">
+                      {{ selectedAnnouncementRichText ? 'ON' : 'OFF' }}
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Rich Text Toolbar -->
+                <div v-if="selectedAnnouncementRichText && selectedAnnouncementIndex !== null"
+                  class="mb-2 border border-gray-300 rounded-md p-1.5 bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
+                  <div class="flex flex-wrap gap-1 items-center">
+                    <button @mousedown.prevent="formatText('bold')"
+                      :class="activeFormats.bold ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
+                      class="px-2 py-1 text-xs font-bold border rounded transition-colors" title="Bold">B</button>
+                    <button @mousedown.prevent="formatText('italic')"
+                      :class="activeFormats.italic ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
+                      class="px-2 py-1 text-xs italic border rounded transition-colors" title="Italic">I</button>
+                    <button @mousedown.prevent="formatText('underline')"
+                      :class="activeFormats.underline ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
+                      class="px-2 py-1 text-xs underline border rounded transition-colors" title="Underline">U</button>
+
+                    <div class="border-l border-gray-300 h-4 mx-1"></div>
+
+                    <button @mousedown.prevent="formatText('size-xs')"
+                      :class="activeFormats.size === 'xs' ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
+                      class="px-2 py-1 text-xs border rounded transition-colors">XS</button>
+                    <button @mousedown.prevent="formatText('size-sm')"
+                      :class="activeFormats.size === 'sm' ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
+                      class="px-2 py-1 text-xs border rounded transition-colors">SM</button>
+                    <button @mousedown.prevent="formatText('size-lg')"
+                      :class="activeFormats.size === 'lg' ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
+                      class="px-2 py-1 text-xs border rounded transition-colors">LG</button>
+                    <button @mousedown.prevent="formatText('size-xl')"
+                      :class="activeFormats.size === 'xl' ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
+                      class="px-2 py-1 text-xs border rounded transition-colors">XL</button>
+
+                    <div class="ml-auto text-[10px] text-gray-400 hidden sm:block">
+                      Highlight to format
+                    </div>
+                  </div>
+                </div>
+
                 <div class="mt-1 flex gap-2">
-                  <textarea id="announcement-text" rows="2" v-model="newAnnouncementText" @keyup.enter="addAnnouncement"
+                  <!-- Plain text textarea (when no announcement is selected OR rich text is OFF) -->
+                  <textarea v-if="!isRichTextEditMode" id="announcement-text" rows="2" v-model="newAnnouncementText"
+                    @keyup.enter="addAnnouncement"
                     class="flex-1 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md p-3 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400"
                     placeholder="Type announcement and press Enter..."></textarea>
+                  <!-- Rich text contenteditable div (when rich text is ON for selected announcement) -->
+                  <div v-else id="announcement-richtext-editor" contenteditable="true" @input="onRichTextInput"
+                    @mouseup="updateActiveFormats" @keyup="updateActiveFormats" @keyup.enter.prevent="addAnnouncement"
+                    class="flex-1 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md p-3 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400 min-h-[56px] outline-none overflow-auto"
+                    :data-placeholder="'Type announcement text...'"></div>
                   <button @click="addAnnouncement" :disabled="!newAnnouncementText?.trim()"
                     class="px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed">
                     Add
@@ -192,20 +248,21 @@
                   <div v-for="(announcement, index) in config.announcementBar.announcements" :key="index"
                     class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200 group relative"
                     :class="{ 'ring-2 ring-indigo-500': selectedAnnouncementIndex === index }">
-                    <span @click="selectAnnouncement(index)" class="cursor-pointer flex-1">
+                    <span @click="selectAnnouncement(index)" class="cursor-pointer flex-1"
+                      v-if="!announcement.richText">
                       {{ announcement.text }}
-                      <a v-if="announcement.url" :href="announcement.url" target="_blank" 
-                         class="ml-1 text-xs underline hover:no-underline"
-                         @click.stop>
-                        🔗
-                      </a>
                     </span>
-                    
+                    <span @click="selectAnnouncement(index)" class="cursor-pointer flex-1" v-else
+                      v-html="announcement.text"></span>
+                    <a v-if="announcement.url" :href="announcement.url" target="_blank"
+                      class="ml-1 text-xs underline hover:no-underline" @click.stop>
+                      🔗
+                    </a>
+
                     <!-- Delete Button -->
                     <button @click="removeAnnouncement(index)"
                       class="ml-2 text-indigo-600 hover:text-indigo-800 dark:text-indigo-300 dark:hover:text-indigo-100 opacity-0 group-hover:opacity-100 transition-opacity"
-                      title="Remove"
-                      @click.stop>
+                      title="Remove" @click.stop>
                       <X class="w-3 h-3" />
                     </button>
                   </div>
@@ -235,7 +292,7 @@
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300">Style
                     Customization</label>
-                  
+
                   <!-- Background Type Selector -->
                   <div class="mb-4">
                     <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">Background Type</label>
@@ -249,12 +306,15 @@
                   <div class="grid grid-cols-2 gap-4">
                     <div class="relative rounded-md shadow-sm">
                       <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">Start Color</label>
-                      <input type="color" v-model="config.announcementBar.style.background.startColor" @input="markChanged"
+                      <input type="color" v-model="config.announcementBar.style.background.startColor"
+                        @input="markChanged"
                         class="h-10 w-full rounded border border-gray-300 cursor-pointer dark:border-gray-600" />
                     </div>
-                    <div class="relative rounded-md shadow-sm" v-if="config.announcementBar.style.background.type !== 'solid'">
+                    <div class="relative rounded-md shadow-sm"
+                      v-if="config.announcementBar.style.background.type !== 'solid'">
                       <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">End Color</label>
-                      <input type="color" v-model="config.announcementBar.style.background.endColor" @input="markChanged"
+                      <input type="color" v-model="config.announcementBar.style.background.endColor"
+                        @input="markChanged"
                         class="h-10 w-full rounded border border-gray-300 cursor-pointer dark:border-gray-600" />
                     </div>
                     <div class="relative rounded-md shadow-sm">
@@ -269,27 +329,32 @@
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300">Link
                     Management</label>
-                  
+
                   <!-- URL Field (shows when announcement is selected) -->
-                  <div v-if="selectedAnnouncementIndex !== null" class="mb-4">
-                    <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">
-                      Link URL for "{{ getSelectedAnnouncementText() }}"
-                    </label>
-                    <input type="url" v-model="selectedAnnouncementUrl" @input="updateSelectedAnnouncementUrl"
-                      class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2.5 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
-                      placeholder="https://example.com (optional)" />
-                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                      This URL will apply only to the selected announcement above.
+                  <div v-if="selectedAnnouncementIndex !== null" class="space-y-4">
+                    <div>
+                      <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">
+                        Link URL for "{{ getSelectedAnnouncementText() }}"
+                      </label>
+                      <input type="url" v-model="selectedAnnouncementUrl" @input="updateSelectedAnnouncementUrl"
+                        class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2.5 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
+                        placeholder="https://example.com (optional)" />
+                    </div>
+
+                    <p class="text-xs text-gray-500 dark:text-gray-400">
+                      These settings apply only to the selected announcement above.
                     </p>
                   </div>
 
                   <!-- Empty state when no announcement selected -->
                   <div v-else class="text-center py-8 px-4 border-2 border-dashed border-gray-300 rounded-lg">
                     <div class="text-gray-400">
-                      <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                      <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                       </svg>
-                      <p class="mt-2 text-sm">Click an announcement to add or edit its URL</p>
+                      <p class="mt-2 text-sm">Click an announcement to add URL or enable rich text</p>
                     </div>
                   </div>
                 </div>
@@ -304,17 +369,21 @@
                 class="w-full bg-white border border-gray-300 rounded shadow-sm overflow-hidden transform transition-all dark:bg-gray-800 dark:border-gray-600">
                 <!-- Scrolling Announcement Bar -->
                 <div v-if="config.announcementBar.active && getActiveAnnouncements().length > 0"
-                  class="py-2.5 px-4 text-center text-sm font-medium transition-colors duration-300 overflow-hidden"
+                  class="h-10 px-4 text-center text-sm font-medium transition-colors duration-300 overflow-hidden flex items-center justify-center"
                   :style="{ background: getBackgroundStyle(config.announcementBar.style.background), color: config.announcementBar.style.textColor }">
                   <div class="animate-scroll-left">
                     <span v-for="announcement in getActiveAnnouncements()" :key="announcement.text"
                       class="inline-block px-4">
-                      <a v-if="announcement.url" :href="announcement.url" target="_blank" 
-                         class="underline hover:no-underline transition-all"
-                         :style="{ color: config.announcementBar.style.textColor }">
-                        {{ announcement.text }}
+                      <a v-if="announcement.url" :href="announcement.url" target="_blank"
+                        class="underline hover:no-underline transition-all"
+                        :style="{ color: config.announcementBar.style.textColor }">
+                        <span v-if="!announcement.richText">{{ announcement.text }}</span>
+                        <span v-else v-html="announcement.text"></span>
                       </a>
-                      <span v-else>{{ announcement.text }}</span>
+                      <span v-else>
+                        <span v-if="!announcement.richText">{{ announcement.text }}</span>
+                        <span v-else v-html="announcement.text"></span>
+                      </span>
                     </span>
                   </div>
                 </div>
@@ -413,7 +482,7 @@
                         <option value="bottom-left">Bottom Left</option>
                       </select>
                     </div>
-                    
+
                     <!-- Background Type Selector -->
                     <div>
                       <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">Background Type</label>
@@ -423,7 +492,7 @@
                         <option value="radial">Gradient</option>
                       </select>
                     </div>
-                    
+
                     <div class="flex items-end space-x-2">
                       <div class="flex-1">
                         <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">Start Color</label>
@@ -436,7 +505,7 @@
                           class="h-9 w-full rounded border border-gray-300 cursor-pointer dark:border-gray-600" />
                       </div>
                     </div>
-                    
+
                     <div class="flex items-end space-x-2" v-if="config.promoCard.style.background.type !== 'solid'">
                       <div class="flex-1">
                         <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">End Color</label>
@@ -449,15 +518,16 @@
                           class="h-9 w-full rounded border border-gray-300 cursor-pointer dark:border-gray-600" />
                       </div>
                     </div>
-                    
-                    <div class="flex items-end space-x-2 mt-4" v-if="config.promoCard.style.background.type === 'solid'">
+
+                    <div class="flex items-end space-x-2 mt-4"
+                      v-if="config.promoCard.style.background.type === 'solid'">
                       <div class="flex-1">
                         <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">Text Color</label>
                         <input type="color" v-model="config.promoCard.style.textColor" @input="markChanged"
                           class="h-9 w-full rounded border border-gray-300 cursor-pointer dark:border-gray-600" />
                       </div>
                     </div>
-                    
+
                     <div class="flex items-end space-x-2 mt-4">
                       <div class="flex-1">
                         <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">Button Bg Color</label>
@@ -540,7 +610,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch, nextTick } from 'vue'
+import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { loadConfig, saveConfig } from './services/campaignService'
 import type { CampaignConfig } from './types/campaign'
@@ -571,6 +641,18 @@ const isDarkMode = ref(false)
 const newAnnouncementText = ref('')
 const selectedAnnouncementIndex = ref<number | null>(null)
 const selectedAnnouncementUrl = ref('')
+const selectedAnnouncementRichText = ref(false)
+const activeFormats = ref<{ bold: boolean; italic: boolean; underline: boolean; size: string }>({
+  bold: false,
+  italic: false,
+  underline: false,
+  size: ''
+})
+
+// Computed property to check if we're in rich text edit mode
+const isRichTextEditMode = computed(() => {
+  return selectedAnnouncementIndex.value !== null && selectedAnnouncementRichText.value
+})
 
 // Sync activeTab with current route
 watch(() => route.path, (newPath) => {
@@ -583,7 +665,7 @@ watch(() => route.path, (newPath) => {
 // Initialize dark mode from localStorage or system preference
 onMounted(async () => {
   config.value = await loadConfig()
-  
+
   // Migrate old string announcements to new Announcement objects
   migrateAnnouncements(config.value)
 
@@ -665,7 +747,7 @@ function addAnnouncement() {
 
 function removeAnnouncement(index: number) {
   config.value.announcementBar.announcements.splice(index, 1)
-  
+
   // Clear selection if the deleted announcement was selected
   if (selectedAnnouncementIndex.value === index) {
     selectedAnnouncementIndex.value = null
@@ -674,30 +756,56 @@ function removeAnnouncement(index: number) {
     // Adjust selection index if an announcement before the selected one was deleted
     selectedAnnouncementIndex.value = selectedAnnouncementIndex.value - 1
   }
-  
+
   markChanged()
 }
 
 function selectAnnouncement(index: number) {
   selectedAnnouncementIndex.value = index
   selectedAnnouncementUrl.value = config.value.announcementBar.announcements[index].url || ''
-  
+  selectedAnnouncementRichText.value = config.value.announcementBar.announcements[index].richText || false
+
   // Put the announcement text in the input bar for editing
   newAnnouncementText.value = config.value.announcementBar.announcements[index].text
-  
-  // Focus the input field
+
+  // Always reset active formats first, then re-compute for the NEW announcement
+  activeFormats.value = { bold: false, italic: false, underline: false, size: '' }
+  if (selectedAnnouncementRichText.value) {
+    updateActiveFormats()
+  }
+
+  // Focus the appropriate input field
   nextTick(() => {
-    const inputElement = document.querySelector('#announcement-text') as HTMLInputElement
-    if (inputElement) {
-      inputElement.focus()
-      inputElement.select()
+    if (selectedAnnouncementRichText.value) {
+      const richEditor = document.querySelector('#announcement-richtext-editor') as HTMLDivElement
+      if (richEditor) {
+        richEditor.innerHTML = config.value.announcementBar.announcements[index].text
+        richEditor.focus()
+        // Place cursor at the end (don't select all - user should highlight specific words to format)
+        const range = document.createRange()
+        range.selectNodeContents(richEditor)
+        range.collapse(false) // collapse to end
+        const sel = window.getSelection()
+        sel?.removeAllRanges()
+        sel?.addRange(range)
+      }
+    } else {
+      const inputElement = document.querySelector('#announcement-text') as HTMLInputElement
+      if (inputElement) {
+        inputElement.focus()
+        inputElement.select()
+      }
     }
   })
 }
 
 function getSelectedAnnouncementText() {
   if (selectedAnnouncementIndex.value !== null) {
-    return config.value.announcementBar.announcements[selectedAnnouncementIndex.value].text
+    const rawText = config.value.announcementBar.announcements[selectedAnnouncementIndex.value].text
+    // Strip HTML tags to show clean readable text in the label
+    const div = document.createElement('div')
+    div.innerHTML = rawText
+    return div.textContent || div.innerText || rawText
   }
   return ''
 }
@@ -707,6 +815,179 @@ function updateSelectedAnnouncementUrl() {
     config.value.announcementBar.announcements[selectedAnnouncementIndex.value].url = selectedAnnouncementUrl.value
     markChanged()
   }
+}
+
+function toggleRichText() {
+  selectedAnnouncementRichText.value = !selectedAnnouncementRichText.value
+  if (selectedAnnouncementIndex.value !== null) {
+    config.value.announcementBar.announcements[selectedAnnouncementIndex.value].richText = selectedAnnouncementRichText.value
+    markChanged()
+
+    if (selectedAnnouncementRichText.value) {
+      // Switching to rich text mode - populate the contenteditable div and update format indicators
+      updateActiveFormats()
+      nextTick(() => {
+        const richEditor = document.querySelector('#announcement-richtext-editor') as HTMLDivElement
+        if (richEditor) {
+          richEditor.innerHTML = newAnnouncementText.value
+          richEditor.focus()
+        }
+      })
+    } else {
+      // Switching off rich text - strip HTML tags and show plain text
+      activeFormats.value = { bold: false, italic: false, underline: false, size: '' }
+
+      // Strip HTML from the announcement text
+      const div = document.createElement('div')
+      div.innerHTML = newAnnouncementText.value
+      const plainText = div.textContent || div.innerText || newAnnouncementText.value
+
+      // Update both the model and the reactive input
+      config.value.announcementBar.announcements[selectedAnnouncementIndex.value].text = plainText
+      newAnnouncementText.value = plainText
+    }
+  }
+}
+
+// Handle input from the contenteditable rich text editor
+function onRichTextInput(event: Event) {
+  const target = event.target as HTMLDivElement
+  const html = target.innerHTML
+
+  // Update the announcement text in the data model
+  if (selectedAnnouncementIndex.value !== null) {
+    config.value.announcementBar.announcements[selectedAnnouncementIndex.value].text = html
+    newAnnouncementText.value = html
+    markChanged()
+  }
+
+  // Update active format indicators
+  updateActiveFormats()
+}
+
+// Update active format indicators based on current cursor/selection position
+function updateActiveFormats() {
+  if (selectedAnnouncementIndex.value === null || !selectedAnnouncementRichText.value) {
+    activeFormats.value = { bold: false, italic: false, underline: false, size: '' }
+    return
+  }
+
+  // Use document.queryCommandState to check formatting at the current cursor position
+  // This is the same API browsers use internally - it checks what's active at the caret
+  activeFormats.value.bold = document.queryCommandState('bold')
+  activeFormats.value.italic = document.queryCommandState('italic')
+  activeFormats.value.underline = document.queryCommandState('underline')
+
+  // Detect font-size by walking up the DOM from the selection's anchor node
+  activeFormats.value.size = ''
+  const selection = window.getSelection()
+  if (selection && selection.anchorNode) {
+    let node: Node | null = selection.anchorNode
+    // Walk up to find a span with font-size set
+    while (node && node !== document.body) {
+      if (node instanceof HTMLElement) {
+        const fontSize = node.style.fontSize
+        if (fontSize) {
+          if (fontSize === '0.75rem') activeFormats.value.size = 'xs'
+          else if (fontSize === '0.875rem') activeFormats.value.size = 'sm'
+          else if (fontSize === '1.125rem') activeFormats.value.size = 'lg'
+          else if (fontSize === '1.25rem') activeFormats.value.size = 'xl'
+          break
+        }
+      }
+      node = node.parentNode
+    }
+  }
+}
+
+function formatText(format: string) {
+  if (selectedAnnouncementIndex.value === null) return
+
+  const richEditor = document.querySelector('#announcement-richtext-editor') as HTMLDivElement
+  if (!richEditor) return
+
+  // Check if text is actually selected (don't apply to everything)
+  const selection = window.getSelection()
+  if (!selection || selection.rangeCount === 0 || selection.isCollapsed) {
+    // No text is highlighted - show a brief visual hint
+    return
+  }
+
+  // Make sure the selection is within our editor
+  const anchorNode = selection.anchorNode
+  if (!anchorNode || !richEditor.contains(anchorNode)) {
+    return
+  }
+
+  // Use execCommand for bold, italic, underline (browser handles combining natively)
+  switch (format) {
+    case 'bold':
+      document.execCommand('bold', false)
+      break
+    case 'italic':
+      document.execCommand('italic', false)
+      break
+    case 'underline':
+      document.execCommand('underline', false)
+      break
+    case 'size-xs':
+      applyFontSize('0.75rem')
+      break
+    case 'size-sm':
+      applyFontSize('0.875rem')
+      break
+    case 'size-lg':
+      applyFontSize('1.125rem')
+      break
+    case 'size-xl':
+      applyFontSize('1.25rem')
+      break
+  }
+
+  // Sync the updated HTML back to the data model
+  const updatedHtml = richEditor.innerHTML
+  config.value.announcementBar.announcements[selectedAnnouncementIndex.value].text = updatedHtml
+  newAnnouncementText.value = updatedHtml
+  markChanged()
+
+  // Update active format indicators
+  updateActiveFormats()
+}
+
+// Apply font size using execCommand with a span wrapper
+function applyFontSize(size: string) {
+  const selection = window.getSelection()
+  if (!selection || selection.rangeCount === 0) return
+
+  const range = selection.getRangeAt(0)
+
+  // Only apply to selected text, not everything
+  if (range.collapsed) return
+
+  // Extract the selected content
+  const fragment = range.extractContents()
+
+  // Remove any existing font-size spans from the fragment
+  const existingSpans = fragment.querySelectorAll('span[style*="font-size"]')
+  existingSpans.forEach(span => {
+    const parent = span.parentNode
+    while (span.firstChild) {
+      parent?.insertBefore(span.firstChild, span)
+    }
+    parent?.removeChild(span)
+  })
+
+  // Wrap in a new span with the desired font size
+  const wrapper = document.createElement('span')
+  wrapper.style.fontSize = size
+  wrapper.appendChild(fragment)
+
+  range.insertNode(wrapper)
+
+  // Restore selection around the wrapper
+  range.selectNodeContents(wrapper)
+  selection.removeAllRanges()
+  selection.addRange(range)
 }
 
 function migrateAnnouncements(config: any) {
@@ -801,5 +1082,12 @@ function getActiveAnnouncements() {
   100% {
     transform: translateX(-50%);
   }
+}
+
+/* Contenteditable placeholder */
+#announcement-richtext-editor:empty:before {
+  content: attr(data-placeholder);
+  color: #9ca3af;
+  pointer-events: none;
 }
 </style>

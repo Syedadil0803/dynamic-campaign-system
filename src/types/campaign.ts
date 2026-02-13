@@ -7,6 +7,7 @@ export interface GradientStyle {
 export interface Announcement {
   text: string;
   url?: string;
+  richText?: boolean;
 }
 
 export interface CampaignConfig {
