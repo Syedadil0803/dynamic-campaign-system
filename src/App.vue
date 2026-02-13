@@ -197,9 +197,6 @@
                     <button @mousedown.prevent="formatText('italic')"
                       :class="activeFormats.italic ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
                       class="px-2 py-1 text-xs italic border rounded transition-colors" title="Italic">I</button>
-                    <button @mousedown.prevent="formatText('underline')"
-                      :class="activeFormats.underline ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
-                      class="px-2 py-1 text-xs underline border rounded transition-colors" title="Underline">U</button>
 
                     <div class="border-l border-gray-300 h-4 mx-1"></div>
 
@@ -642,10 +639,9 @@ const newAnnouncementText = ref('')
 const selectedAnnouncementIndex = ref<number | null>(null)
 const selectedAnnouncementUrl = ref('')
 const selectedAnnouncementRichText = ref(false)
-const activeFormats = ref<{ bold: boolean; italic: boolean; underline: boolean; size: string }>({
+const activeFormats = ref<{ bold: boolean; italic: boolean; size: string }>({
   bold: false,
   italic: false,
-  underline: false,
   size: ''
 })
 
@@ -769,7 +765,7 @@ function selectAnnouncement(index: number) {
   newAnnouncementText.value = config.value.announcementBar.announcements[index].text
 
   // Always reset active formats first, then re-compute for the NEW announcement
-  activeFormats.value = { bold: false, italic: false, underline: false, size: '' }
+  activeFormats.value = { bold: false, italic: false, size: '' }
   if (selectedAnnouncementRichText.value) {
     updateActiveFormats()
   }
@@ -835,7 +831,7 @@ function toggleRichText() {
       })
     } else {
       // Switching off rich text - strip HTML tags and show plain text
-      activeFormats.value = { bold: false, italic: false, underline: false, size: '' }
+      activeFormats.value = { bold: false, italic: false, size: '' }
 
       // Strip HTML from the announcement text
       const div = document.createElement('div')
@@ -868,7 +864,7 @@ function onRichTextInput(event: Event) {
 // Update active format indicators based on current cursor/selection position
 function updateActiveFormats() {
   if (selectedAnnouncementIndex.value === null || !selectedAnnouncementRichText.value) {
-    activeFormats.value = { bold: false, italic: false, underline: false, size: '' }
+    activeFormats.value = { bold: false, italic: false, size: '' }
     return
   }
 
@@ -876,7 +872,6 @@ function updateActiveFormats() {
   // This is the same API browsers use internally - it checks what's active at the caret
   activeFormats.value.bold = document.queryCommandState('bold')
   activeFormats.value.italic = document.queryCommandState('italic')
-  activeFormats.value.underline = document.queryCommandState('underline')
 
   // Detect font-size by walking up the DOM from the selection's anchor node
   activeFormats.value.size = ''
@@ -926,9 +921,6 @@ function formatText(format: string) {
       break
     case 'italic':
       document.execCommand('italic', false)
-      break
-    case 'underline':
-      document.execCommand('underline', false)
       break
     case 'size-xs':
       applyFontSize('0.75rem')
