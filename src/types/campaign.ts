@@ -1,7 +1,9 @@
 export interface GradientStyle {
-  type: 'solid' | 'radial';
+  type: 'solid' | 'linear' | 'radial';
   startColor: string;
   endColor: string;
+  direction?: string; // for linear gradients: 'to right', 'to bottom', etc.
+  midpoint?: number; // 0-100, controls where colors meet (default 50)
 }
 
 export interface Announcement {
@@ -55,9 +57,11 @@ export const defaultConfig: CampaignConfig = {
     endDate: '',
     style: {
       background: {
-        type: 'solid',
+        type: 'linear',
         startColor: '#dc2626',
         endColor: '#dc2626',
+        direction: 'to right',
+        midpoint: 50,
       },
       textColor: '#ffffff',
     },
@@ -71,9 +75,11 @@ export const defaultConfig: CampaignConfig = {
     style: {
       position: 'bottom-right',
       background: {
-        type: 'solid',
+        type: 'linear',
         startColor: '#ffffff',
         endColor: '#ffffff',
+        direction: 'to right',
+        midpoint: 50,
       },
       textColor: '#111827',
       buttonColor: '#6366f1',

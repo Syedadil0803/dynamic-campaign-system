@@ -305,33 +305,103 @@
                     Customization</label>
 
                   <!-- Background Type Selector -->
-                  <div class="mb-4">
-                    <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">Background Type</label>
-                    <select v-model="config.announcementBar.style.background.type" @change="markChanged"
-                      class="block w-full text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md p-2 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
-                      <option value="solid">Solid</option>
-                      <option value="radial">Gradient</option>
-                    </select>
-                  </div>
-
                   <div class="grid grid-cols-2 gap-4">
+                    <!-- Background Type -->
                     <div class="relative rounded-md shadow-sm">
-                      <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">Start Color</label>
-                      <input type="color" v-model="config.announcementBar.style.background.startColor"
-                        @input="markChanged"
-                        class="h-10 w-full rounded border border-gray-300 cursor-pointer dark:border-gray-600" />
+                      <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">Background Type</label>
+                      <select v-model="config.announcementBar.style.background.type" @change="markChanged"
+                        class="block w-full text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md p-2 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
+                        <option value="solid">Solid</option>
+                        <option value="linear">Linear</option>
+                        <option value="radial">Gradient</option>
+                      </select>
                     </div>
-                    <div class="relative rounded-md shadow-sm"
-                      v-if="config.announcementBar.style.background.type !== 'solid'">
-                      <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">End Color</label>
-                      <input type="color" v-model="config.announcementBar.style.background.endColor"
-                        @input="markChanged"
-                        class="h-10 w-full rounded border border-gray-300 cursor-pointer dark:border-gray-600" />
-                    </div>
+                    
+                    <!-- Text Color (Always Visible) -->
                     <div class="relative rounded-md shadow-sm">
                       <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">Text Color</label>
                       <input type="color" v-model="config.announcementBar.style.textColor" @input="markChanged"
                         class="h-10 w-full rounded border border-gray-300 cursor-pointer dark:border-gray-600" />
+                    </div>
+                  </div>
+                  
+                  <!-- Linear Gradient Controls (Full Width Below) -->
+                  <div v-if="config.announcementBar.style.background.type === 'linear'" class="relative rounded-md shadow-sm mt-4">
+                    <div class="grid grid-cols-3 gap-4">
+                      <div class="relative">
+                        <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">Start Color</label>
+                        <input type="color" v-model="config.announcementBar.style.background.startColor"
+                          @input="markChanged"
+                          class="h-10 w-full rounded border border-gray-300 cursor-pointer dark:border-gray-600" />
+                      </div>
+                      <div class="relative">
+                        <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">End Color</label>
+                        <input type="color" v-model="config.announcementBar.style.background.endColor"
+                          @input="markChanged"
+                          class="h-10 w-full rounded border border-gray-300 cursor-pointer dark:border-gray-600" />
+                      </div>
+                      <div class="relative">
+                        <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">Direction</label>
+                        <select v-model="config.announcementBar.style.background.direction" @change="markChanged"
+                          class="block w-full text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md p-2 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
+                          <option value="to right">To Right →</option>
+                          <option value="to left">To Left ←</option>
+                          <option value="to bottom">To Bottom ↓</option>
+                          <option value="to top">To Top ↑</option>
+                          <option value="to bottom right">To Bottom Right ↘</option>
+                          <option value="to bottom left">To Bottom Left ↙</option>
+                          <option value="to top right">To Top Right ↗</option>
+                          <option value="to top left">To Top Left ↖</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div class="mt-4 space-y-2">
+                      <label class="block text-xs text-gray-500 dark:text-gray-400">Balance: {{ config.announcementBar.style.background.midpoint ?? 50 }}%</label>
+                      <input type="range" min="0" max="100" v-model.number="config.announcementBar.style.background.midpoint" @input="markChanged"
+                        class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700" />
+                    </div>
+                  </div>
+                  
+                  <!-- Color Controls (Full Width Below) -->
+                  <div class="grid grid-cols-2 gap-4 mt-4">
+                    <!-- Solid Background -->
+                    <div v-if="config.announcementBar.style.background.type === 'solid'" class="col-span-2">
+                      <div class="grid grid-cols-2 gap-4">
+                        <div class="relative rounded-md shadow-sm">
+                          <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">Background Color</label>
+                          <input type="color" v-model="config.announcementBar.style.background.startColor"
+                            @input="markChanged"
+                            class="h-10 w-full rounded border border-gray-300 cursor-pointer dark:border-gray-600" />
+                        </div>
+                        <div class="relative rounded-md shadow-sm">
+                          <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">Text Color</label>
+                          <input type="color" v-model="config.announcementBar.style.textColor" @input="markChanged"
+                            class="h-10 w-full rounded border border-gray-300 cursor-pointer dark:border-gray-600" />
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <!-- Radial Gradient -->
+                    <div v-if="config.announcementBar.style.background.type === 'radial'" class="col-span-2">
+                      <div class="grid grid-cols-2 gap-4">
+                        <div class="relative rounded-md shadow-sm">
+                          <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">Center Color</label>
+                          <input type="color" v-model="config.announcementBar.style.background.startColor"
+                            @input="markChanged"
+                            class="h-10 w-full rounded border border-gray-300 cursor-pointer dark:border-gray-600" />
+                        </div>
+                        <div class="relative rounded-md shadow-sm">
+                          <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">Outer Color</label>
+                          <input type="color" v-model="config.announcementBar.style.background.endColor"
+                            @input="markChanged"
+                            class="h-10 w-full rounded border border-gray-300 cursor-pointer dark:border-gray-600" />
+                        </div>
+                      </div>
+                      <div class="mt-4 space-y-2">
+                        <label class="block text-xs text-gray-500 dark:text-gray-400">Balance: {{ config.announcementBar.style.background.midpoint ?? 50 }}%</label>
+                        <input type="range" min="0" max="100" v-model.number="config.announcementBar.style.background.midpoint" @input="markChanged"
+                          class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700" />
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -484,68 +554,101 @@
                 <!-- Styling -->
                 <div class="border-t border-gray-200 pt-4 dark:border-gray-600">
                   <h4 class="text-sm font-medium text-gray-900 mb-3 dark:text-gray-100">Card Appearance</h4>
-                  <div class="grid grid-cols-2 gap-4">
-                    <div>
-                      <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">Position</label>
-                      <select v-model="config.promoCard.style.position" @change="markChanged"
-                        class="block w-full text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md p-2 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
-                        <option value="bottom-right">Bottom Right</option>
-                        <option value="bottom-left">Bottom Left</option>
-                      </select>
+                  <div class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                      <div>
+                        <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">Position</label>
+                        <select v-model="config.promoCard.style.position" @change="markChanged"
+                          class="block w-full text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md p-2 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
+                          <option value="bottom-right">Bottom Right</option>
+                          <option value="bottom-left">Bottom Left</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">Background Type</label>
+                        <select v-model="config.promoCard.style.background.type" @change="markChanged"
+                          class="block w-full text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md p-2 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
+                          <option value="solid">Solid</option>
+                          <option value="linear">Linear</option>
+                          <option value="radial">Gradient</option>
+                        </select>
+                      </div>
                     </div>
-
-                    <!-- Background Type Selector -->
-                    <div>
-                      <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">Background Type</label>
-                      <select v-model="config.promoCard.style.background.type" @change="markChanged"
-                        class="block w-full text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md p-2 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
-                        <option value="solid">Solid</option>
-                        <option value="radial">Gradient</option>
-                      </select>
-                    </div>
-
-                    <div class="flex items-end space-x-2">
-                      <div class="flex-1">
+                    
+                    <!-- Linear Gradient Controls -->
+                    <div v-if="config.promoCard.style.background.type === 'linear'" class="grid grid-cols-3 gap-4">
+                      <div>
                         <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">Start Color</label>
                         <input type="color" v-model="config.promoCard.style.background.startColor" @input="markChanged"
                           class="h-9 w-full rounded border border-gray-300 cursor-pointer dark:border-gray-600" />
                       </div>
-                      <div class="flex-1" v-if="config.promoCard.style.background.type !== 'solid'">
+                      <div>
                         <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">End Color</label>
                         <input type="color" v-model="config.promoCard.style.background.endColor" @input="markChanged"
                           class="h-9 w-full rounded border border-gray-300 cursor-pointer dark:border-gray-600" />
+                      </div>
+                      <div>
+                        <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">Direction</label>
+                        <select v-model="config.promoCard.style.background.direction" @change="markChanged"
+                          class="block w-full text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md p-2 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
+                          <option value="to right">To Right →</option>
+                          <option value="to left">To Left ←</option>
+                          <option value="to bottom">To Bottom ↓</option>
+                          <option value="to top">To Top ↑</option>
+                          <option value="to bottom right">To Bottom Right ↘</option>
+                          <option value="to bottom left">To Bottom Left ↙</option>
+                          <option value="to top right">To Top Right ↗</option>
+                          <option value="to top left">To Top Left ↖</option>
+                        </select>
                       </div>
                     </div>
-
-                    <div class="flex items-end space-x-2" v-if="config.promoCard.style.background.type !== 'solid'">
-                      <div class="flex-1">
-                        <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">End Color</label>
-                        <input type="color" v-model="config.promoCard.style.background.endColor" @input="markChanged"
+                    <div v-if="config.promoCard.style.background.type === 'linear'" class="space-y-2">
+                      <label class="block text-xs text-gray-500 dark:text-gray-400">Balance: {{ config.promoCard.style.background.midpoint ?? 50 }}%</label>
+                      <input type="range" min="0" max="100" v-model.number="config.promoCard.style.background.midpoint" @input="markChanged"
+                        class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700" />
+                    </div>
+                    
+                    <!-- Solid Background Colors -->
+                    <div v-if="config.promoCard.style.background.type === 'solid'" class="grid grid-cols-2 gap-4">
+                      <div>
+                        <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">Background Color</label>
+                        <input type="color" v-model="config.promoCard.style.background.startColor" @input="markChanged"
                           class="h-9 w-full rounded border border-gray-300 cursor-pointer dark:border-gray-600" />
                       </div>
-                      <div class="flex-1">
+                      <div>
                         <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">Text Color</label>
                         <input type="color" v-model="config.promoCard.style.textColor" @input="markChanged"
                           class="h-9 w-full rounded border border-gray-300 cursor-pointer dark:border-gray-600" />
                       </div>
                     </div>
-
-                    <div class="flex items-end space-x-2 mt-4"
-                      v-if="config.promoCard.style.background.type === 'solid'">
-                      <div class="flex-1">
-                        <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">Text Color</label>
-                        <input type="color" v-model="config.promoCard.style.textColor" @input="markChanged"
+                    
+                    <!-- Radial Gradient Colors -->
+                    <div v-if="config.promoCard.style.background.type === 'radial'" class="grid grid-cols-2 gap-4">
+                      <div>
+                        <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">Center Color</label>
+                        <input type="color" v-model="config.promoCard.style.background.startColor" @input="markChanged"
+                          class="h-9 w-full rounded border border-gray-300 cursor-pointer dark:border-gray-600" />
+                      </div>
+                      <div>
+                        <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">Outer Color</label>
+                        <input type="color" v-model="config.promoCard.style.background.endColor" @input="markChanged"
                           class="h-9 w-full rounded border border-gray-300 cursor-pointer dark:border-gray-600" />
                       </div>
                     </div>
+                    <div v-if="config.promoCard.style.background.type === 'radial'" class="space-y-2">
+                      <label class="block text-xs text-gray-500 dark:text-gray-400">Balance: {{ config.promoCard.style.background.midpoint ?? 50 }}%</label>
+                      <input type="range" min="0" max="100" v-model.number="config.promoCard.style.background.midpoint" @input="markChanged"
+                        class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700" />
+                    </div>
 
-                    <div class="flex items-end space-x-2 mt-4">
-                      <div class="flex-1">
+                    <!-- Button Colors -->
+                    <div class="grid grid-cols-2 gap-4">
+                      <div>
                         <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">Button Bg Color</label>
                         <input type="color" v-model="config.promoCard.style.buttonColor" @input="markChanged"
                           class="h-9 w-full rounded border border-gray-300 cursor-pointer dark:border-gray-600" />
                       </div>
-                      <div class="flex-1">
+                      <div>
                         <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">Button Text Color</label>
                         <input type="color" v-model="config.promoCard.style.buttonTextColor" @input="markChanged"
                           class="h-9 w-full rounded border border-gray-300 cursor-pointer dark:border-gray-600" />
@@ -1029,8 +1132,13 @@ function migrateAnnouncements(config: any) {
 function getBackgroundStyle(background: any) {
   if (background.type === 'solid') {
     return background.startColor
+  } else if (background.type === 'linear') {
+    const direction = background.direction || 'to right'
+    const midpoint = background.midpoint ?? 50
+    return `linear-gradient(${direction}, ${background.startColor} 0%, ${background.startColor} ${midpoint}%, ${background.endColor} 100%)`
   } else if (background.type === 'radial') {
-    return `radial-gradient(circle, ${background.startColor}, ${background.endColor})`
+    const midpoint = background.midpoint ?? 50
+    return `radial-gradient(circle, ${background.startColor} 0%, ${background.startColor} ${midpoint}%, ${background.endColor} 100%)`
   }
   return background.startColor
 }
