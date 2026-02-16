@@ -512,25 +512,63 @@
             <div class="p-6 grid grid-cols-1 lg:grid-cols-2 gap-8">
               <!-- Form Side -->
               <div class="space-y-6">
+                <!-- Global Text Formatting Toolbar -->
+                <div class="border border-gray-300 rounded-md p-3 bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
+                  <label class="block text-xs font-medium text-gray-700 mb-2 dark:text-gray-300">Rich Text Editor</label>
+                  <div class="flex flex-wrap gap-1 items-center">
+                    <button @mousedown.prevent="formatPromoText('bold')"
+                      :class="promoFormats.bold ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
+                      class="px-2 py-1 text-xs font-bold border rounded transition-colors" title="Bold">B</button>
+                    <button @mousedown.prevent="formatPromoText('italic')"
+                      :class="promoFormats.italic ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
+                      class="px-2 py-1 text-xs italic border rounded transition-colors" title="Italic">I</button>
+
+                    <div class="border-l border-gray-300 h-4 mx-1"></div>
+
+                    <button @mousedown.prevent="formatPromoText('size-xs')"
+                      :class="promoFormats.size === 'xs' ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
+                      class="px-2 py-1 text-xs border rounded transition-colors">XS</button>
+                    <button @mousedown.prevent="formatPromoText('size-sm')"
+                      :class="promoFormats.size === 'sm' ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
+                      class="px-2 py-1 text-xs border rounded transition-colors">SM</button>
+                    <button @mousedown.prevent="formatPromoText('size-lg')"
+                      :class="promoFormats.size === 'lg' ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
+                      class="px-2 py-1 text-xs border rounded transition-colors">LG</button>
+                    <button @mousedown.prevent="formatPromoText('size-xl')"
+                      :class="promoFormats.size === 'xl' ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
+                      class="px-2 py-1 text-xs border rounded transition-colors">XL</button>
+                    <button @mousedown.prevent="formatPromoText('size-xxl')"
+                      :class="promoFormats.size === 'xxl' ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
+                      class="px-2 py-1 text-xs border rounded transition-colors">XXL</button>
+
+                    <div class="ml-auto text-[10px] text-gray-400 hidden sm:block">
+                      Select text to format
+                    </div>
+                  </div>
+                </div>
+
                 <div>
                   <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Title</label>
-                  <input type="text" v-model="config.promoCard.title" @input="markChanged"
-                    class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md p-2.5 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
-                    placeholder="Get 20% OFF" />
+                  <div id="promo-title-editor" contenteditable="true" @input="onPromoTitleInput"
+                    @mouseup="updatePromoFormats" @keyup="updatePromoFormats"
+                    class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md p-2.5 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 min-h-[42px] outline-none"
+                    :data-placeholder="'Get 20% OFF'"></div>
                 </div>
 
                 <div>
                   <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Subtitle</label>
-                  <input type="text" v-model="config.promoCard.subtitle" @input="markChanged"
-                    class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md p-2.5 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
-                    placeholder="Limited time offer" />
+                  <div id="promo-subtitle-editor" contenteditable="true" @input="onPromoSubtitleInput"
+                    @mouseup="updatePromoFormats" @keyup="updatePromoFormats"
+                    class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md p-2.5 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 min-h-[42px] outline-none"
+                    :data-placeholder="'Limited time offer'"></div>
                 </div>
 
                 <div>
                   <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
-                  <textarea rows="2" v-model="config.promoCard.description" @input="markChanged"
-                    class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md p-2.5 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400"
-                    placeholder="Sign up for our newsletter today!"></textarea>
+                  <div id="promo-description-editor" contenteditable="true" @input="onPromoDescriptionInput"
+                    @mouseup="updatePromoFormats" @keyup="updatePromoFormats"
+                    class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md p-2.5 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 min-h-[56px] outline-none"
+                    :data-placeholder="'Sign up for our newsletter today!'"></div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
@@ -577,43 +615,8 @@
                 <!-- Timer Text Editor -->
                 <div v-if="config.promoCard.showTimer">
                   <label class="block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300">Timer Text</label>
-                  
-                  <!-- Rich Text Toolbar -->
-                  <div class="mb-2 border border-gray-300 rounded-md p-1.5 bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
-                    <div class="flex flex-wrap gap-1 items-center">
-                      <button @mousedown.prevent="formatTimerText('bold')"
-                        :class="timerFormats.bold ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
-                        class="px-2 py-1 text-xs font-bold border rounded transition-colors" title="Bold">B</button>
-                      <button @mousedown.prevent="formatTimerText('italic')"
-                        :class="timerFormats.italic ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
-                        class="px-2 py-1 text-xs italic border rounded transition-colors" title="Italic">I</button>
-
-                      <div class="border-l border-gray-300 h-4 mx-1"></div>
-
-                      <button @mousedown.prevent="formatTimerText('size-xs')"
-                        :class="timerFormats.size === 'xs' ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
-                        class="px-2 py-1 text-xs border rounded transition-colors">XS</button>
-                      <button @mousedown.prevent="formatTimerText('size-sm')"
-                        :class="timerFormats.size === 'sm' ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
-                        class="px-2 py-1 text-xs border rounded transition-colors">SM</button>
-                      <button @mousedown.prevent="formatTimerText('size-lg')"
-                        :class="timerFormats.size === 'lg' ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
-                        class="px-2 py-1 text-xs border rounded transition-colors">LG</button>
-                      <button @mousedown.prevent="formatTimerText('size-xl')"
-                        :class="timerFormats.size === 'xl' ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
-                        class="px-2 py-1 text-xs border rounded transition-colors">XL</button>
-                      <button @mousedown.prevent="formatTimerText('size-xxl')"
-                        :class="timerFormats.size === 'xxl' ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
-                        class="px-2 py-1 text-xs border rounded transition-colors">XXL</button>
-
-                      <div class="ml-auto text-[10px] text-gray-400 hidden sm:block">
-                        Highlight to format
-                      </div>
-                    </div>
-                  </div>
-
                   <div id="timer-richtext-editor" contenteditable="true" @input="onTimerTextInput"
-                    @mouseup="updateTimerFormats" @keyup="updateTimerFormats"
+                    @mouseup="updatePromoFormats" @keyup="updatePromoFormats"
                     class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md p-3 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 min-h-[56px] outline-none overflow-auto"
                     :data-placeholder="'Ends in hh:mm:ss'"></div>
                   <p class="text-xs text-gray-500 mt-1 dark:text-gray-400">Use hh, mm, ss placeholders. Select to format.</p>
@@ -784,8 +787,8 @@
                       background: getBackgroundStyle(config.promoCard.style.titleStyle.background), 
                       color: config.promoCard.style.titleStyle.textColor,
                       textAlign: config.promoCard.style.titleStyle.textAlign || 'center'
-                    }">
-                    {{ config.promoCard.title || 'Title' }}
+                    }"
+                    v-html="config.promoCard.title || 'Title'">
                   </h3>
                   
                   <!-- Subtitle -->
@@ -794,8 +797,8 @@
                       background: getBackgroundStyle(config.promoCard.style.subheadingStyle.background), 
                       color: config.promoCard.style.subheadingStyle.textColor,
                       textAlign: config.promoCard.style.subheadingStyle.textAlign || 'center'
-                    }">
-                    {{ config.promoCard.subtitle }}
+                    }"
+                    v-html="config.promoCard.subtitle">
                   </h4>
                   <h4 v-else class="text-sm font-medium mb-2 px-2 py-1 rounded"
                     :style="{ 
@@ -811,8 +814,8 @@
                     :style="{ 
                       background: getBackgroundStyle(config.promoCard.style.descriptionStyle.background), 
                       color: config.promoCard.style.descriptionStyle.textColor 
-                    }">
-                    {{ config.promoCard.description || 'Description text goes here.' }}
+                    }"
+                    v-html="config.promoCard.description || 'Description text goes here.'">
                   </p>
                   
                   <!-- Timer Display -->
@@ -928,6 +931,12 @@ const timerFormats = ref<ActiveFormats>({
   size: ''
 })
 
+const promoFormats = ref<ActiveFormats>({
+  bold: false,
+  italic: false,
+  size: ''
+})
+
 // Computed property to check if we're in rich text edit mode
 const isRichTextEditMode = computed(() => {
   return selectedAnnouncementIndex.value !== null && selectedAnnouncementRichText.value
@@ -969,11 +978,26 @@ onMounted(async () => {
     currentTime.value = Date.now()
   }, 1000)
   
-  // Populate timer editor after DOM is ready
+  // Populate editors after DOM is ready
   await nextTick()
   const timerEditor = document.querySelector('#timer-richtext-editor') as HTMLDivElement
   if (timerEditor && config.value.promoCard.timerText) {
     timerEditor.innerHTML = config.value.promoCard.timerText
+  }
+  
+  const titleEditor = document.querySelector('#promo-title-editor') as HTMLDivElement
+  if (titleEditor && config.value.promoCard.title) {
+    titleEditor.innerHTML = config.value.promoCard.title
+  }
+  
+  const subtitleEditor = document.querySelector('#promo-subtitle-editor') as HTMLDivElement
+  if (subtitleEditor && config.value.promoCard.subtitle) {
+    subtitleEditor.innerHTML = config.value.promoCard.subtitle
+  }
+  
+  const descriptionEditor = document.querySelector('#promo-description-editor') as HTMLDivElement
+  if (descriptionEditor && config.value.promoCard.description) {
+    descriptionEditor.innerHTML = config.value.promoCard.description
   }
 })
 
@@ -1465,6 +1489,80 @@ function formatTimerText(format: string) {
   config.value.promoCard.timerText = richEditor.innerHTML
   markChanged()
   updateTimerFormats()
+}
+
+function updatePromoFormats() {
+  promoFormats.value.bold = document.queryCommandState('bold')
+  promoFormats.value.italic = document.queryCommandState('italic')
+  promoFormats.value.size = ''
+  const selection = window.getSelection()
+  if (selection && selection.anchorNode) {
+    let node: Node | null = selection.anchorNode
+    while (node && node !== document.body) {
+      if (node instanceof HTMLElement) {
+        const fontSize = node.style.fontSize
+        if (fontSize) {
+          if (fontSize === '0.75rem') promoFormats.value.size = 'xs'
+          else if (fontSize === '0.875rem') promoFormats.value.size = 'sm'
+          else if (fontSize === '1.125rem') promoFormats.value.size = 'lg'
+          else if (fontSize === '1.25rem') promoFormats.value.size = 'xl'
+          else if (fontSize === '1.5rem') promoFormats.value.size = 'xxl'
+          break
+        }
+      }
+      node = node.parentNode
+    }
+  }
+}
+
+function formatPromoText(format: string) {
+  const selection = window.getSelection()
+  if (!selection || selection.rangeCount === 0 || selection.isCollapsed) return
+
+  switch (format) {
+    case 'bold':
+      document.execCommand('bold', false)
+      break
+    case 'italic':
+      document.execCommand('italic', false)
+      break
+    case 'size-xs':
+      applyFontSize('0.75rem')
+      break
+    case 'size-sm':
+      applyFontSize('0.875rem')
+      break
+    case 'size-lg':
+      applyFontSize('1.125rem')
+      break
+    case 'size-xl':
+      applyFontSize('1.25rem')
+      break
+    case 'size-xxl':
+      applyFontSize('1.5rem')
+      break
+  }
+
+  markChanged()
+  updatePromoFormats()
+}
+
+function onPromoTitleInput(event: Event) {
+  const target = event.target as HTMLDivElement
+  config.value.promoCard.title = target.innerHTML
+  markChanged()
+}
+
+function onPromoSubtitleInput(event: Event) {
+  const target = event.target as HTMLDivElement
+  config.value.promoCard.subtitle = target.innerHTML
+  markChanged()
+}
+
+function onPromoDescriptionInput(event: Event) {
+  const target = event.target as HTMLDivElement
+  config.value.promoCard.description = target.innerHTML
+  markChanged()
 }
 
 function getBackgroundStyle(background: any) {
