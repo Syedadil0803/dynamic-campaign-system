@@ -564,8 +564,7 @@
                 <!-- Timer Toggle -->
                 <div class="flex items-center justify-between">
                   <div>
-                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Show Timer</label>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">Display countdown timer in preview</p>
+                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Enable Timer</label>
                   </div>
                   <button @click="toggleTimer"
                     :class="config.promoCard.showTimer ? 'bg-indigo-600' : 'bg-gray-200'"
