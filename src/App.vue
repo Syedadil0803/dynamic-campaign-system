@@ -897,7 +897,6 @@ import { useRoute, useRouter } from 'vue-router'
 import { loadConfig, saveConfig } from './services/campaignService'
 import type { CampaignConfig } from './types/campaign'
 import { defaultConfig } from './types/campaign'
-import TextStyleSelector from './components/TextStyleSelector.vue'
 import {
   LayoutDashboard,
   Megaphone,
@@ -930,10 +929,6 @@ const currentTime = ref(Date.now())
 const selectedAnnouncementUrl = ref('')
 const selectedAnnouncementRichText = ref(false)
 
-// Promo card rich text editor state
-const isEditingDescription = ref(false)
-const editingDescriptionText = ref('')
-
 type ActiveFormats = {
   bold: boolean
   italic: boolean
@@ -941,12 +936,6 @@ type ActiveFormats = {
 }
 
 const activeFormats = ref<ActiveFormats>({
-  bold: false,
-  italic: false,
-  size: ''
-})
-
-const timerFormats = ref<ActiveFormats>({
   bold: false,
   italic: false,
   size: ''
@@ -1046,44 +1035,6 @@ function updateDarkModeClass() {
 
 const markChanged = () => {
   hasChanges.value = true
-}
-
-const updateTitleStyle = (newStyle: any) => {
-  config.value.promoCard.style.titleStyle = newStyle
-  markChanged()
-}
-
-const updateSubheadingStyle = (newStyle: any) => {
-  config.value.promoCard.style.subheadingStyle = newStyle
-  markChanged()
-}
-
-const updateDescriptionStyle = (newStyle: any) => {
-  config.value.promoCard.style.descriptionStyle = newStyle
-  markChanged()
-}
-
-// Rich text editor functions for description
-const toggleFormat = (format: 'bold' | 'italic' | 'size') => {
-  activeFormats.value[format] = !activeFormats.value[format]
-  markChanged()
-}
-
-const saveDescription = () => {
-  config.value.promoCard.description = editingDescriptionText.value
-  isEditingDescription.value = false
-  markChanged()
-}
-
-const cancelDescriptionEdit = () => {
-  isEditingDescription.value = false
-  editingDescriptionText.value = config.value.promoCard.description
-  markChanged()
-}
-
-const updateDateStyle = (newStyle: any) => {
-  config.value.promoCard.style.dateStyle = newStyle
-  markChanged()
 }
 
 const calculateHoursRemaining = () => {
@@ -1454,70 +1405,6 @@ function onTimerTextInput(event: Event) {
   const target = event.target as HTMLDivElement
   config.value.promoCard.timerText = target.innerHTML
   markChanged()
-  updateTimerFormats()
-}
-
-function updateTimerFormats() {
-  timerFormats.value.bold = document.queryCommandState('bold')
-  timerFormats.value.italic = document.queryCommandState('italic')
-  timerFormats.value.size = ''
-  const selection = window.getSelection()
-  if (selection && selection.anchorNode) {
-    let node: Node | null = selection.anchorNode
-    while (node && node !== document.body) {
-      if (node instanceof HTMLElement) {
-        const fontSize = node.style.fontSize
-        if (fontSize) {
-          if (fontSize === '0.75rem') timerFormats.value.size = 'xs'
-          else if (fontSize === '0.875rem') timerFormats.value.size = 'sm'
-          else if (fontSize === '1.125rem') timerFormats.value.size = 'lg'
-          else if (fontSize === '1.25rem') timerFormats.value.size = 'xl'
-          else if (fontSize === '1.5rem') timerFormats.value.size = 'xxl'
-          break
-        }
-      }
-      node = node.parentNode
-    }
-  }
-}
-
-function formatTimerText(format: string) {
-  const richEditor = document.querySelector('#timer-richtext-editor') as HTMLDivElement
-  if (!richEditor) return
-
-  const selection = window.getSelection()
-  if (!selection || selection.rangeCount === 0 || selection.isCollapsed) return
-
-  const anchorNode = selection.anchorNode
-  if (!anchorNode || !richEditor.contains(anchorNode)) return
-
-  switch (format) {
-    case 'bold':
-      document.execCommand('bold', false)
-      break
-    case 'italic':
-      document.execCommand('italic', false)
-      break
-    case 'size-xs':
-      applyFontSize('0.75rem')
-      break
-    case 'size-sm':
-      applyFontSize('0.875rem')
-      break
-    case 'size-lg':
-      applyFontSize('1.125rem')
-      break
-    case 'size-xl':
-      applyFontSize('1.25rem')
-      break
-    case 'size-xxl':
-      applyFontSize('1.5rem')
-      break
-  }
-
-  config.value.promoCard.timerText = richEditor.innerHTML
-  markChanged()
-  updateTimerFormats()
 }
 
 function updatePromoFormats() {

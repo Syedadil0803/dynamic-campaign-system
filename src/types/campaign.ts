@@ -24,7 +24,7 @@ export interface PromoCard {
   showTimer: boolean;
   timerText?: string;
   style: {
-    position: 'bottom-right' | 'bottom-left';
+    position: 'bottom-right' | 'bottom-left' | 'top-right' | 'top-left';
     background: GradientStyle;
     textColor: string;
     buttonColor: string;
