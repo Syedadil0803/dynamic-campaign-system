@@ -42,6 +42,7 @@ export interface PromoCard {
     descriptionStyle: {
       background: GradientStyle;
       textColor: string;
+      textAlign?: 'left' | 'center' | 'right';
     };
     dateStyle: {
       background: GradientStyle;
@@ -141,6 +142,7 @@ export const defaultConfig: CampaignConfig = {
           midpoint: 50,
         },
         textColor: '#ffffff',
+        textAlign: 'left',
       },
       dateStyle: {
         background: {

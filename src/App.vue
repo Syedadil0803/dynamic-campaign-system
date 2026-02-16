@@ -513,36 +513,94 @@
               <!-- Form Side -->
               <div class="space-y-6">
                 <!-- Global Text Formatting Toolbar -->
-                <div class="border border-gray-300 rounded-md p-3 bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
-                  <label class="block text-xs font-medium text-gray-700 mb-2 dark:text-gray-300">Rich Text Editor</label>
-                  <div class="flex flex-wrap gap-1 items-center">
-                    <button @mousedown.prevent="formatPromoText('bold')"
-                      :class="promoFormats.bold ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
-                      class="px-2 py-1 text-xs font-bold border rounded transition-colors" title="Bold">B</button>
-                    <button @mousedown.prevent="formatPromoText('italic')"
-                      :class="promoFormats.italic ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
-                      class="px-2 py-1 text-xs italic border rounded transition-colors" title="Italic">I</button>
+                <div class="border border-gray-300 rounded-md p-2.5 bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
+                  <label class="block text-xs font-medium text-gray-700 mb-2 dark:text-gray-300">Style Controls</label>
+                  <div class="space-y-2">
+                    <!-- Row 1: Text Formatting + Text Color + Alignment -->
+                    <div class="flex flex-wrap gap-1.5 items-center">
+                      <button @mousedown.prevent="formatPromoText('bold')"
+                        :class="promoFormats.bold ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
+                        class="px-2.5 py-1.5 text-xs font-bold border rounded transition-colors" title="Bold">B</button>
+                      <button @mousedown.prevent="formatPromoText('italic')"
+                        :class="promoFormats.italic ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
+                        class="px-2.5 py-1.5 text-xs italic border rounded transition-colors" title="Italic">I</button>
 
-                    <div class="border-l border-gray-300 h-4 mx-1"></div>
+                      <div class="border-l border-gray-300 h-5 mx-0.5"></div>
 
-                    <button @mousedown.prevent="formatPromoText('size-xs')"
-                      :class="promoFormats.size === 'xs' ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
-                      class="px-2 py-1 text-xs border rounded transition-colors">XS</button>
-                    <button @mousedown.prevent="formatPromoText('size-sm')"
-                      :class="promoFormats.size === 'sm' ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
-                      class="px-2 py-1 text-xs border rounded transition-colors">SM</button>
-                    <button @mousedown.prevent="formatPromoText('size-lg')"
-                      :class="promoFormats.size === 'lg' ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
-                      class="px-2 py-1 text-xs border rounded transition-colors">LG</button>
-                    <button @mousedown.prevent="formatPromoText('size-xl')"
-                      :class="promoFormats.size === 'xl' ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
-                      class="px-2 py-1 text-xs border rounded transition-colors">XL</button>
-                    <button @mousedown.prevent="formatPromoText('size-xxl')"
-                      :class="promoFormats.size === 'xxl' ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
-                      class="px-2 py-1 text-xs border rounded transition-colors">XXL</button>
+                      <button @mousedown.prevent="formatPromoText('size-xs')"
+                        :class="promoFormats.size === 'xs' ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
+                        class="px-2.5 py-1.5 text-xs border rounded transition-colors">XS</button>
+                      <button @mousedown.prevent="formatPromoText('size-sm')"
+                        :class="promoFormats.size === 'sm' ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
+                        class="px-2.5 py-1.5 text-xs border rounded transition-colors">SM</button>
+                      <button @mousedown.prevent="formatPromoText('size-lg')"
+                        :class="promoFormats.size === 'lg' ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
+                        class="px-2.5 py-1.5 text-xs border rounded transition-colors">LG</button>
+                      <button @mousedown.prevent="formatPromoText('size-xl')"
+                        :class="promoFormats.size === 'xl' ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
+                        class="px-2.5 py-1.5 text-xs border rounded transition-colors">XL</button>
+                      <button @mousedown.prevent="formatPromoText('size-xxl')"
+                        :class="promoFormats.size === 'xxl' ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
+                        class="px-2.5 py-1.5 text-xs border rounded transition-colors">XXL</button>
 
-                    <div class="ml-auto text-[10px] text-gray-400 hidden sm:block">
-                      Select text to format
+                      <div class="border-l border-gray-300 h-5 mx-0.5"></div>
+
+                      <div class="flex gap-1.5 items-center">
+                        <label class="text-xs text-gray-500 dark:text-gray-400">Text:</label>
+                        <input type="color" v-model="currentFieldTextColor" @input="updateFieldColors"
+                          class="h-7 w-10 rounded border border-gray-300 cursor-pointer dark:border-gray-600" />
+                      </div>
+
+                      <div class="border-l border-gray-300 h-5 mx-0.5"></div>
+                      
+                      <button @click="setFieldAlignment('left')" @mousedown.prevent
+                        class="px-2.5 py-1.5 text-xs border rounded transition-colors border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600" title="Align Left">L</button>
+                      <button @click="setFieldAlignment('center')" @mousedown.prevent
+                        class="px-2.5 py-1.5 text-xs border rounded transition-colors border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600" title="Align Center">C</button>
+                      <button @click="setFieldAlignment('right')" @mousedown.prevent
+                        class="px-2.5 py-1.5 text-xs border rounded transition-colors border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600" title="Align Right">R</button>
+                    </div>
+
+                    <!-- Row 2: Background Type + Colors + Gradient Controls -->
+                    <div class="flex flex-wrap gap-1.5 items-center">
+                      <select v-model="currentFieldBgType" @change="updateFieldBgType"
+                        class="text-xs border-gray-300 rounded px-2 py-1.5 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
+                        <option value="solid">Solid</option>
+                        <option value="linear">Linear</option>
+                        <option value="radial">Radial</option>
+                      </select>
+
+                      <div class="border-l border-gray-300 h-5 mx-0.5"></div>
+
+                      <div class="flex gap-1.5 items-center">
+                        <label class="text-xs text-gray-500 dark:text-gray-400">Start:</label>
+                        <input type="color" v-model="currentFieldBgColor" @input="updateFieldColors"
+                          class="h-7 w-10 rounded border border-gray-300 cursor-pointer dark:border-gray-600" />
+                      </div>
+
+                      <div v-if="currentFieldBgType !== 'solid'" class="flex gap-1.5 items-center">
+                        <label class="text-xs text-gray-500 dark:text-gray-400">End:</label>
+                        <input type="color" v-model="currentFieldBgEndColor" @input="updateFieldGradient"
+                          class="h-7 w-10 rounded border border-gray-300 cursor-pointer dark:border-gray-600" />
+                      </div>
+
+                      <select v-if="currentFieldBgType === 'linear'" v-model="currentFieldBgDirection" @change="updateFieldGradient"
+                        class="text-xs border-gray-300 rounded px-2 py-1.5 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
+                        <option value="to right">→</option>
+                        <option value="to left">←</option>
+                        <option value="to bottom">↓</option>
+                        <option value="to top">↑</option>
+                        <option value="to bottom right">↘</option>
+                        <option value="to bottom left">↙</option>
+                        <option value="to top right">↗</option>
+                        <option value="to top left">↖</option>
+                      </select>
+
+                      <div v-if="currentFieldBgType !== 'solid'" class="flex-1 flex gap-1.5 items-center min-w-[150px]">
+                        <label class="text-xs text-gray-500 dark:text-gray-400">{{currentFieldBgMidpoint}}%</label>
+                        <input type="range" min="0" max="100" v-model.number="currentFieldBgMidpoint" @input="updateFieldGradient"
+                          class="flex-1 h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700" />
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -550,7 +608,7 @@
                 <div>
                   <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Title</label>
                   <div id="promo-title-editor" contenteditable="true" @input="onPromoTitleInput"
-                    @mouseup="updatePromoFormats" @keyup="updatePromoFormats"
+                    @mouseup="updatePromoFormats" @keyup="updatePromoFormats" @focus="currentFieldFocus = 'title'; syncToolbarWithField()"
                     class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md p-2.5 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 min-h-[42px] outline-none"
                     :data-placeholder="'Get 20% OFF'"></div>
                 </div>
@@ -558,7 +616,7 @@
                 <div>
                   <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Subtitle</label>
                   <div id="promo-subtitle-editor" contenteditable="true" @input="onPromoSubtitleInput"
-                    @mouseup="updatePromoFormats" @keyup="updatePromoFormats"
+                    @mouseup="updatePromoFormats" @keyup="updatePromoFormats" @focus="currentFieldFocus = 'subtitle'; syncToolbarWithField()"
                     class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md p-2.5 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 min-h-[42px] outline-none"
                     :data-placeholder="'Limited time offer'"></div>
                 </div>
@@ -566,24 +624,10 @@
                 <div>
                   <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
                   <div id="promo-description-editor" contenteditable="true" @input="onPromoDescriptionInput"
-                    @mouseup="updatePromoFormats" @keyup="updatePromoFormats"
+                    @mouseup="updatePromoFormats" @keyup="updatePromoFormats" @focus="currentFieldFocus = 'description'; syncToolbarWithField()"
                     class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md p-2.5 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 min-h-[56px] outline-none"
                     :data-placeholder="'Sign up for our newsletter today!'"></div>
                 </div>
-
-                <div class="grid grid-cols-2 gap-4">
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Button Text</label>
-                    <input type="text" v-model="config.promoCard.buttonText" @input="markChanged"
-                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2.5 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100" />
-                  </div>
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Button URL</label>
-                    <input type="text" v-model="config.promoCard.buttonUrl" @input="markChanged"
-                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2.5 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100" />
-                  </div>
-                </div>
-
 
                 <!-- Dates -->
                 <div class="grid grid-cols-2 gap-4">
@@ -616,10 +660,36 @@
                 <div v-if="config.promoCard.showTimer">
                   <label class="block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300">Timer Text</label>
                   <div id="timer-richtext-editor" contenteditable="true" @input="onTimerTextInput"
-                    @mouseup="updatePromoFormats" @keyup="updatePromoFormats"
+                    @mouseup="updatePromoFormats" @keyup="updatePromoFormats" @focus="currentFieldFocus = 'timer'; syncToolbarWithField()"
                     class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md p-3 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 min-h-[56px] outline-none overflow-auto"
                     :data-placeholder="'Ends in hh:mm:ss'"></div>
                   <p class="text-xs text-gray-500 mt-1 dark:text-gray-400">Use hh, mm, ss placeholders. Select to format.</p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Button Text</label>
+                    <input type="text" v-model="config.promoCard.buttonText" @input="markChanged"
+                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2.5 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100" />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Button URL</label>
+                    <input type="text" v-model="config.promoCard.buttonUrl" @input="markChanged"
+                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2.5 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100" />
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">Button Bg Color</label>
+                    <input type="color" v-model="config.promoCard.style.buttonColor" @input="markChanged"
+                      class="h-9 w-full rounded border border-gray-300 cursor-pointer dark:border-gray-600" />
+                  </div>
+                  <div>
+                    <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">Button Text Color</label>
+                    <input type="color" v-model="config.promoCard.style.buttonTextColor" @input="markChanged"
+                      class="h-9 w-full rounded border border-gray-300 cursor-pointer dark:border-gray-600" />
+                  </div>
                 </div>
 
                 <!-- Styling -->
@@ -680,15 +750,10 @@
                     </div>
                     
                     <!-- Solid Background Colors -->
-                    <div v-if="config.promoCard.style.background.type === 'solid'" class="grid grid-cols-2 gap-4">
+                    <div v-if="config.promoCard.style.background.type === 'solid'">
                       <div>
                         <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">Background Color</label>
                         <input type="color" v-model="config.promoCard.style.background.startColor" @input="markChanged"
-                          class="h-9 w-full rounded border border-gray-300 cursor-pointer dark:border-gray-600" />
-                      </div>
-                      <div>
-                        <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">Text Color</label>
-                        <input type="color" v-model="config.promoCard.style.textColor" @input="markChanged"
                           class="h-9 w-full rounded border border-gray-300 cursor-pointer dark:border-gray-600" />
                       </div>
                     </div>
@@ -710,51 +775,6 @@
                       <label class="block text-xs text-gray-500 dark:text-gray-400">Balance: {{ config.promoCard.style.background.midpoint ?? 50 }}%</label>
                       <input type="range" min="0" max="100" v-model.number="config.promoCard.style.background.midpoint" @input="markChanged"
                         class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700" />
-                    </div>
-
-                    <!-- Title Style -->
-                    <TextStyleSelector 
-                      label="Title Style"
-                      v-model="config.promoCard.style.titleStyle"
-                      @update:modelValue="updateTitleStyle"
-                      :showTextAlign="true"
-                    />
-                    
-                    <!-- Subheading Style -->
-                    <TextStyleSelector 
-                      label="Subheading Style"
-                      v-model="config.promoCard.style.subheadingStyle"
-                      @update:modelValue="updateSubheadingStyle"
-                      :showTextAlign="true"
-                    />
-                    
-                    <!-- Description Style -->
-                    <TextStyleSelector 
-                      label="Description Style"
-                      v-model="config.promoCard.style.descriptionStyle"
-                      @update:modelValue="updateDescriptionStyle"
-                    />
-                    
-                    <!-- Date Style -->
-                    <TextStyleSelector 
-                      label="Date Style"
-                      v-model="config.promoCard.style.dateStyle"
-                      @update:modelValue="updateDateStyle"
-                      :showTextAlign="true"
-                    />
-                    
-                    <!-- Button Colors -->
-                    <div class="grid grid-cols-2 gap-4">
-                      <div>
-                        <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">Button Bg Color</label>
-                        <input type="color" v-model="config.promoCard.style.buttonColor" @input="markChanged"
-                          class="h-9 w-full rounded border border-gray-300 cursor-pointer dark:border-gray-600" />
-                      </div>
-                      <div>
-                        <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">Button Text Color</label>
-                        <input type="color" v-model="config.promoCard.style.buttonTextColor" @input="markChanged"
-                          class="h-9 w-full rounded border border-gray-300 cursor-pointer dark:border-gray-600" />
-                      </div>
                     </div>
                   </div>
                 </div>
@@ -813,7 +833,8 @@
                   <p class="text-sm opacity-90 mb-2 px-2 py-1 rounded"
                     :style="{ 
                       background: getBackgroundStyle(config.promoCard.style.descriptionStyle.background), 
-                      color: config.promoCard.style.descriptionStyle.textColor 
+                      color: config.promoCard.style.descriptionStyle.textColor,
+                      textAlign: config.promoCard.style.descriptionStyle.textAlign || 'left'
                     }"
                     v-html="config.promoCard.description || 'Description text goes here.'">
                   </p>
@@ -936,6 +957,14 @@ const promoFormats = ref<ActiveFormats>({
   italic: false,
   size: ''
 })
+
+const currentFieldBgType = ref('solid')
+const currentFieldFocus = ref<'title' | 'subtitle' | 'description' | 'timer' | null>(null)
+const currentFieldTextColor = ref('#ffffff')
+const currentFieldBgColor = ref('#111827')
+const currentFieldBgEndColor = ref('#111827')
+const currentFieldBgDirection = ref('to right')
+const currentFieldBgMidpoint = ref(50)
 
 // Computed property to check if we're in rich text edit mode
 const isRichTextEditMode = computed(() => {
@@ -1545,6 +1574,101 @@ function formatPromoText(format: string) {
 
   markChanged()
   updatePromoFormats()
+}
+
+function setFieldAlignment(align: 'left' | 'center' | 'right') {
+  if (!currentFieldFocus.value) return
+  
+  const styleMap: Record<string, any> = {
+    title: config.value.promoCard.style.titleStyle,
+    subtitle: config.value.promoCard.style.subheadingStyle,
+    description: config.value.promoCard.style.descriptionStyle,
+    timer: config.value.promoCard.style.dateStyle
+  }
+  
+  const style = styleMap[currentFieldFocus.value]
+  if (style && 'textAlign' in style) {
+    style.textAlign = align
+    markChanged()
+  }
+}
+
+function syncToolbarWithField() {
+  if (!currentFieldFocus.value) return
+  
+  const styleMap: Record<string, any> = {
+    title: config.value.promoCard.style.titleStyle,
+    subtitle: config.value.promoCard.style.subheadingStyle,
+    description: config.value.promoCard.style.descriptionStyle,
+    timer: config.value.promoCard.style.dateStyle
+  }
+  
+  const style = styleMap[currentFieldFocus.value]
+  if (style) {
+    currentFieldTextColor.value = style.textColor || '#ffffff'
+    currentFieldBgColor.value = style.background.startColor || '#111827'
+    currentFieldBgType.value = style.background.type || 'solid'
+    currentFieldBgEndColor.value = style.background.endColor || '#111827'
+    currentFieldBgDirection.value = style.background.direction || 'to right'
+    currentFieldBgMidpoint.value = style.background.midpoint ?? 50
+  }
+}
+
+function updateFieldColors() {
+  if (!currentFieldFocus.value) return
+  
+  const styleMap: Record<string, any> = {
+    title: config.value.promoCard.style.titleStyle,
+    subtitle: config.value.promoCard.style.subheadingStyle,
+    description: config.value.promoCard.style.descriptionStyle,
+    timer: config.value.promoCard.style.dateStyle
+  }
+  
+  const style = styleMap[currentFieldFocus.value]
+  if (style) {
+    style.textColor = currentFieldTextColor.value
+    style.background.startColor = currentFieldBgColor.value
+    if (style.background.type !== 'solid') {
+      style.background.endColor = currentFieldBgColor.value
+    }
+    markChanged()
+  }
+}
+
+function updateFieldBgType() {
+  if (!currentFieldFocus.value) return
+  
+  const styleMap: Record<string, any> = {
+    title: config.value.promoCard.style.titleStyle,
+    subtitle: config.value.promoCard.style.subheadingStyle,
+    description: config.value.promoCard.style.descriptionStyle,
+    timer: config.value.promoCard.style.dateStyle
+  }
+  
+  const style = styleMap[currentFieldFocus.value]
+  if (style) {
+    style.background.type = currentFieldBgType.value
+    markChanged()
+  }
+}
+
+function updateFieldGradient() {
+  if (!currentFieldFocus.value) return
+  
+  const styleMap: Record<string, any> = {
+    title: config.value.promoCard.style.titleStyle,
+    subtitle: config.value.promoCard.style.subheadingStyle,
+    description: config.value.promoCard.style.descriptionStyle,
+    timer: config.value.promoCard.style.dateStyle
+  }
+  
+  const style = styleMap[currentFieldFocus.value]
+  if (style) {
+    style.background.endColor = currentFieldBgEndColor.value
+    style.background.direction = currentFieldBgDirection.value
+    style.background.midpoint = currentFieldBgMidpoint.value
+    markChanged()
+  }
 }
 
 function onPromoTitleInput(event: Event) {
