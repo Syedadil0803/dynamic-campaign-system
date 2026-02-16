@@ -12,6 +12,45 @@ export interface Announcement {
   richText?: boolean;
 }
 
+export interface PromoCard {
+  active: boolean;
+  title: string;
+  subtitle: string;
+  description: string;
+  buttonText: string;
+  buttonUrl: string;
+  startDate: string;
+  endDate: string;
+  showTimer: boolean;
+  timerText?: string;
+  style: {
+    position: 'bottom-right' | 'bottom-left';
+    background: GradientStyle;
+    textColor: string;
+    buttonColor: string;
+    buttonTextColor: string;
+    titleStyle: {
+      background: GradientStyle;
+      textColor: string;
+      textAlign?: 'left' | 'center' | 'right';
+    };
+    subheadingStyle: {
+      background: GradientStyle;
+      textColor: string;
+      textAlign?: 'left' | 'center' | 'right';
+    };
+    descriptionStyle: {
+      background: GradientStyle;
+      textColor: string;
+    };
+    dateStyle: {
+      background: GradientStyle;
+      textColor: string;
+      textAlign?: 'left' | 'center' | 'right';
+    };
+  };
+}
+
 export interface CampaignConfig {
   version: string;
   lastUpdated: string;
@@ -25,22 +64,7 @@ export interface CampaignConfig {
       textColor: string;
     };
   };
-  promoCard: {
-    active: boolean;
-    title: string;
-    description: string;
-    buttonText?: string;
-    buttonUrl?: string;
-    startDate: string;
-    endDate: string;
-    style: {
-      position: 'bottom-left' | 'bottom-right' | 'top-left' | 'top-right';
-      background: GradientStyle;
-      textColor: string;
-      buttonColor: string;
-      buttonTextColor: string;
-    };
-  };
+  promoCard: PromoCard;
 }
 
 export const defaultConfig: CampaignConfig = {
@@ -69,9 +93,14 @@ export const defaultConfig: CampaignConfig = {
   promoCard: {
     active: false,
     title: '',
+    subtitle: '',
     description: '',
+    buttonText: 'Shop Now',
+    buttonUrl: '',
     startDate: '',
     endDate: '',
+    showTimer: true,
+    timerText: 'Ends in hh:mm:ss',
     style: {
       position: 'bottom-right',
       background: {
@@ -84,6 +113,45 @@ export const defaultConfig: CampaignConfig = {
       textColor: '#111827',
       buttonColor: '#6366f1',
       buttonTextColor: '#ffffff',
+      titleStyle: {
+        background: {
+          type: 'solid',
+          startColor: '#111827',
+          endColor: '#111827',
+          midpoint: 50,
+        },
+        textColor: '#ffffff',
+        textAlign: 'center',
+      },
+      subheadingStyle: {
+        background: {
+          type: 'solid',
+          startColor: '#374151',
+          endColor: '#374151',
+          midpoint: 50,
+        },
+        textColor: '#ffffff',
+        textAlign: 'center',
+      },
+      descriptionStyle: {
+        background: {
+          type: 'solid',
+          startColor: '#374151',
+          endColor: '#374151',
+          midpoint: 50,
+        },
+        textColor: '#ffffff',
+      },
+      dateStyle: {
+        background: {
+          type: 'solid',
+          startColor: '#6b7280',
+          endColor: '#6b7280',
+          midpoint: 50,
+        },
+        textColor: '#ffffff',
+        textAlign: 'center',
+      },
     },
   },
 };

@@ -226,6 +226,9 @@
                     <button @mousedown.prevent="formatText('size-xl')"
                       :class="activeFormats.size === 'xl' ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
                       class="px-2 py-1 text-xs border rounded transition-colors">XL</button>
+                    <button @mousedown.prevent="formatText('size-xxl')"
+                      :class="activeFormats.size === 'xxl' ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
+                      class="px-2 py-1 text-xs border rounded transition-colors">XXL</button>
 
                     <div class="ml-auto text-[10px] text-gray-400 hidden sm:block">
                       Highlight to format
@@ -517,6 +520,13 @@
                 </div>
 
                 <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Subtitle</label>
+                  <input type="text" v-model="config.promoCard.subtitle" @input="markChanged"
+                    class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md p-2.5 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
+                    placeholder="Limited time offer" />
+                </div>
+
+                <div>
                   <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
                   <textarea rows="2" v-model="config.promoCard.description" @input="markChanged"
                     class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md p-2.5 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400"
@@ -549,6 +559,65 @@
                     <input type="date" v-model="config.promoCard.endDate" @input="markChanged"
                       class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2.5 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100" />
                   </div>
+                </div>
+
+                <!-- Timer Toggle -->
+                <div class="flex items-center justify-between">
+                  <div>
+                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Show Timer</label>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Display countdown timer in preview</p>
+                  </div>
+                  <button @click="toggleTimer"
+                    :class="config.promoCard.showTimer ? 'bg-indigo-600' : 'bg-gray-200'"
+                    class="relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    <span :class="config.promoCard.showTimer ? 'translate-x-5' : 'translate-x-0'"
+                      class="pointer-events-none relative inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200"></span>
+                  </button>
+                </div>
+
+                <!-- Timer Text Editor -->
+                <div v-if="config.promoCard.showTimer">
+                  <label class="block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300">Timer Text</label>
+                  
+                  <!-- Rich Text Toolbar -->
+                  <div class="mb-2 border border-gray-300 rounded-md p-1.5 bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
+                    <div class="flex flex-wrap gap-1 items-center">
+                      <button @mousedown.prevent="formatTimerText('bold')"
+                        :class="timerFormats.bold ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
+                        class="px-2 py-1 text-xs font-bold border rounded transition-colors" title="Bold">B</button>
+                      <button @mousedown.prevent="formatTimerText('italic')"
+                        :class="timerFormats.italic ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
+                        class="px-2 py-1 text-xs italic border rounded transition-colors" title="Italic">I</button>
+
+                      <div class="border-l border-gray-300 h-4 mx-1"></div>
+
+                      <button @mousedown.prevent="formatTimerText('size-xs')"
+                        :class="timerFormats.size === 'xs' ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
+                        class="px-2 py-1 text-xs border rounded transition-colors">XS</button>
+                      <button @mousedown.prevent="formatTimerText('size-sm')"
+                        :class="timerFormats.size === 'sm' ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
+                        class="px-2 py-1 text-xs border rounded transition-colors">SM</button>
+                      <button @mousedown.prevent="formatTimerText('size-lg')"
+                        :class="timerFormats.size === 'lg' ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
+                        class="px-2 py-1 text-xs border rounded transition-colors">LG</button>
+                      <button @mousedown.prevent="formatTimerText('size-xl')"
+                        :class="timerFormats.size === 'xl' ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
+                        class="px-2 py-1 text-xs border rounded transition-colors">XL</button>
+                      <button @mousedown.prevent="formatTimerText('size-xxl')"
+                        :class="timerFormats.size === 'xxl' ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
+                        class="px-2 py-1 text-xs border rounded transition-colors">XXL</button>
+
+                      <div class="ml-auto text-[10px] text-gray-400 hidden sm:block">
+                        Highlight to format
+                      </div>
+                    </div>
+                  </div>
+
+                  <div id="timer-richtext-editor" contenteditable="true" @input="onTimerTextInput"
+                    @mouseup="updateTimerFormats" @keyup="updateTimerFormats"
+                    class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md p-3 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 min-h-[56px] outline-none overflow-auto"
+                    :data-placeholder="'Ends in hh:mm:ss'"></div>
+                  <p class="text-xs text-gray-500 mt-1 dark:text-gray-400">Use hh, mm, ss placeholders. Select to format.</p>
                 </div>
 
                 <!-- Styling -->
@@ -641,6 +710,37 @@
                         class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700" />
                     </div>
 
+                    <!-- Title Style -->
+                    <TextStyleSelector 
+                      label="Title Style"
+                      v-model="config.promoCard.style.titleStyle"
+                      @update:modelValue="updateTitleStyle"
+                      :showTextAlign="true"
+                    />
+                    
+                    <!-- Subheading Style -->
+                    <TextStyleSelector 
+                      label="Subheading Style"
+                      v-model="config.promoCard.style.subheadingStyle"
+                      @update:modelValue="updateSubheadingStyle"
+                      :showTextAlign="true"
+                    />
+                    
+                    <!-- Description Style -->
+                    <TextStyleSelector 
+                      label="Description Style"
+                      v-model="config.promoCard.style.descriptionStyle"
+                      @update:modelValue="updateDescriptionStyle"
+                    />
+                    
+                    <!-- Date Style -->
+                    <TextStyleSelector 
+                      label="Date Style"
+                      v-model="config.promoCard.style.dateStyle"
+                      @update:modelValue="updateDateStyle"
+                      :showTextAlign="true"
+                    />
+                    
                     <!-- Button Colors -->
                     <div class="grid grid-cols-2 gap-4">
                       <div>
@@ -674,14 +774,58 @@
                     'top-4 right-4': config.promoCard.style.position === 'top-right',
                     'top-4 left-4': config.promoCard.style.position === 'top-left'
                   }"
-                  :style="{ background: getBackgroundStyle(config.promoCard.style.background), color: config.promoCard.style.textColor }">
+                  :style="{ background: getBackgroundStyle(config.promoCard.style.background) }">
                   <button class="absolute top-2 right-2 text-current opacity-60 hover:opacity-100 p-1">
                     <X class="w-4 h-4" />
                   </button>
 
-                  <h3 class="text-lg font-bold mb-1">{{ config.promoCard.title || 'Title' }}</h3>
-                  <p class="text-sm opacity-90 mb-4">{{ config.promoCard.description || 'Description text goes here.' }}
+                  <!-- Title -->
+                  <h3 class="text-lg font-bold mb-1 px-2 py-1 rounded"
+                    :style="{ 
+                      background: getBackgroundStyle(config.promoCard.style.titleStyle.background), 
+                      color: config.promoCard.style.titleStyle.textColor,
+                      textAlign: config.promoCard.style.titleStyle.textAlign || 'center'
+                    }">
+                    {{ config.promoCard.title || 'Title' }}
+                  </h3>
+                  
+                  <!-- Subtitle -->
+                  <h4 v-if="config.promoCard.subtitle" class="text-sm font-medium mb-2 px-2 py-1 rounded"
+                    :style="{ 
+                      background: getBackgroundStyle(config.promoCard.style.subheadingStyle.background), 
+                      color: config.promoCard.style.subheadingStyle.textColor,
+                      textAlign: config.promoCard.style.subheadingStyle.textAlign || 'center'
+                    }">
+                    {{ config.promoCard.subtitle }}
+                  </h4>
+                  <h4 v-else class="text-sm font-medium mb-2 px-2 py-1 rounded"
+                    :style="{ 
+                      background: getBackgroundStyle(config.promoCard.style.subheadingStyle.background), 
+                      color: config.promoCard.style.subheadingStyle.textColor,
+                      textAlign: config.promoCard.style.subheadingStyle.textAlign || 'center'
+                    }">
+                    Subtitle
+                  </h4>
+                  
+                  <!-- Description -->
+                  <p class="text-sm opacity-90 mb-2 px-2 py-1 rounded"
+                    :style="{ 
+                      background: getBackgroundStyle(config.promoCard.style.descriptionStyle.background), 
+                      color: config.promoCard.style.descriptionStyle.textColor 
+                    }">
+                    {{ config.promoCard.description || 'Description text goes here.' }}
                   </p>
+                  
+                  <!-- Timer Display -->
+                  <div v-if="config.promoCard.showTimer && (config.promoCard.startDate || config.promoCard.endDate)" 
+                    class="text-xs mb-4 px-2 py-1 rounded"
+                    :style="{ 
+                      background: getBackgroundStyle(config.promoCard.style.dateStyle.background), 
+                      color: config.promoCard.style.dateStyle.textColor,
+                      textAlign: config.promoCard.style.dateStyle.textAlign || 'center'
+                    }"
+                    v-html="getFormattedTimerText()">
+                  </div>
 
                   <button v-if="config.promoCard.buttonText"
                     class="w-full py-2 px-4 rounded-lg text-sm font-semibold transition-transform active:scale-95"
@@ -730,6 +874,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { loadConfig, saveConfig } from './services/campaignService'
 import type { CampaignConfig } from './types/campaign'
 import { defaultConfig } from './types/campaign'
+import TextStyleSelector from './components/TextStyleSelector.vue'
 import {
   LayoutDashboard,
   Megaphone,
@@ -758,9 +903,27 @@ const toastIsError = ref(false)
 const isDarkMode = ref(false)
 const newAnnouncementText = ref('')
 const selectedAnnouncementIndex = ref<number | null>(null)
+const currentTime = ref(Date.now())
 const selectedAnnouncementUrl = ref('')
 const selectedAnnouncementRichText = ref(false)
-const activeFormats = ref<{ bold: boolean; italic: boolean; size: string }>({
+
+// Promo card rich text editor state
+const isEditingDescription = ref(false)
+const editingDescriptionText = ref('')
+
+type ActiveFormats = {
+  bold: boolean
+  italic: boolean
+  size: string
+}
+
+const activeFormats = ref<ActiveFormats>({
+  bold: false,
+  italic: false,
+  size: ''
+})
+
+const timerFormats = ref<ActiveFormats>({
   bold: false,
   italic: false,
   size: ''
@@ -785,6 +948,11 @@ onMounted(async () => {
 
   // Migrate old string announcements to new Announcement objects
   migrateAnnouncements(config.value)
+  
+  // Initialize timer text if not set
+  if (!config.value.promoCard.timerText) {
+    config.value.promoCard.timerText = 'Ends in hh:mm:ss'
+  }
 
   // Check for saved dark mode preference or system preference
   const savedDarkMode = localStorage.getItem('darkMode')
@@ -796,6 +964,18 @@ onMounted(async () => {
 
   // Apply dark mode class to html element
   updateDarkModeClass()
+  
+  // Update timer every second
+  setInterval(() => {
+    currentTime.value = Date.now()
+  }, 1000)
+  
+  // Populate timer editor after DOM is ready
+  await nextTick()
+  const timerEditor = document.querySelector('#timer-richtext-editor') as HTMLDivElement
+  if (timerEditor && config.value.promoCard.timerText) {
+    timerEditor.innerHTML = config.value.promoCard.timerText
+  }
 })
 
 function toggleDarkMode() {
@@ -812,8 +992,88 @@ function updateDarkModeClass() {
   }
 }
 
-function markChanged() {
+const markChanged = () => {
   hasChanges.value = true
+}
+
+const updateTitleStyle = (newStyle: any) => {
+  config.value.promoCard.style.titleStyle = newStyle
+  markChanged()
+}
+
+const updateSubheadingStyle = (newStyle: any) => {
+  config.value.promoCard.style.subheadingStyle = newStyle
+  markChanged()
+}
+
+const updateDescriptionStyle = (newStyle: any) => {
+  config.value.promoCard.style.descriptionStyle = newStyle
+  markChanged()
+}
+
+// Rich text editor functions for description
+const toggleFormat = (format: 'bold' | 'italic' | 'size') => {
+  activeFormats.value[format] = !activeFormats.value[format]
+  markChanged()
+}
+
+const saveDescription = () => {
+  config.value.promoCard.description = editingDescriptionText.value
+  isEditingDescription.value = false
+  markChanged()
+}
+
+const cancelDescriptionEdit = () => {
+  isEditingDescription.value = false
+  editingDescriptionText.value = config.value.promoCard.description
+  markChanged()
+}
+
+const updateDateStyle = (newStyle: any) => {
+  config.value.promoCard.style.dateStyle = newStyle
+  markChanged()
+}
+
+const calculateHoursRemaining = () => {
+  if (!config.value.promoCard.startDate || !config.value.promoCard.endDate) {
+    return '00:00:00'
+  }
+  
+  const now = new Date(currentTime.value)
+  const start = new Date(config.value.promoCard.startDate)
+  const end = new Date(config.value.promoCard.endDate)
+  
+  // Set to start of day (midnight)
+  start.setHours(0, 0, 0, 0)
+  end.setHours(23, 59, 59, 999)
+  
+  if (now < start) {
+    const diff = start.getTime() - now.getTime()
+    const hours = Math.floor(diff / (1000 * 60 * 60))
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000)
+    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
+  }
+  
+  if (now > end) {
+    return '00:00:00'
+  }
+  
+  const remaining = end.getTime() - now.getTime()
+  const hours = Math.floor(remaining / (1000 * 60 * 60))
+  const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60))
+  const seconds = Math.floor((remaining % (1000 * 60)) / 1000)
+  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
+}
+
+const getFormattedTimerText = () => {
+  const timerValue = calculateHoursRemaining()
+  const [hours, minutes, seconds] = timerValue.split(':')
+  const template = config.value.promoCard.timerText || 'Ends in hh:mm:ss'
+  return template
+    .replace(/hh/g, hours)
+    .replace(/mm/g, minutes)
+    .replace(/ss/g, seconds)
 }
 
 async function handleSave() {
@@ -840,7 +1100,12 @@ function switchTab(tab: 'dashboard' | 'announcement' | 'promo') {
   router.push(`/${tab}`)
 }
 
-function toggleCampaign(type: 'announcementBar' | 'promoCard') {
+const toggleTimer = () => {
+  config.value.promoCard.showTimer = !config.value.promoCard.showTimer
+  markChanged()
+}
+
+const toggleCampaign = (type: 'announcementBar' | 'promoCard') => {
   config.value[type].active = !config.value[type].active
   markChanged()
 }
@@ -1018,6 +1283,7 @@ function updateActiveFormats() {
           else if (fontSize === '0.875rem') activeFormats.value.size = 'sm'
           else if (fontSize === '1.125rem') activeFormats.value.size = 'lg'
           else if (fontSize === '1.25rem') activeFormats.value.size = 'xl'
+          else if (fontSize === '1.5rem') activeFormats.value.size = 'xxl'
           break
         }
       }
@@ -1064,6 +1330,9 @@ function formatText(format: string) {
       break
     case 'size-xl':
       applyFontSize('1.25rem')
+      break
+    case 'size-xxl':
+      applyFontSize('1.5rem')
       break
   }
 
@@ -1127,6 +1396,76 @@ function migrateAnnouncements(config: any) {
       markChanged() // Mark as changed so migration gets saved
     }
   }
+}
+
+function onTimerTextInput(event: Event) {
+  const target = event.target as HTMLDivElement
+  config.value.promoCard.timerText = target.innerHTML
+  markChanged()
+  updateTimerFormats()
+}
+
+function updateTimerFormats() {
+  timerFormats.value.bold = document.queryCommandState('bold')
+  timerFormats.value.italic = document.queryCommandState('italic')
+  timerFormats.value.size = ''
+  const selection = window.getSelection()
+  if (selection && selection.anchorNode) {
+    let node: Node | null = selection.anchorNode
+    while (node && node !== document.body) {
+      if (node instanceof HTMLElement) {
+        const fontSize = node.style.fontSize
+        if (fontSize) {
+          if (fontSize === '0.75rem') timerFormats.value.size = 'xs'
+          else if (fontSize === '0.875rem') timerFormats.value.size = 'sm'
+          else if (fontSize === '1.125rem') timerFormats.value.size = 'lg'
+          else if (fontSize === '1.25rem') timerFormats.value.size = 'xl'
+          else if (fontSize === '1.5rem') timerFormats.value.size = 'xxl'
+          break
+        }
+      }
+      node = node.parentNode
+    }
+  }
+}
+
+function formatTimerText(format: string) {
+  const richEditor = document.querySelector('#timer-richtext-editor') as HTMLDivElement
+  if (!richEditor) return
+
+  const selection = window.getSelection()
+  if (!selection || selection.rangeCount === 0 || selection.isCollapsed) return
+
+  const anchorNode = selection.anchorNode
+  if (!anchorNode || !richEditor.contains(anchorNode)) return
+
+  switch (format) {
+    case 'bold':
+      document.execCommand('bold', false)
+      break
+    case 'italic':
+      document.execCommand('italic', false)
+      break
+    case 'size-xs':
+      applyFontSize('0.75rem')
+      break
+    case 'size-sm':
+      applyFontSize('0.875rem')
+      break
+    case 'size-lg':
+      applyFontSize('1.125rem')
+      break
+    case 'size-xl':
+      applyFontSize('1.25rem')
+      break
+    case 'size-xxl':
+      applyFontSize('1.5rem')
+      break
+  }
+
+  config.value.promoCard.timerText = richEditor.innerHTML
+  markChanged()
+  updateTimerFormats()
 }
 
 function getBackgroundStyle(background: any) {
