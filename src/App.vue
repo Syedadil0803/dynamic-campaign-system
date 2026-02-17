@@ -1412,9 +1412,6 @@ function applyFontSize(size: string) {
   const richEditor = document.querySelector('#announcement-richtext-editor') as HTMLDivElement
   if (!richEditor) return
 
-  // Get the selected text content (plain text)
-  const selectedText = range.toString()
-  
   // Get all text nodes in the selection
   const textNodes: Text[] = []
   const walker = document.createTreeWalker(
