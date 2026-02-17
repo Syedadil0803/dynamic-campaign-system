@@ -1401,7 +1401,7 @@ function formatText(format: string) {
   updateActiveFormats()
 }
 
-// Apply font size - root fix: normalize the content first, then apply
+// Apply font size - preserves bold/italic, prevents nesting
 function applyFontSize(size: string) {
   const selection = window.getSelection()
   if (!selection || selection.rangeCount === 0) return
@@ -1409,66 +1409,75 @@ function applyFontSize(size: string) {
   const range = selection.getRangeAt(0)
   if (range.collapsed) return
 
-  const richEditor = document.querySelector('#announcement-richtext-editor') as HTMLDivElement
-  if (!richEditor) return
+  const selectedText = range.toString()
+  if (!selectedText) return
 
-  // Get all text nodes in the selection
-  const textNodes: Text[] = []
-  const walker = document.createTreeWalker(
-    range.commonAncestorContainer,
-    NodeFilter.SHOW_TEXT,
-    {
-      acceptNode: (node) => {
-        if (range.intersectsNode(node)) {
-          return NodeFilter.FILTER_ACCEPT
-        }
-        return NodeFilter.FILTER_REJECT
-      }
-    }
-  )
+  // Check if selection contains bold or italic by examining the range
+  const fragment = range.cloneContents()
+  const tempDiv = document.createElement('div')
+  tempDiv.appendChild(fragment)
   
-  let node: Node | null
-  while ((node = walker.nextNode())) {
-    textNodes.push(node as Text)
+  // Check for bold/italic in the cloned content
+  const hasBold = !!tempDiv.querySelector('b, strong')
+  const hasItalic = !!tempDiv.querySelector('i, em')
+  
+  // Also check if the selection is inside bold/italic elements
+  let node = range.commonAncestorContainer
+  if (node.nodeType === Node.TEXT_NODE) {
+    node = node.parentElement!
   }
-
-  // Remove font-size from all parent spans of selected text nodes
-  textNodes.forEach(textNode => {
-    let parent = textNode.parentElement
-    while (parent && parent !== richEditor) {
-      if (parent.tagName === 'SPAN' && parent.style.fontSize) {
-        // Remove only the font-size style, keep other styles
-        parent.style.removeProperty('font-size')
-        // If span has no other styles, unwrap it
-        if (!parent.getAttribute('style') || parent.getAttribute('style')?.trim() === '') {
-          const grandParent = parent.parentNode
-          while (parent.firstChild) {
-            grandParent?.insertBefore(parent.firstChild, parent)
-          }
-          grandParent?.removeChild(parent)
-          break
-        }
-      }
-      parent = parent.parentElement
+  
+  let isBold = hasBold
+  let isItalic = hasItalic
+  
+  // Walk up the tree to check parent elements
+  let current = node as HTMLElement
+  while (current && current.contentEditable !== 'true') {
+    if (current.tagName === 'B' || current.tagName === 'STRONG') {
+      isBold = true
     }
-  })
-
-  // Now extract and wrap with new font-size
-  const newRange = document.createRange()
-  newRange.setStart(range.startContainer, range.startOffset)
-  newRange.setEnd(range.endContainer, range.endOffset)
+    if (current.tagName === 'I' || current.tagName === 'EM') {
+      isItalic = true
+    }
+    current = current.parentElement!
+  }
   
-  const fragment = newRange.extractContents()
+  // Delete the selection
+  document.execCommand('delete', false)
   
-  // Create wrapper with new font-size
-  const wrapper = document.createElement('span')
-  wrapper.style.fontSize = size
-  wrapper.appendChild(fragment)
+  // Create the new span with font-size
+  const newSpan = document.createElement('span')
+  newSpan.style.fontSize = size
   
-  newRange.insertNode(wrapper)
+  // Build the content with preserved formatting
+  let content: Node
+  if (isBold && isItalic) {
+    const bold = document.createElement('b')
+    const italic = document.createElement('i')
+    italic.textContent = selectedText
+    bold.appendChild(italic)
+    content = bold
+  } else if (isBold) {
+    const bold = document.createElement('b')
+    bold.textContent = selectedText
+    content = bold
+  } else if (isItalic) {
+    const italic = document.createElement('i')
+    italic.textContent = selectedText
+    content = italic
+  } else {
+    content = document.createTextNode(selectedText)
+  }
   
-  // Restore selection
-  newRange.selectNodeContents(wrapper)
+  newSpan.appendChild(content)
+  
+  // Insert the new span
+  const newRange = selection.getRangeAt(0)
+  newRange.insertNode(newSpan)
+  
+  // Move cursor after the span
+  newRange.setStartAfter(newSpan)
+  newRange.setEndAfter(newSpan)
   selection.removeAllRanges()
   selection.addRange(newRange)
 }
