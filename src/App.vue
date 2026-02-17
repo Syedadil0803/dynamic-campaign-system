@@ -790,7 +790,7 @@
 
                 <!-- The Actual Card Preview -->
                 <div v-if="config.promoCard.active"
-                  class="absolute w-72 rounded-xl shadow-2xl p-5 transition-all duration-300 flex flex-col" :class="{
+                  class="absolute w-[400px] rounded-xl shadow-2xl p-5 transition-all duration-300 flex flex-col" :class="{
                     'bottom-4 right-4': config.promoCard.style.position === 'bottom-right',
                     'bottom-4 left-4': config.promoCard.style.position === 'bottom-left',
                     'top-4 right-4': config.promoCard.style.position === 'top-right',
@@ -802,7 +802,7 @@
                   </button>
 
                   <!-- Title -->
-                  <h3 class="text-lg font-bold mb-1 px-2 py-1 rounded"
+                  <h3 class="text-lg font-bold mb-1 px-2 py-1 rounded break-words"
                     :style="{ 
                       background: getBackgroundStyle(config.promoCard.style.titleStyle.background), 
                       color: config.promoCard.style.titleStyle.textColor,
@@ -812,7 +812,7 @@
                   </h3>
                   
                   <!-- Subtitle -->
-                  <h4 v-if="config.promoCard.subtitle" class="text-sm font-medium mb-2 px-2 py-1 rounded"
+                  <h4 v-if="config.promoCard.subtitle" class="text-sm font-medium mb-2 px-2 py-1 rounded break-words"
                     :style="{ 
                       background: getBackgroundStyle(config.promoCard.style.subheadingStyle.background), 
                       color: config.promoCard.style.subheadingStyle.textColor,
@@ -820,7 +820,7 @@
                     }"
                     v-html="config.promoCard.subtitle">
                   </h4>
-                  <h4 v-else class="text-sm font-medium mb-2 px-2 py-1 rounded"
+                  <h4 v-else class="text-sm font-medium mb-2 px-2 py-1 rounded break-words"
                     :style="{ 
                       background: getBackgroundStyle(config.promoCard.style.subheadingStyle.background), 
                       color: config.promoCard.style.subheadingStyle.textColor,
@@ -830,7 +830,7 @@
                   </h4>
                   
                   <!-- Description -->
-                  <p class="text-sm opacity-90 mb-2 px-2 py-1 rounded"
+                  <p class="text-sm opacity-90 mb-2 px-2 py-1 rounded break-words"
                     :style="{ 
                       background: getBackgroundStyle(config.promoCard.style.descriptionStyle.background), 
                       color: config.promoCard.style.descriptionStyle.textColor,
@@ -841,7 +841,7 @@
                   
                   <!-- Timer Display -->
                   <div v-if="config.promoCard.showTimer && (config.promoCard.startDate || config.promoCard.endDate)" 
-                    class="text-xs mb-4 px-2 py-1 rounded"
+                    class="text-xs mb-4 px-2 py-1 rounded break-words"
                     :style="{ 
                       background: getBackgroundStyle(config.promoCard.style.dateStyle.background), 
                       color: config.promoCard.style.dateStyle.textColor,
