@@ -1105,6 +1105,15 @@ function switchTab(tab: 'dashboard' | 'announcement' | 'promo') {
 
 const toggleTimer = () => {
   config.value.promoCard.showTimer = !config.value.promoCard.showTimer
+  if (config.value.promoCard.showTimer && !config.value.promoCard.timerText) {
+    config.value.promoCard.timerText = 'Ends in hh:mm:ss'
+    nextTick(() => {
+      const timerEditor = document.querySelector('#timer-richtext-editor') as HTMLDivElement
+      if (timerEditor) {
+        timerEditor.innerHTML = 'Ends in hh:mm:ss'
+      }
+    })
+  }
   markChanged()
 }
 
@@ -1457,6 +1466,21 @@ function formatPromoText(format: string) {
     case 'size-xxl':
       applyFontSize('1.5rem')
       break
+  }
+
+  // Sync the updated HTML back to config based on which field is focused
+  if (currentFieldFocus.value === 'title') {
+    const editor = document.querySelector('#promo-title-editor') as HTMLDivElement
+    if (editor) config.value.promoCard.title = editor.innerHTML
+  } else if (currentFieldFocus.value === 'subtitle') {
+    const editor = document.querySelector('#promo-subtitle-editor') as HTMLDivElement
+    if (editor) config.value.promoCard.subtitle = editor.innerHTML
+  } else if (currentFieldFocus.value === 'description') {
+    const editor = document.querySelector('#promo-description-editor') as HTMLDivElement
+    if (editor) config.value.promoCard.description = editor.innerHTML
+  } else if (currentFieldFocus.value === 'timer') {
+    const editor = document.querySelector('#timer-richtext-editor') as HTMLDivElement
+    if (editor) config.value.promoCard.timerText = editor.innerHTML
   }
 
   markChanged()
