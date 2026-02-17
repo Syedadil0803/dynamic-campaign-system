@@ -717,8 +717,11 @@
                   </div>
                 </div>
 
+              </div>
+
+              <div class="space-y-4">
                 <!-- Styling -->
-                <div class="border-t border-gray-200 pt-3 dark:border-gray-600">
+                <div class="border border-gray-200 rounded-lg p-4 bg-white dark:bg-gray-800 dark:border-gray-700">
                   <h4 class="text-sm font-medium text-gray-900 mb-2 dark:text-gray-100">Card Appearance</h4>
                   <div class="space-y-3">
                     <div class="grid grid-cols-2 gap-4">
@@ -804,83 +807,84 @@
                   </div>
                 </div>
 
-              </div>
-
               <!-- Preview Side -->
               <div
-                class="bg-gray-100 rounded-lg p-4 flex items-center justify-center relative min-h-[400px] border border-gray-200 bg-[url('https://lib.shadcn.com/placeholder.svg')] bg-center bg-no-repeat bg-contain dark:bg-gray-700 dark:border-gray-600">
+                class="bg-gray-100 rounded-lg p-4 relative self-start min-h-[260px] border border-gray-200 bg-[url('https://lib.shadcn.com/placeholder.svg')] bg-center bg-no-repeat bg-contain dark:bg-gray-700 dark:border-gray-600">
                 <div
                   class="absolute inset-0 flex items-center justify-center text-gray-400 text-sm font-medium pointer-events-none dark:text-gray-500">
                   Website Content Area</div>
 
                 <!-- The Actual Card Preview -->
-                <div v-if="config.promoCard.active"
-                  class="absolute w-[400px] rounded-xl shadow-2xl p-5 transition-all duration-300 flex flex-col" :class="{
-                    'bottom-4 right-4': config.promoCard.style.position === 'bottom-right',
-                    'bottom-4 left-4': config.promoCard.style.position === 'bottom-left',
-                    'top-4 right-4': config.promoCard.style.position === 'top-right',
-                    'top-4 left-4': config.promoCard.style.position === 'top-left'
-                  }"
-                  :style="{ background: getBackgroundStyle(config.promoCard.style.background) }">
-                  <button class="absolute top-2 right-2 text-current opacity-60 hover:opacity-100 p-1">
-                    <X class="w-4 h-4" />
-                  </button>
+                <div class="relative z-10 w-full min-h-[228px] grid">
+                  <div v-if="config.promoCard.active"
+                    class="relative w-[400px] rounded-xl shadow-2xl p-5 transition-all duration-300 flex flex-col" :class="{
+                      'justify-self-end self-end': config.promoCard.style.position === 'bottom-right',
+                      'justify-self-start self-end': config.promoCard.style.position === 'bottom-left',
+                      'justify-self-end self-start': config.promoCard.style.position === 'top-right',
+                      'justify-self-start self-start': config.promoCard.style.position === 'top-left'
+                    }"
+                    :style="{ background: getBackgroundStyle(config.promoCard.style.background) }">
+                    <button class="absolute top-2 right-2 text-current opacity-60 hover:opacity-100 p-1">
+                      <X class="w-4 h-4" />
+                    </button>
 
-                  <!-- Title -->
-                  <h3 class="text-lg font-bold mb-1 px-2 py-1 rounded break-words"
-                    :style="{ 
-                      background: getBackgroundStyle(config.promoCard.style.titleStyle.background), 
-                      color: config.promoCard.style.titleStyle.textColor,
-                      textAlign: config.promoCard.style.titleStyle.textAlign || 'center'
-                    }"
-                    v-html="config.promoCard.title || 'Title'">
-                  </h3>
-                  
-                  <!-- Subtitle -->
-                  <h4 v-if="config.promoCard.subtitle" class="text-sm font-medium mb-2 px-2 py-1 rounded break-words"
-                    :style="{ 
-                      background: getBackgroundStyle(config.promoCard.style.subheadingStyle.background), 
-                      color: config.promoCard.style.subheadingStyle.textColor,
-                      textAlign: config.promoCard.style.subheadingStyle.textAlign || 'center'
-                    }"
-                    v-html="config.promoCard.subtitle">
-                  </h4>
-                  <h4 v-else class="text-sm font-medium mb-2 px-2 py-1 rounded break-words"
-                    :style="{ 
-                      background: getBackgroundStyle(config.promoCard.style.subheadingStyle.background), 
-                      color: config.promoCard.style.subheadingStyle.textColor,
-                      textAlign: config.promoCard.style.subheadingStyle.textAlign || 'center'
-                    }">
-                    Subtitle
-                  </h4>
-                  
-                  <!-- Description -->
-                  <p class="text-sm opacity-90 mb-2 px-2 py-1 rounded break-words"
-                    :style="{ 
-                      background: getBackgroundStyle(config.promoCard.style.descriptionStyle.background), 
-                      color: config.promoCard.style.descriptionStyle.textColor,
-                      textAlign: config.promoCard.style.descriptionStyle.textAlign || 'left'
-                    }"
-                    v-html="config.promoCard.description || 'Description text goes here.'">
-                  </p>
-                  
-                  <!-- Timer Display -->
-                  <div v-if="config.promoCard.showTimer && (config.promoCard.startDate || config.promoCard.endDate)" 
-                    class="text-xs mb-4 px-2 py-1 rounded break-words"
-                    :style="{ 
-                      background: getBackgroundStyle(config.promoCard.style.dateStyle.background), 
-                      color: config.promoCard.style.dateStyle.textColor,
-                      textAlign: config.promoCard.style.dateStyle.textAlign || 'center'
-                    }"
-                    v-html="getFormattedTimerText()">
+                    <!-- Title -->
+                    <h3 class="text-lg font-bold mb-1 px-2 py-1 rounded break-words"
+                      :style="{ 
+                        background: getBackgroundStyle(config.promoCard.style.titleStyle.background), 
+                        color: config.promoCard.style.titleStyle.textColor,
+                        textAlign: config.promoCard.style.titleStyle.textAlign || 'center'
+                      }"
+                      v-html="config.promoCard.title || 'Title'">
+                    </h3>
+                    
+                    <!-- Subtitle -->
+                    <h4 v-if="config.promoCard.subtitle" class="text-sm font-medium mb-2 px-2 py-1 rounded break-words"
+                      :style="{ 
+                        background: getBackgroundStyle(config.promoCard.style.subheadingStyle.background), 
+                        color: config.promoCard.style.subheadingStyle.textColor,
+                        textAlign: config.promoCard.style.subheadingStyle.textAlign || 'center'
+                      }"
+                      v-html="config.promoCard.subtitle">
+                    </h4>
+                    <h4 v-else class="text-sm font-medium mb-2 px-2 py-1 rounded break-words"
+                      :style="{ 
+                        background: getBackgroundStyle(config.promoCard.style.subheadingStyle.background), 
+                        color: config.promoCard.style.subheadingStyle.textColor,
+                        textAlign: config.promoCard.style.subheadingStyle.textAlign || 'center'
+                      }">
+                      Subtitle
+                    </h4>
+                    
+                    <!-- Description -->
+                    <p class="text-sm opacity-90 mb-2 px-2 py-1 rounded break-words"
+                      :style="{ 
+                        background: getBackgroundStyle(config.promoCard.style.descriptionStyle.background), 
+                        color: config.promoCard.style.descriptionStyle.textColor,
+                        textAlign: config.promoCard.style.descriptionStyle.textAlign || 'left'
+                      }"
+                      v-html="config.promoCard.description || 'Description text goes here.'">
+                    </p>
+                    
+                    <!-- Timer Display -->
+                    <div v-if="config.promoCard.showTimer && (config.promoCard.startDate || config.promoCard.endDate)" 
+                      class="text-xs mb-4 px-2 py-1 rounded break-words"
+                      :style="{ 
+                        background: getBackgroundStyle(config.promoCard.style.dateStyle.background), 
+                        color: config.promoCard.style.dateStyle.textColor,
+                        textAlign: config.promoCard.style.dateStyle.textAlign || 'center'
+                      }"
+                      v-html="getFormattedTimerText()">
+                    </div>
+
+                    <button v-if="config.promoCard.showButton && config.promoCard.buttonText"
+                      class="w-full py-2 px-4 rounded-lg text-sm font-semibold transition-transform active:scale-95"
+                      :style="{ backgroundColor: config.promoCard.style.buttonColor, color: config.promoCard.style.buttonTextColor }">
+                      {{ config.promoCard.buttonText }}
+                    </button>
                   </div>
-
-                  <button v-if="config.promoCard.showButton && config.promoCard.buttonText"
-                    class="w-full py-2 px-4 rounded-lg text-sm font-semibold transition-transform active:scale-95"
-                    :style="{ backgroundColor: config.promoCard.style.buttonColor, color: config.promoCard.style.buttonTextColor }">
-                    {{ config.promoCard.buttonText }}
-                  </button>
                 </div>
+              </div>
               </div>
 
               <SamplePromoTemplates @apply-template="applyPromoTemplate" />
