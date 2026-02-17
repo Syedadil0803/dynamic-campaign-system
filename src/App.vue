@@ -183,127 +183,118 @@
             </div>
 
             <div class="p-4 space-y-6">
-              <!-- Announcement Input -->
-              <div class="mb-6">
-                <div class="flex items-center justify-between mb-2">
-                  <label for="announcement-text" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Announcement Text
-                  </label>
-
-                  <!-- Rich Text Toggle - Only show when editing an existing announcement -->
-                  <div v-if="selectedAnnouncementIndex !== null" class="flex items-center gap-2">
-                    <span class="text-xs text-gray-500">Rich Text</span>
-                    <button @click="toggleRichText"
-                      :class="selectedAnnouncementRichText ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700'"
-                      class="px-2 py-0.5 text-xs rounded-md border-0 focus:ring-2 focus:ring-indigo-500 transition-colors">
-                      {{ selectedAnnouncementRichText ? 'ON' : 'OFF' }}
-                    </button>
-                  </div>
-                </div>
-
-                <!-- Rich Text Toolbar -->
-                <div v-if="selectedAnnouncementRichText && selectedAnnouncementIndex !== null"
-                  class="mb-2 border border-gray-300 rounded-md p-1.5 bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
-                  <div class="flex flex-wrap gap-1 items-center">
-                    <button @mousedown.prevent="formatText('bold')"
-                      :class="activeFormats.bold ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
-                      class="px-2 py-1 text-xs font-bold border rounded transition-colors" title="Bold">B</button>
-                    <button @mousedown.prevent="formatText('italic')"
-                      :class="activeFormats.italic ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
-                      class="px-2 py-1 text-xs italic border rounded transition-colors" title="Italic">I</button>
-
-                    <div class="border-l border-gray-300 h-4 mx-1"></div>
-
-                    <button @mousedown.prevent="formatText('size-xs')"
-                      :class="activeFormats.size === 'xs' ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
-                      class="px-2 py-1 text-xs border rounded transition-colors">XS</button>
-                    <button @mousedown.prevent="formatText('size-sm')"
-                      :class="activeFormats.size === 'sm' ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
-                      class="px-2 py-1 text-xs border rounded transition-colors">SM</button>
-                    <button @mousedown.prevent="formatText('size-lg')"
-                      :class="activeFormats.size === 'lg' ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
-                      class="px-2 py-1 text-xs border rounded transition-colors">LG</button>
-                    <button @mousedown.prevent="formatText('size-xl')"
-                      :class="activeFormats.size === 'xl' ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
-                      class="px-2 py-1 text-xs border rounded transition-colors">XL</button>
-                    <button @mousedown.prevent="formatText('size-xxl')"
-                      :class="activeFormats.size === 'xxl' ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
-                      class="px-2 py-1 text-xs border rounded transition-colors">XXL</button>
-
-                    <div class="ml-auto text-[10px] text-gray-400 hidden sm:block">
-                      Highlight to format
+              <!-- Live Preview Area Inline -->
+              <div class="bg-gray-100 p-4 border border-gray-200 rounded-md dark:bg-gray-700 dark:border-gray-600">
+                <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 dark:text-gray-400">Preview
+                </h4>
+                <div
+                  class="w-full bg-white border border-gray-300 rounded shadow-sm overflow-hidden transform transition-all dark:bg-gray-800 dark:border-gray-600">
+                  <!-- Scrolling Announcement Bar -->
+                  <div v-if="config.announcementBar.active && config.announcementBar.announcements.length > 0"
+                    class="h-10 px-4 text-center text-sm font-medium transition-colors duration-300 overflow-hidden flex items-center justify-center"
+                    :style="{ background: getBackgroundStyle(config.announcementBar.style.background), color: config.announcementBar.style.textColor }">
+                    <div class="animate-scroll-left">
+                      <span v-for="announcement in config.announcementBar.announcements" :key="announcement.text"
+                        class="inline-block px-4">
+                        <a v-if="announcement.url" :href="announcement.url" target="_blank"
+                          class="underline hover:no-underline transition-all"
+                          :style="{ color: config.announcementBar.style.textColor }">
+                          <span v-if="!announcement.richText">{{ announcement.text }}</span>
+                          <span v-else v-html="announcement.text"></span>
+                        </a>
+                        <span v-else>
+                          <span v-if="!announcement.richText">{{ announcement.text }}</span>
+                          <span v-else v-html="announcement.text"></span>
+                        </span>
+                      </span>
                     </div>
                   </div>
-                </div>
-
-                <div class="mt-1 flex gap-2">
-                  <!-- Plain text textarea (when no announcement is selected OR rich text is OFF) -->
-                  <textarea v-if="!isRichTextEditMode" id="announcement-text" rows="2" v-model="newAnnouncementText"
-                    @keyup.enter="addAnnouncement"
-                    class="flex-1 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md p-3 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400"
-                    placeholder="Type announcement and press Enter..."></textarea>
-                  <!-- Rich text contenteditable div (when rich text is ON for selected announcement) -->
-                  <div v-else id="announcement-richtext-editor" contenteditable="true" @input="onRichTextInput"
-                    @mouseup="updateActiveFormats" @keyup="updateActiveFormats" @keyup.enter.prevent="addAnnouncement"
-                    class="flex-1 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md p-3 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400 min-h-[56px] outline-none overflow-auto"
-                    :data-placeholder="'Type announcement text...'"></div>
-                  <button @click="addAnnouncement" :disabled="!newAnnouncementText?.trim()"
-                    class="px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed">
-                    Add
-                  </button>
-                </div>
-              </div>
-
-              <!-- Announcements List -->
-              <div class="mb-6">
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Announcements</label>
-                <div class="flex flex-wrap gap-2 mb-4">
-                  <div v-for="(announcement, index) in config.announcementBar.announcements" :key="index"
-                    class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200 group relative"
-                    :class="{ 'ring-2 ring-indigo-500': selectedAnnouncementIndex === index }">
-                    <span @click="selectAnnouncement(index)" class="cursor-pointer flex-1"
-                      v-if="!announcement.richText">
-                      {{ announcement.text }}
-                    </span>
-                    <span @click="selectAnnouncement(index)" class="cursor-pointer flex-1" v-else
-                      v-html="announcement.text"></span>
-                    <a v-if="announcement.url" :href="announcement.url" target="_blank"
-                      class="ml-1 text-xs underline hover:no-underline" @click.stop>
-                      🔗
-                    </a>
-
-                    <!-- Delete Button -->
-                    <button @click="removeAnnouncement(index)"
-                      class="ml-2 text-indigo-600 hover:text-indigo-800 dark:text-indigo-300 dark:hover:text-indigo-100 opacity-0 group-hover:opacity-100 transition-opacity"
-                      title="Remove" @click.stop>
-                      <X class="w-3 h-3" />
-                    </button>
-                  </div>
-                </div>
-
-                <!-- Single Date Fields for All Announcements -->
-                <div class="border-t pt-4">
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Schedule</label>
-                  <div class="grid grid-cols-2 gap-4">
-                    <div>
-                      <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Start Date</label>
-                      <input type="date" v-model="config.announcementBar.startDate" @input="markChanged"
-                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2.5 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100" />
-                    </div>
-                    <div>
-                      <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">End Date</label>
-                      <input type="date" v-model="config.announcementBar.endDate" @input="markChanged"
-                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2.5 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100" />
+                  <!-- Website Header Mock -->
+                  <div
+                    class="h-12 bg-white flex items-center justify-between px-4 border-b border-gray-100 dark:bg-gray-900 dark:border-gray-700">
+                    <div class="w-24 h-4 bg-gray-200 rounded"></div>
+                    <div class="flex space-x-2">
+                      <div class="w-12 h-4 bg-gray-100 rounded"></div>
+                      <div class="w-12 h-4 bg-gray-100 rounded"></div>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <!-- Style and URL Sections Side by Side -->
               <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- Style Customization -->
-                <div>
+                <div class="space-y-6">
+                  <!-- Announcement Input -->
+                  <div>
+                    <div class="flex items-center justify-between mb-2">
+                      <label for="announcement-text" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Announcement Text
+                      </label>
+
+                      <div class="flex items-center gap-2">
+                        <span class="text-xs text-gray-500">Rich Text</span>
+                        <button @click="toggleRichText"
+                          :class="selectedAnnouncementRichText ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700'"
+                          class="px-2 py-0.5 text-xs rounded-md border-0 focus:ring-2 focus:ring-indigo-500 transition-colors">
+                          {{ selectedAnnouncementRichText ? 'ON' : 'OFF' }}
+                        </button>
+                      </div>
+                    </div>
+
+                    <!-- Rich Text Toolbar -->
+                    <div v-if="selectedAnnouncementRichText"
+                      class="mb-2 border border-gray-300 rounded-md p-1.5 bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
+                      <div class="flex flex-wrap gap-1 items-center">
+                        <button @mousedown.prevent="formatText('bold')"
+                          :class="activeFormats.bold ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
+                          class="px-2 py-1 text-xs font-bold border rounded transition-colors" title="Bold">B</button>
+                        <button @mousedown.prevent="formatText('italic')"
+                          :class="activeFormats.italic ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
+                          class="px-2 py-1 text-xs italic border rounded transition-colors" title="Italic">I</button>
+
+                        <div class="border-l border-gray-300 h-4 mx-1"></div>
+
+                        <button @mousedown.prevent="formatText('size-xs')"
+                          :class="activeFormats.size === 'xs' ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
+                          class="px-2 py-1 text-xs border rounded transition-colors">XS</button>
+                        <button @mousedown.prevent="formatText('size-sm')"
+                          :class="activeFormats.size === 'sm' ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
+                          class="px-2 py-1 text-xs border rounded transition-colors">SM</button>
+                        <button @mousedown.prevent="formatText('size-lg')"
+                          :class="activeFormats.size === 'lg' ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
+                          class="px-2 py-1 text-xs border rounded transition-colors">LG</button>
+                        <button @mousedown.prevent="formatText('size-xl')"
+                          :class="activeFormats.size === 'xl' ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
+                          class="px-2 py-1 text-xs border rounded transition-colors">XL</button>
+                        <button @mousedown.prevent="formatText('size-xxl')"
+                          :class="activeFormats.size === 'xxl' ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
+                          class="px-2 py-1 text-xs border rounded transition-colors">XXL</button>
+
+                        <div class="ml-auto text-[10px] text-gray-400 hidden sm:block">
+                          Highlight to format
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="mt-1 flex gap-2">
+                      <!-- Plain text textarea (when no announcement is selected OR rich text is OFF) -->
+                      <textarea v-if="!isRichTextEditMode" id="announcement-text" rows="2" v-model="newAnnouncementText"
+                        @keyup.enter="addAnnouncement"
+                        class="flex-1 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md p-3 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400"
+                        placeholder="Type announcement and press Enter..."></textarea>
+                      <!-- Rich text contenteditable div (when rich text is ON for selected announcement) -->
+                      <div v-else id="announcement-richtext-editor" contenteditable="true" @input="onRichTextInput"
+                        @mouseup="updateActiveFormats" @keyup="updateActiveFormats" @keyup.enter.prevent="addAnnouncement"
+                        class="flex-1 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md p-3 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400 min-h-[56px] outline-none overflow-auto"
+                        :data-placeholder="'Type announcement text...'"></div>
+                      <button @click="addAnnouncement" :disabled="!newAnnouncementText?.trim()"
+                        class="px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed">
+                        Add
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Style Customization -->
+                  <div>
                   <label class="block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300">Style
                     Customization</label>
 
@@ -409,75 +400,91 @@
                   </div>
                 </div>
 
-                <!-- URL Management -->
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300">Link
-                    Management</label>
+                </div>
 
-                  <!-- URL Field (shows when announcement is selected) -->
-                  <div v-if="selectedAnnouncementIndex !== null" class="space-y-4">
-                    <div>
-                      <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">
-                        Link URL for "{{ getSelectedAnnouncementText() }}"
-                      </label>
-                      <input type="url" v-model="selectedAnnouncementUrl" @input="updateSelectedAnnouncementUrl"
-                        class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2.5 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
-                        placeholder="https://example.com (optional)" />
-                    </div>
-
-                    <p class="text-xs text-gray-500 dark:text-gray-400">
-                      These settings apply only to the selected announcement above.
-                    </p>
-                  </div>
-
-                  <!-- Empty state when no announcement selected -->
-                  <div v-else class="text-center py-8 px-4 border-2 border-dashed border-gray-300 rounded-lg">
-                    <div class="text-gray-400">
-                      <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                      </svg>
-                      <p class="mt-2 text-sm">Click an announcement to add URL or enable rich text</p>
+                <div class="space-y-6">
+                  <!-- Single Date Fields for All Announcements -->
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Schedule</label>
+                    <div class="grid grid-cols-2 gap-4">
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Start Date</label>
+                        <input type="date" v-model="config.announcementBar.startDate" @input="markChanged"
+                          class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2.5 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100" />
+                      </div>
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">End Date</label>
+                        <input type="date" v-model="config.announcementBar.endDate" @input="markChanged"
+                          class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2.5 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100" />
+                      </div>
                     </div>
                   </div>
-                </div>
-              </div>
-            </div>
 
-            <!-- Live Preview Area Inline -->
-            <div class="bg-gray-100 p-4 border-t border-gray-200 dark:bg-gray-700 dark:border-gray-600">
-              <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 dark:text-gray-400">Preview
-              </h4>
-              <div
-                class="w-full bg-white border border-gray-300 rounded shadow-sm overflow-hidden transform transition-all dark:bg-gray-800 dark:border-gray-600">
-                <!-- Scrolling Announcement Bar -->
-                <div v-if="config.announcementBar.active && config.announcementBar.announcements.length > 0"
-                  class="h-10 px-4 text-center text-sm font-medium transition-colors duration-300 overflow-hidden flex items-center justify-center"
-                  :style="{ background: getBackgroundStyle(config.announcementBar.style.background), color: config.announcementBar.style.textColor }">
-                  <div class="animate-scroll-left">
-                    <span v-for="announcement in config.announcementBar.announcements" :key="announcement.text"
-                      class="inline-block px-4">
-                      <a v-if="announcement.url" :href="announcement.url" target="_blank"
-                        class="underline hover:no-underline transition-all"
-                        :style="{ color: config.announcementBar.style.textColor }">
-                        <span v-if="!announcement.richText">{{ announcement.text }}</span>
-                        <span v-else v-html="announcement.text"></span>
-                      </a>
-                      <span v-else>
-                        <span v-if="!announcement.richText">{{ announcement.text }}</span>
-                        <span v-else v-html="announcement.text"></span>
-                      </span>
-                    </span>
+                  <!-- Announcements List -->
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Announcements</label>
+                    <div
+                      :class="[
+                        'flex flex-wrap gap-2 mb-4',
+                        config.announcementBar.announcements.length > 2 ? 'max-h-20 overflow-y-auto pr-1' : ''
+                      ]">
+                      <div v-for="(announcement, index) in config.announcementBar.announcements" :key="index"
+                        class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200 group relative"
+                        :class="{ 'ring-1 ring-indigo-300/60 dark:ring-indigo-400/40': selectedAnnouncementIndex === index }">
+                        <span @click="selectAnnouncement(index)" class="cursor-pointer flex-1"
+                          v-if="!announcement.richText">
+                          {{ announcement.text }}
+                        </span>
+                        <span @click="selectAnnouncement(index)" class="cursor-pointer flex-1" v-else
+                          v-html="announcement.text"></span>
+                        <a v-if="announcement.url" :href="announcement.url" target="_blank"
+                          class="ml-1 text-xs underline hover:no-underline" @click.stop>
+                          🔗
+                        </a>
+
+                        <!-- Delete Button -->
+                        <button @click="removeAnnouncement(index)"
+                          class="ml-2 text-indigo-600 hover:text-indigo-800 dark:text-indigo-300 dark:hover:text-indigo-100 opacity-0 group-hover:opacity-100 transition-opacity"
+                          title="Remove" @click.stop>
+                          <X class="w-3 h-3" />
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                </div>
-                <!-- Website Header Mock -->
-                <div
-                  class="h-12 bg-white flex items-center justify-between px-4 border-b border-gray-100 dark:bg-gray-900 dark:border-gray-700">
-                  <div class="w-24 h-4 bg-gray-200 rounded"></div>
-                  <div class="flex space-x-2">
-                    <div class="w-12 h-4 bg-gray-100 rounded"></div>
-                    <div class="w-12 h-4 bg-gray-100 rounded"></div>
+
+                  <!-- URL Management -->
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300">Link
+                      Management</label>
+
+                    <!-- URL Field (shows when announcement is selected) -->
+                    <div v-if="selectedAnnouncementIndex !== null" class="space-y-4">
+                      <div>
+                        <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">
+                          Link URL for "{{ getSelectedAnnouncementText() }}"
+                        </label>
+                        <input type="url" v-model="selectedAnnouncementUrl" @input="updateSelectedAnnouncementUrl"
+                          class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2.5 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
+                          placeholder="https://example.com (optional)" />
+                      </div>
+
+                      <p class="text-xs text-gray-500 dark:text-gray-400">
+                        These settings apply only to the selected announcement above.
+                      </p>
+                    </div>
+
+                    <!-- Empty state when no announcement selected -->
+                    <div v-else class="text-center py-2 border-2 border-dashed border-gray-300 rounded-lg">
+                      <div class="text-gray-400">
+                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24"
+                          stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                        </svg>
+                        <p class="mt-2 text-sm">Click an announcement to add URL or enable rich text</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -517,48 +524,52 @@
                   <label class="block text-xs font-medium text-gray-700 mb-1.5 dark:text-gray-300">Style Controls</label>
                   <div class="space-y-1.5">
                     <!-- Row 1: Text Formatting + Text Color + Alignment -->
-                    <div class="flex flex-wrap gap-1.5 items-center">
-                      <button @mousedown.prevent="formatPromoText('bold')"
-                        :class="promoFormats.bold ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
-                        class="px-2.5 py-1.5 text-xs font-bold border rounded transition-colors" title="Bold">B</button>
-                      <button @mousedown.prevent="formatPromoText('italic')"
-                        :class="promoFormats.italic ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
-                        class="px-2.5 py-1.5 text-xs italic border rounded transition-colors" title="Italic">I</button>
+                    <div class="flex flex-wrap items-center gap-2">
+                      <div class="flex flex-wrap items-center gap-1.5">
+                        <button @mousedown.prevent="formatPromoText('bold')"
+                          :class="promoFormats.bold ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
+                          class="px-2.5 py-1.5 text-xs font-bold border rounded transition-colors" title="Bold">B</button>
+                        <button @mousedown.prevent="formatPromoText('italic')"
+                          :class="promoFormats.italic ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
+                          class="px-2.5 py-1.5 text-xs italic border rounded transition-colors" title="Italic">I</button>
 
-                      <div class="border-l border-gray-300 h-5 mx-0.5"></div>
+                        <div class="border-l border-gray-300 h-5 mx-0.5"></div>
 
-                      <button @mousedown.prevent="formatPromoText('size-xs')"
-                        :class="promoFormats.size === 'xs' ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
-                        class="px-2.5 py-1.5 text-xs border rounded transition-colors">XS</button>
-                      <button @mousedown.prevent="formatPromoText('size-sm')"
-                        :class="promoFormats.size === 'sm' ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
-                        class="px-2.5 py-1.5 text-xs border rounded transition-colors">SM</button>
-                      <button @mousedown.prevent="formatPromoText('size-lg')"
-                        :class="promoFormats.size === 'lg' ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
-                        class="px-2.5 py-1.5 text-xs border rounded transition-colors">LG</button>
-                      <button @mousedown.prevent="formatPromoText('size-xl')"
-                        :class="promoFormats.size === 'xl' ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
-                        class="px-2.5 py-1.5 text-xs border rounded transition-colors">XL</button>
-                      <button @mousedown.prevent="formatPromoText('size-xxl')"
-                        :class="promoFormats.size === 'xxl' ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
-                        class="px-2.5 py-1.5 text-xs border rounded transition-colors">XXL</button>
-
-                      <div class="border-l border-gray-300 h-5 mx-0.5"></div>
-
-                      <div class="flex gap-1.5 items-center">
-                        <label class="text-xs text-gray-500 dark:text-gray-400">Text:</label>
-                        <input type="color" v-model="currentFieldTextColor" @input="updateFieldColors"
-                          class="h-7 w-10 rounded border border-gray-300 cursor-pointer dark:border-gray-600" />
+                        <button @mousedown.prevent="formatPromoText('size-xs')"
+                          :class="promoFormats.size === 'xs' ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
+                          class="px-2.5 py-1.5 text-xs border rounded transition-colors">XS</button>
+                        <button @mousedown.prevent="formatPromoText('size-sm')"
+                          :class="promoFormats.size === 'sm' ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
+                          class="px-2.5 py-1.5 text-xs border rounded transition-colors">SM</button>
+                        <button @mousedown.prevent="formatPromoText('size-lg')"
+                          :class="promoFormats.size === 'lg' ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
+                          class="px-2.5 py-1.5 text-xs border rounded transition-colors">LG</button>
+                        <button @mousedown.prevent="formatPromoText('size-xl')"
+                          :class="promoFormats.size === 'xl' ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
+                          class="px-2.5 py-1.5 text-xs border rounded transition-colors">XL</button>
+                        <button @mousedown.prevent="formatPromoText('size-xxl')"
+                          :class="promoFormats.size === 'xxl' ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
+                          class="px-2.5 py-1.5 text-xs border rounded transition-colors">XXL</button>
                       </div>
 
-                      <div class="border-l border-gray-300 h-5 mx-0.5"></div>
-                      
-                      <button @click="setFieldAlignment('left')" @mousedown.prevent
-                        class="px-2.5 py-1.5 text-xs border rounded transition-colors border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600" title="Align Left">L</button>
-                      <button @click="setFieldAlignment('center')" @mousedown.prevent
-                        class="px-2.5 py-1.5 text-xs border rounded transition-colors border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600" title="Align Center">C</button>
-                      <button @click="setFieldAlignment('right')" @mousedown.prevent
-                        class="px-2.5 py-1.5 text-xs border rounded transition-colors border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600" title="Align Right">R</button>
+                      <div class="w-full sm:w-auto sm:ml-auto flex items-center gap-1.5">
+                        <div class="border-l border-gray-300 h-5 mx-0.5"></div>
+
+                        <div class="flex gap-1.5 items-center">
+                          <label class="text-xs text-gray-500 dark:text-gray-400">Text:</label>
+                          <input type="color" v-model="currentFieldTextColor" @input="updateFieldColors"
+                            class="h-7 w-10 rounded border border-gray-300 cursor-pointer dark:border-gray-600" />
+                        </div>
+
+                        <div class="border-l border-gray-300 h-5 mx-0.5"></div>
+
+                        <button @click="setFieldAlignment('left')" @mousedown.prevent
+                          class="px-2.5 py-1.5 text-xs border rounded transition-colors border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600" title="Align Left">L</button>
+                        <button @click="setFieldAlignment('center')" @mousedown.prevent
+                          class="px-2.5 py-1.5 text-xs border rounded transition-colors border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600" title="Align Center">C</button>
+                        <button @click="setFieldAlignment('right')" @mousedown.prevent
+                          class="px-2.5 py-1.5 text-xs border rounded transition-colors border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600" title="Align Right">R</button>
+                      </div>
                     </div>
 
                     <!-- Row 2: Background Type + Colors + Gradient Controls -->
@@ -1006,7 +1017,7 @@ async function applyPromoTemplate(template: PromoCard, templateName: string) {
 
 // Computed property to check if we're in rich text edit mode
 const isRichTextEditMode = computed(() => {
-  return selectedAnnouncementIndex.value !== null && selectedAnnouncementRichText.value
+  return selectedAnnouncementRichText.value
 })
 
 // Sync activeTab with current route
@@ -1185,7 +1196,7 @@ function addAnnouncement() {
       selectedAnnouncementUrl.value = ''
     } else {
       // Add new announcement
-      config.value.announcementBar.announcements.push({ text })
+      config.value.announcementBar.announcements.push({ text, richText: selectedAnnouncementRichText.value })
     }
     newAnnouncementText.value = ''
     markChanged()
@@ -1266,6 +1277,26 @@ function updateSelectedAnnouncementUrl() {
 
 function toggleRichText() {
   selectedAnnouncementRichText.value = !selectedAnnouncementRichText.value
+
+  if (selectedAnnouncementIndex.value === null) {
+    if (selectedAnnouncementRichText.value) {
+      updateActiveFormats()
+      nextTick(() => {
+        const richEditor = document.querySelector('#announcement-richtext-editor') as HTMLDivElement
+        if (richEditor) {
+          richEditor.innerHTML = newAnnouncementText.value
+          richEditor.focus()
+        }
+      })
+    } else {
+      activeFormats.value = { bold: false, italic: false, size: '' }
+      const div = document.createElement('div')
+      div.innerHTML = newAnnouncementText.value
+      newAnnouncementText.value = div.textContent || div.innerText || newAnnouncementText.value
+    }
+    return
+  }
+
   if (selectedAnnouncementIndex.value !== null) {
     config.value.announcementBar.announcements[selectedAnnouncementIndex.value].richText = selectedAnnouncementRichText.value
     markChanged()
@@ -1301,10 +1332,11 @@ function onRichTextInput(event: Event) {
   const target = event.target as HTMLDivElement
   const html = target.innerHTML
 
+  newAnnouncementText.value = html
+
   // Update the announcement text in the data model
   if (selectedAnnouncementIndex.value !== null) {
     config.value.announcementBar.announcements[selectedAnnouncementIndex.value].text = html
-    newAnnouncementText.value = html
     markChanged()
   }
 
@@ -1314,7 +1346,7 @@ function onRichTextInput(event: Event) {
 
 // Update active format indicators based on current cursor/selection position
 function updateActiveFormats() {
-  if (selectedAnnouncementIndex.value === null || !selectedAnnouncementRichText.value) {
+  if (!selectedAnnouncementRichText.value) {
     activeFormats.value = { bold: false, italic: false, size: '' }
     return
   }
@@ -1348,8 +1380,6 @@ function updateActiveFormats() {
 }
 
 function formatText(format: string) {
-  if (selectedAnnouncementIndex.value === null) return
-
   const richEditor = document.querySelector('#announcement-richtext-editor') as HTMLDivElement
   if (!richEditor) return
 
@@ -1393,9 +1423,11 @@ function formatText(format: string) {
 
   // Sync the updated HTML back to the data model
   const updatedHtml = richEditor.innerHTML
-  config.value.announcementBar.announcements[selectedAnnouncementIndex.value].text = updatedHtml
   newAnnouncementText.value = updatedHtml
-  markChanged()
+  if (selectedAnnouncementIndex.value !== null) {
+    config.value.announcementBar.announcements[selectedAnnouncementIndex.value].text = updatedHtml
+    markChanged()
+  }
 
   // Update active format indicators
   updateActiveFormats()
