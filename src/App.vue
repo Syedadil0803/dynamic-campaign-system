@@ -663,8 +663,8 @@
                   <div id="timer-richtext-editor" contenteditable="true" @input="onTimerTextInput"
                     @mouseup="updatePromoFormats" @keyup="updatePromoFormats" @focus="currentFieldFocus = 'timer'; syncToolbarWithField()"
                     class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md p-2 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 min-h-[48px] outline-none break-words overflow-wrap-anywhere"
-                    :data-placeholder="'Ends in hh:mm:ss'"></div>
-                  <p class="text-xs text-gray-500 mt-1 dark:text-gray-400">Use hh, mm, ss placeholders. Select to format.</p>
+                    :data-placeholder="'Ends in hh mmm sss'"></div>
+                  <p class="text-xs text-gray-500 mt-1 dark:text-gray-400">Use h, mm, ss or hh, m, s placeholders. Select to format.</p>
                 </div>
 
                 <!-- Button Toggle -->
@@ -871,6 +871,8 @@
                   </button>
                 </div>
               </div>
+
+              <SamplePromoTemplates @apply-template="applyPromoTemplate" />
             </div>
           </section>
 
@@ -909,8 +911,9 @@
 import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { loadConfig, saveConfig } from './services/campaignService'
-import type { CampaignConfig } from './types/campaign'
+import type { CampaignConfig, PromoCard } from './types/campaign'
 import { defaultConfig } from './types/campaign'
+import SamplePromoTemplates from './components/SamplePromoTemplates.vue'
 import {
   LayoutDashboard,
   Megaphone,
@@ -969,6 +972,38 @@ const currentFieldBgEndColor = ref('#111827')
 const currentFieldBgDirection = ref('to right')
 const currentFieldBgMidpoint = ref(50)
 
+const syncPromoEditorsFromConfig = () => {
+  const timerEditor = document.querySelector('#timer-richtext-editor') as HTMLDivElement
+  if (timerEditor) {
+    timerEditor.innerHTML = config.value.promoCard.timerText || 'Ends in <strong>hh</strong> mmm sss'
+  }
+
+  const titleEditor = document.querySelector('#promo-title-editor') as HTMLDivElement
+  if (titleEditor) {
+    titleEditor.innerHTML = config.value.promoCard.title || ''
+  }
+
+  const subtitleEditor = document.querySelector('#promo-subtitle-editor') as HTMLDivElement
+  if (subtitleEditor) {
+    subtitleEditor.innerHTML = config.value.promoCard.subtitle || ''
+  }
+
+  const descriptionEditor = document.querySelector('#promo-description-editor') as HTMLDivElement
+  if (descriptionEditor) {
+    descriptionEditor.innerHTML = config.value.promoCard.description || ''
+  }
+}
+
+async function applyPromoTemplate(template: PromoCard, templateName: string) {
+  config.value.promoCard = JSON.parse(JSON.stringify(template))
+  await nextTick()
+  syncPromoEditorsFromConfig()
+  currentFieldFocus.value = 'title'
+  syncToolbarWithField()
+  markChanged()
+  toast(`Template applied: ${templateName}`)
+}
+
 // Computed property to check if we're in rich text edit mode
 const isRichTextEditMode = computed(() => {
   return selectedAnnouncementIndex.value !== null && selectedAnnouncementRichText.value
@@ -991,7 +1026,7 @@ onMounted(async () => {
   
   // Initialize timer text if not set
   if (!config.value.promoCard.timerText) {
-    config.value.promoCard.timerText = 'Ends in hh:mm:ss'
+    config.value.promoCard.timerText = 'Ends in <strong>hh</strong> mmm sss'
   }
 
   // Check for saved dark mode preference or system preference
@@ -1012,25 +1047,7 @@ onMounted(async () => {
   
   // Populate editors after DOM is ready
   await nextTick()
-  const timerEditor = document.querySelector('#timer-richtext-editor') as HTMLDivElement
-  if (timerEditor && config.value.promoCard.timerText) {
-    timerEditor.innerHTML = config.value.promoCard.timerText
-  }
-  
-  const titleEditor = document.querySelector('#promo-title-editor') as HTMLDivElement
-  if (titleEditor && config.value.promoCard.title) {
-    titleEditor.innerHTML = config.value.promoCard.title
-  }
-  
-  const subtitleEditor = document.querySelector('#promo-subtitle-editor') as HTMLDivElement
-  if (subtitleEditor && config.value.promoCard.subtitle) {
-    subtitleEditor.innerHTML = config.value.promoCard.subtitle
-  }
-  
-  const descriptionEditor = document.querySelector('#promo-description-editor') as HTMLDivElement
-  if (descriptionEditor && config.value.promoCard.description) {
-    descriptionEditor.innerHTML = config.value.promoCard.description
-  }
+  syncPromoEditorsFromConfig()
 })
 
 function toggleDarkMode() {
@@ -1086,8 +1103,18 @@ const calculateHoursRemaining = () => {
 const getFormattedTimerText = () => {
   const timerValue = calculateHoursRemaining()
   const [hours, minutes, seconds] = timerValue.split(':')
-  const template = config.value.promoCard.timerText || 'Ends in hh:mm:ss'
+  const hoursRaw = String(Number(hours) || 0)
+  const minutesRaw = String(Number(minutes) || 0)
+  const secondsRaw = String(Number(seconds) || 0)
+  const template = config.value.promoCard.timerText || 'Ends in <strong>hh</strong> mmm sss'
   return template
+    .replace(/\{hh\}/g, hours)
+    .replace(/\{h\}/g, hoursRaw)
+    .replace(/\{mm\}/g, minutes)
+    .replace(/\{m\}/g, minutesRaw)
+    .replace(/\{ss\}/g, seconds)
+    .replace(/\{s\}/g, secondsRaw)
+    // Backward compatibility with old templates
     .replace(/hh/g, hours)
     .replace(/mm/g, minutes)
     .replace(/ss/g, seconds)
@@ -1119,12 +1146,14 @@ function switchTab(tab: 'dashboard' | 'announcement' | 'promo') {
 
 const toggleTimer = () => {
   config.value.promoCard.showTimer = !config.value.promoCard.showTimer
-  if (config.value.promoCard.showTimer && !config.value.promoCard.timerText) {
-    config.value.promoCard.timerText = 'Ends in hh:mm:ss'
+  if (config.value.promoCard.showTimer) {
+    if (!config.value.promoCard.timerText) {
+      config.value.promoCard.timerText = 'Ends in <strong>hh</strong> mmm sss'
+    }
     nextTick(() => {
       const timerEditor = document.querySelector('#timer-richtext-editor') as HTMLDivElement
       if (timerEditor) {
-        timerEditor.innerHTML = 'Ends in hh:mm:ss'
+        timerEditor.innerHTML = config.value.promoCard.timerText || 'Ends in <strong>hh</strong> mmm sss'
       }
     })
   }
