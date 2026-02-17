@@ -1401,40 +1401,79 @@ function formatText(format: string) {
   updateActiveFormats()
 }
 
-// Apply font size using execCommand with a span wrapper
+// Apply font size - root fix: normalize the content first, then apply
 function applyFontSize(size: string) {
   const selection = window.getSelection()
   if (!selection || selection.rangeCount === 0) return
 
   const range = selection.getRangeAt(0)
-
-  // Only apply to selected text, not everything
   if (range.collapsed) return
 
-  // Extract the selected content
-  const fragment = range.extractContents()
+  const richEditor = document.querySelector('#announcement-richtext-editor') as HTMLDivElement
+  if (!richEditor) return
 
-  // Remove any existing font-size spans from the fragment
-  const existingSpans = fragment.querySelectorAll('span[style*="font-size"]')
-  existingSpans.forEach(span => {
-    const parent = span.parentNode
-    while (span.firstChild) {
-      parent?.insertBefore(span.firstChild, span)
+  // Get the selected text content (plain text)
+  const selectedText = range.toString()
+  
+  // Get all text nodes in the selection
+  const textNodes: Text[] = []
+  const walker = document.createTreeWalker(
+    range.commonAncestorContainer,
+    NodeFilter.SHOW_TEXT,
+    {
+      acceptNode: (node) => {
+        if (range.intersectsNode(node)) {
+          return NodeFilter.FILTER_ACCEPT
+        }
+        return NodeFilter.FILTER_REJECT
+      }
     }
-    parent?.removeChild(span)
+  )
+  
+  let node: Node | null
+  while ((node = walker.nextNode())) {
+    textNodes.push(node as Text)
+  }
+
+  // Remove font-size from all parent spans of selected text nodes
+  textNodes.forEach(textNode => {
+    let parent = textNode.parentElement
+    while (parent && parent !== richEditor) {
+      if (parent.tagName === 'SPAN' && parent.style.fontSize) {
+        // Remove only the font-size style, keep other styles
+        parent.style.removeProperty('font-size')
+        // If span has no other styles, unwrap it
+        if (!parent.getAttribute('style') || parent.getAttribute('style')?.trim() === '') {
+          const grandParent = parent.parentNode
+          while (parent.firstChild) {
+            grandParent?.insertBefore(parent.firstChild, parent)
+          }
+          grandParent?.removeChild(parent)
+          break
+        }
+      }
+      parent = parent.parentElement
+    }
   })
 
-  // Wrap in a new span with the desired font size
+  // Now extract and wrap with new font-size
+  const newRange = document.createRange()
+  newRange.setStart(range.startContainer, range.startOffset)
+  newRange.setEnd(range.endContainer, range.endOffset)
+  
+  const fragment = newRange.extractContents()
+  
+  // Create wrapper with new font-size
   const wrapper = document.createElement('span')
   wrapper.style.fontSize = size
   wrapper.appendChild(fragment)
-
-  range.insertNode(wrapper)
-
-  // Restore selection around the wrapper
-  range.selectNodeContents(wrapper)
+  
+  newRange.insertNode(wrapper)
+  
+  // Restore selection
+  newRange.selectNodeContents(wrapper)
   selection.removeAllRanges()
-  selection.addRange(range)
+  selection.addRange(newRange)
 }
 
 function migrateAnnouncements(config: any) {
