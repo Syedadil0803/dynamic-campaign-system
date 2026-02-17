@@ -22,6 +22,7 @@ export interface PromoCard {
   startDate: string;
   endDate: string;
   showTimer: boolean;
+  showButton: boolean;
   timerText?: string;
   style: {
     position: 'bottom-right' | 'bottom-left' | 'top-right' | 'top-left';
@@ -100,7 +101,8 @@ export const defaultConfig: CampaignConfig = {
     buttonUrl: '',
     startDate: '',
     endDate: '',
-    showTimer: true,
+    showTimer: false,
+    showButton: false,
     timerText: 'Ends in hh:mm:ss',
     style: {
       position: 'bottom-right',

@@ -76,7 +76,7 @@
 
       <!-- Scrollable Content -->
       <main class="flex-1 overflow-y-auto bg-gray-50 p-6 dark:bg-gray-900">
-        <div class="max-w-6xl mx-auto space-y-8 pb-12">
+        <div class="max-w-[1400px] mx-auto space-y-8 pb-12">
 
           <!-- Dashboard Overview -->
           <div v-if="activeTab === 'dashboard'" class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -161,7 +161,7 @@
           <section v-if="activeTab === 'announcement'" id="announcement"
             class="bg-white shadow rounded-lg border border-gray-200 overflow-hidden dark:bg-gray-800 dark:border-gray-700">
             <div
-              class="px-6 py-5 border-b border-gray-200 bg-gray-50/50 flex items-center justify-between dark:border-gray-700 dark:bg-gray-700/50">
+              class="px-6 py-3 border-b border-gray-200 bg-gray-50/50 flex items-center justify-between dark:border-gray-700 dark:bg-gray-700/50">
               <div class="flex items-center">
                 <div class="p-2 bg-indigo-100 rounded-lg mr-4">
                   <Megaphone class="w-5 h-5 text-indigo-600" />
@@ -182,7 +182,7 @@
               </button>
             </div>
 
-            <div class="p-6 space-y-6">
+            <div class="p-4 space-y-6">
               <!-- Announcement Input -->
               <div class="mb-6">
                 <div class="flex items-center justify-between mb-2">
@@ -488,7 +488,7 @@
           <section v-if="activeTab === 'promo'" id="promo"
             class="bg-white shadow rounded-lg border border-gray-200 overflow-hidden dark:bg-gray-800 dark:border-gray-700">
             <div
-              class="px-6 py-5 border-b border-gray-200 bg-gray-50/50 flex items-center justify-between dark:border-gray-700 dark:bg-gray-700/50">
+              class="px-6 py-3 border-b border-gray-200 bg-gray-50/50 flex items-center justify-between dark:border-gray-700 dark:bg-gray-700/50">
               <div class="flex items-center">
                 <div class="p-2 bg-pink-100 rounded-lg mr-4">
                   <Gift class="w-5 h-5 text-pink-600" />
@@ -509,13 +509,13 @@
               </button>
             </div>
 
-            <div class="p-6 grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div class="p-4 grid grid-cols-1 lg:grid-cols-2 gap-6">
               <!-- Form Side -->
-              <div class="space-y-6">
+              <div class="space-y-4">
                 <!-- Global Text Formatting Toolbar -->
-                <div class="border border-gray-300 rounded-md p-2.5 bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
-                  <label class="block text-xs font-medium text-gray-700 mb-2 dark:text-gray-300">Style Controls</label>
-                  <div class="space-y-2">
+                <div class="border border-gray-300 rounded-md p-2 bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
+                  <label class="block text-xs font-medium text-gray-700 mb-1.5 dark:text-gray-300">Style Controls</label>
+                  <div class="space-y-1.5">
                     <!-- Row 1: Text Formatting + Text Color + Alignment -->
                     <div class="flex flex-wrap gap-1.5 items-center">
                       <button @mousedown.prevent="formatPromoText('bold')"
@@ -605,41 +605,42 @@
                   </div>
                 </div>
 
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Title</label>
-                  <div id="promo-title-editor" contenteditable="true" @input="onPromoTitleInput"
-                    @mouseup="updatePromoFormats" @keyup="updatePromoFormats" @focus="currentFieldFocus = 'title'; syncToolbarWithField()"
-                    class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md p-2.5 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 min-h-[42px] outline-none"
-                    :data-placeholder="'Get 20% OFF'"></div>
-                </div>
-
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Subtitle</label>
-                  <div id="promo-subtitle-editor" contenteditable="true" @input="onPromoSubtitleInput"
-                    @mouseup="updatePromoFormats" @keyup="updatePromoFormats" @focus="currentFieldFocus = 'subtitle'; syncToolbarWithField()"
-                    class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md p-2.5 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 min-h-[42px] outline-none"
-                    :data-placeholder="'Limited time offer'"></div>
+                <div class="grid grid-cols-2 gap-3">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Title</label>
+                    <div id="promo-title-editor" contenteditable="true" @input="onPromoTitleInput"
+                      @mouseup="updatePromoFormats" @keyup="updatePromoFormats" @focus="currentFieldFocus = 'title'; syncToolbarWithField()"
+                      class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md p-2 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 min-h-[38px] outline-none break-words overflow-wrap-anywhere"
+                      :data-placeholder="'Get 20% OFF'"></div>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Subtitle</label>
+                    <div id="promo-subtitle-editor" contenteditable="true" @input="onPromoSubtitleInput"
+                      @mouseup="updatePromoFormats" @keyup="updatePromoFormats" @focus="currentFieldFocus = 'subtitle'; syncToolbarWithField()"
+                      class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md p-2 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 min-h-[38px] outline-none break-words overflow-wrap-anywhere"
+                      :data-placeholder="'Limited time offer'"></div>
+                  </div>
                 </div>
 
                 <div>
                   <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
                   <div id="promo-description-editor" contenteditable="true" @input="onPromoDescriptionInput"
                     @mouseup="updatePromoFormats" @keyup="updatePromoFormats" @focus="currentFieldFocus = 'description'; syncToolbarWithField()"
-                    class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md p-2.5 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 min-h-[56px] outline-none"
+                    class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md p-2 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 min-h-[48px] outline-none break-words overflow-wrap-anywhere"
                     :data-placeholder="'Sign up for our newsletter today!'"></div>
                 </div>
 
                 <!-- Dates -->
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-2 gap-3">
                   <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Start Date</label>
                     <input type="date" v-model="config.promoCard.startDate" @input="markChanged"
-                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2.5 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100" />
+                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100" />
                   </div>
                   <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">End Date</label>
                     <input type="date" v-model="config.promoCard.endDate" @input="markChanged"
-                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2.5 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100" />
+                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100" />
                   </div>
                 </div>
 
@@ -658,28 +659,41 @@
 
                 <!-- Timer Text Editor -->
                 <div v-if="config.promoCard.showTimer">
-                  <label class="block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300">Timer Text</label>
+                  <label class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Timer Text</label>
                   <div id="timer-richtext-editor" contenteditable="true" @input="onTimerTextInput"
                     @mouseup="updatePromoFormats" @keyup="updatePromoFormats" @focus="currentFieldFocus = 'timer'; syncToolbarWithField()"
-                    class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md p-3 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 min-h-[56px] outline-none overflow-auto"
+                    class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md p-2 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 min-h-[48px] outline-none break-words overflow-wrap-anywhere"
                     :data-placeholder="'Ends in hh:mm:ss'"></div>
                   <p class="text-xs text-gray-500 mt-1 dark:text-gray-400">Use hh, mm, ss placeholders. Select to format.</p>
                 </div>
 
-                <div class="grid grid-cols-2 gap-4">
+                <!-- Button Toggle -->
+                <div class="flex items-center justify-between">
+                  <div>
+                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Enable Button</label>
+                  </div>
+                  <button @click="config.promoCard.showButton = !config.promoCard.showButton; markChanged()"
+                    :class="config.promoCard.showButton ? 'bg-indigo-600' : 'bg-gray-200'"
+                    class="relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    <span :class="config.promoCard.showButton ? 'translate-x-5' : 'translate-x-0'"
+                      class="pointer-events-none relative inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200"></span>
+                  </button>
+                </div>
+
+                <div v-if="config.promoCard.showButton" class="grid grid-cols-2 gap-3">
                   <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Button Text</label>
                     <input type="text" v-model="config.promoCard.buttonText" @input="markChanged"
-                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2.5 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100" />
+                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100" />
                   </div>
                   <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Button URL</label>
                     <input type="text" v-model="config.promoCard.buttonUrl" @input="markChanged"
-                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2.5 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100" />
+                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100" />
                   </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-4">
+                <div v-if="config.promoCard.showButton" class="grid grid-cols-2 gap-3">
                   <div>
                     <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">Button Bg Color</label>
                     <input type="color" v-model="config.promoCard.style.buttonColor" @input="markChanged"
@@ -693,9 +707,9 @@
                 </div>
 
                 <!-- Styling -->
-                <div class="border-t border-gray-200 pt-4 dark:border-gray-600">
-                  <h4 class="text-sm font-medium text-gray-900 mb-3 dark:text-gray-100">Card Appearance</h4>
-                  <div class="space-y-4">
+                <div class="border-t border-gray-200 pt-3 dark:border-gray-600">
+                  <h4 class="text-sm font-medium text-gray-900 mb-2 dark:text-gray-100">Card Appearance</h4>
+                  <div class="space-y-3">
                     <div class="grid grid-cols-2 gap-4">
                       <div>
                         <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">Position</label>
@@ -850,7 +864,7 @@
                     v-html="getFormattedTimerText()">
                   </div>
 
-                  <button v-if="config.promoCard.buttonText"
+                  <button v-if="config.promoCard.showButton && config.promoCard.buttonText"
                     class="w-full py-2 px-4 rounded-lg text-sm font-semibold transition-transform active:scale-95"
                     :style="{ backgroundColor: config.promoCard.style.buttonColor, color: config.promoCard.style.buttonTextColor }">
                     {{ config.promoCard.buttonText }}
