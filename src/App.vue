@@ -1679,9 +1679,6 @@ function updateFieldColors() {
   if (style) {
     style.textColor = currentFieldTextColor.value
     style.background.startColor = currentFieldBgColor.value
-    if (style.background.type !== 'solid') {
-      style.background.endColor = currentFieldBgColor.value
-    }
     markChanged()
   }
 }
