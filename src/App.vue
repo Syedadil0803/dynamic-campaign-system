@@ -1045,6 +1045,8 @@ const syncPromoEditorsFromConfig = () => {
 
 async function applyPromoTemplate(template: PromoCard, templateName: string) {
   config.value.promoCard = JSON.parse(JSON.stringify(template))
+  // Ensure all text fields in the template have explicit font-size
+  normalizePromoCardFontSizes()
   await nextTick()
   syncPromoEditorsFromConfig()
   currentFieldFocus.value = 'title'
@@ -1095,6 +1097,16 @@ onMounted(async () => {
   // Initialize buttonFullWidth if not set
   if (config.value.promoCard.buttonFullWidth === undefined) {
     config.value.promoCard.buttonFullWidth = true
+  }
+
+  // Normalize all promo card text fields to have explicit font-size
+  normalizePromoCardFontSizes()
+
+  // Normalize announcement texts to have explicit font-size
+  if (config.value.announcementBar?.announcements) {
+    for (const ann of config.value.announcementBar.announcements) {
+      if (ann.text) ann.text = wrapBareTextWithFontSize(ann.text)
+    }
   }
 
   // Check for saved dark mode preference or system preference
@@ -1387,7 +1399,7 @@ function toggleRichText() {
 // Handle input from the contenteditable rich text editor
 function onRichTextInput(event: Event) {
   const target = event.target as HTMLDivElement
-  const html = target.innerHTML
+  const html = wrapBareTextWithFontSize(target.innerHTML)
 
   newAnnouncementText.value = html
 
@@ -1479,7 +1491,7 @@ function formatText(format: string) {
   }
 
   // Sync the updated HTML back to the data model
-  const updatedHtml = richEditor.innerHTML
+  const updatedHtml = wrapBareTextWithFontSize(richEditor.innerHTML)
   newAnnouncementText.value = updatedHtml
   if (selectedAnnouncementIndex.value !== null) {
     config.value.announcementBar.announcements[selectedAnnouncementIndex.value].text = updatedHtml
@@ -1622,9 +1634,69 @@ function migrateAnnouncements(config: any) {
   }
 }
 
+// Wraps any bare text nodes (not inside a font-size span) with the default 1rem font-size
+// This ensures ALL text in the stored HTML/JSON has explicit font-size
+function wrapBareTextWithFontSize(html: string): string {
+  // Treat empty, whitespace-only, or browser-inserted <br> as empty
+  if (!html || html.trim() === '' || /^(<br\s*\/?>)+$/i.test(html.trim())) return ''
+
+  const container = document.createElement('div')
+  container.innerHTML = html
+
+  function processNode(parent: HTMLElement) {
+    const children = Array.from(parent.childNodes)
+    for (const node of children) {
+      if (node.nodeType === Node.TEXT_NODE) {
+        const text = node.textContent || ''
+        // Skip empty or zero-width-space-only text nodes
+        if (!text || text.replace(/\u200B/g, '').trim() === '') continue
+
+        // Check if any ancestor already has font-size
+        let hasFontSize = false
+        let ancestor = node.parentElement
+        while (ancestor && ancestor !== container) {
+          if (ancestor.style && ancestor.style.fontSize) {
+            hasFontSize = true
+            break
+          }
+          ancestor = ancestor.parentElement
+        }
+
+        if (!hasFontSize) {
+          // Wrap this bare text node in a span with default font-size
+          const span = document.createElement('span')
+          span.style.fontSize = '1rem'
+          span.textContent = text
+          parent.replaceChild(span, node)
+        }
+      } else if (node.nodeType === Node.ELEMENT_NODE) {
+        const el = node as HTMLElement
+        // Only recurse into elements that DON'T already have font-size
+        if (!el.style.fontSize) {
+          processNode(el)
+        }
+      }
+    }
+  }
+
+  processNode(container)
+  return container.innerHTML
+}
+
+// Ensures all promo card text fields have explicit font-size in their HTML
+// This is the single root-level normalizer — called on load, template apply, etc.
+function normalizePromoCardFontSizes() {
+  const pc = config.value.promoCard
+  if (pc.title) pc.title = wrapBareTextWithFontSize(pc.title)
+  if (pc.subtitle) pc.subtitle = wrapBareTextWithFontSize(pc.subtitle)
+  if (pc.description) pc.description = wrapBareTextWithFontSize(pc.description)
+  if (pc.timerText) pc.timerText = wrapBareTextWithFontSize(pc.timerText)
+  if (pc.buttonText) pc.buttonText = wrapBareTextWithFontSize(pc.buttonText)
+}
+
 function onTimerTextInput(event: Event) {
   const target = event.target as HTMLDivElement
-  config.value.promoCard.timerText = target.innerHTML
+  config.value.promoCard.timerText = wrapBareTextWithFontSize(target.innerHTML)
   markChanged()
 }
 
@@ -1690,19 +1762,19 @@ function formatPromoText(format: string) {
   // Sync the updated HTML back to config based on which field is focused
   if (currentFieldFocus.value === 'title') {
     const editor = document.querySelector('#promo-title-editor') as HTMLDivElement
-    if (editor) config.value.promoCard.title = editor.innerHTML
+    if (editor) config.value.promoCard.title = wrapBareTextWithFontSize(editor.innerHTML)
   } else if (currentFieldFocus.value === 'subtitle') {
     const editor = document.querySelector('#promo-subtitle-editor') as HTMLDivElement
-    if (editor) config.value.promoCard.subtitle = editor.innerHTML
+    if (editor) config.value.promoCard.subtitle = wrapBareTextWithFontSize(editor.innerHTML)
   } else if (currentFieldFocus.value === 'description') {
     const editor = document.querySelector('#promo-description-editor') as HTMLDivElement
-    if (editor) config.value.promoCard.description = editor.innerHTML
+    if (editor) config.value.promoCard.description = wrapBareTextWithFontSize(editor.innerHTML)
   } else if (currentFieldFocus.value === 'timer') {
     const editor = document.querySelector('#timer-richtext-editor') as HTMLDivElement
-    if (editor) config.value.promoCard.timerText = editor.innerHTML
+    if (editor) config.value.promoCard.timerText = wrapBareTextWithFontSize(editor.innerHTML)
   } else if (currentFieldFocus.value === 'button') {
     const editor = document.querySelector('#promo-button-editor') as HTMLDivElement
-    if (editor) config.value.promoCard.buttonText = editor.innerHTML
+    if (editor) config.value.promoCard.buttonText = wrapBareTextWithFontSize(editor.innerHTML)
   }
 
   markChanged()
@@ -1838,25 +1910,25 @@ function updateFieldGradient() {
 
 function onPromoTitleInput(event: Event) {
   const target = event.target as HTMLDivElement
-  config.value.promoCard.title = target.innerHTML
+  config.value.promoCard.title = wrapBareTextWithFontSize(target.innerHTML)
   markChanged()
 }
 
 function onPromoSubtitleInput(event: Event) {
   const target = event.target as HTMLDivElement
-  config.value.promoCard.subtitle = target.innerHTML
+  config.value.promoCard.subtitle = wrapBareTextWithFontSize(target.innerHTML)
   markChanged()
 }
 
 function onPromoDescriptionInput(event: Event) {
   const target = event.target as HTMLDivElement
-  config.value.promoCard.description = target.innerHTML
+  config.value.promoCard.description = wrapBareTextWithFontSize(target.innerHTML)
   markChanged()
 }
 
 function onPromoButtonInput(event: Event) {
   const target = event.target as HTMLDivElement
-  config.value.promoCard.buttonText = target.innerHTML
+  config.value.promoCard.buttonText = wrapBareTextWithFontSize(target.innerHTML)
   markChanged()
 }
 
