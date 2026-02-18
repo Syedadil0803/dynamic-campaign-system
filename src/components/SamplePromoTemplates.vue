@@ -54,11 +54,14 @@
             }"
             v-html="getTemplateTimerPreviewText(template.promoCard.timerText)">
           </div>
-          <button
-            class="w-full py-2 px-4 rounded-lg text-sm font-semibold"
-            :style="{ backgroundColor: template.promoCard.style.buttonColor, color: template.promoCard.style.buttonTextColor }">
-            {{ template.promoCard.buttonText }}
-          </button>
+          <div :class="template.promoCard.buttonFullWidth ? '' : 'flex justify-center'">
+            <button
+              :class="template.promoCard.buttonFullWidth ? 'w-full' : ''"
+              class="py-2 px-4 rounded-lg text-sm font-semibold"
+              :style="{ backgroundColor: template.promoCard.style.buttonColor, color: template.promoCard.style.buttonTextColor }">
+              {{ template.promoCard.buttonText }}
+            </button>
+          </div>
         </div>
       </div>
     </div>

@@ -19,6 +19,7 @@ export interface PromoCard {
   description: string;
   buttonText: string;
   buttonUrl: string;
+  buttonFullWidth?: boolean;
   startDate: string;
   endDate: string;
   showTimer: boolean;
@@ -99,6 +100,7 @@ export const defaultConfig: CampaignConfig = {
     description: '',
     buttonText: 'Shop Now',
     buttonUrl: '',
+    buttonFullWidth: true,
     startDate: '',
     endDate: '',
     showTimer: false,

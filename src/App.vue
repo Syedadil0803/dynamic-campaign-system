@@ -724,6 +724,20 @@
                   </div>
                 </div>
 
+                <!-- Button Width Toggle -->
+                <div v-if="config.promoCard.showButton" class="flex items-center justify-between">
+                  <div>
+                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Full Width Button</label>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Dynamic width adapts to text length</p>
+                  </div>
+                  <button @click="config.promoCard.buttonFullWidth = !config.promoCard.buttonFullWidth; markChanged()"
+                    :class="config.promoCard.buttonFullWidth ? 'bg-indigo-600' : 'bg-gray-200'"
+                    class="relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    <span :class="config.promoCard.buttonFullWidth ? 'translate-x-5' : 'translate-x-0'"
+                      class="pointer-events-none relative inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200"></span>
+                  </button>
+                </div>
+
                 <div v-if="config.promoCard.showButton" class="grid grid-cols-2 gap-3">
                   <div>
                     <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">Button Bg Color</label>
@@ -893,11 +907,15 @@
                         }" v-html="getFormattedTimerText()">
                       </div>
 
-                      <button v-if="config.promoCard.showButton && config.promoCard.buttonText"
-                        class="w-full py-2 px-4 rounded-lg text-sm font-semibold transition-transform active:scale-95"
-                        :style="{ backgroundColor: config.promoCard.style.buttonColor, color: config.promoCard.style.buttonTextColor }">
-                        {{ config.promoCard.buttonText }}
-                      </button>
+                      <div v-if="config.promoCard.showButton && config.promoCard.buttonText"
+                        :class="config.promoCard.buttonFullWidth ? '' : 'flex justify-center'">
+                        <button
+                          :class="config.promoCard.buttonFullWidth ? 'w-full' : ''"
+                          class="py-2 px-4 rounded-lg text-sm font-semibold transition-transform active:scale-95"
+                          :style="{ backgroundColor: config.promoCard.style.buttonColor, color: config.promoCard.style.buttonTextColor }">
+                          {{ config.promoCard.buttonText }}
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
