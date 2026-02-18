@@ -202,13 +202,9 @@
                         <a v-if="announcement.url" :href="announcement.url" target="_blank"
                           class="underline hover:no-underline transition-all"
                           :style="{ color: config.announcementBar.style.textColor }">
-                          <span v-if="!announcement.richText">{{ announcement.text }}</span>
-                          <span v-else v-html="announcement.text"></span>
+                          <span v-html="announcement.text"></span>
                         </a>
-                        <span v-else>
-                          <span v-if="!announcement.richText">{{ announcement.text }}</span>
-                          <span v-else v-html="announcement.text"></span>
-                        </span>
+                        <span v-else v-html="announcement.text"></span>
                       </span>
                     </div>
                   </div>
@@ -444,10 +440,6 @@
                         class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200 group relative"
                         :class="{ 'ring-1 ring-indigo-300/60 dark:ring-indigo-400/40': selectedAnnouncementIndex === index }">
                         <span @click="selectAnnouncement(index)" class="cursor-pointer flex-1"
-                          v-if="!announcement.richText">
-                          {{ announcement.text }}
-                        </span>
-                        <span @click="selectAnnouncement(index)" class="cursor-pointer flex-1" v-else
                           v-html="announcement.text"></span>
                         <a v-if="announcement.url" :href="announcement.url" target="_blank"
                           class="ml-1 text-xs underline hover:no-underline" @click.stop>
@@ -1544,78 +1536,69 @@ function applyFontSize(size: string) {
     return
   }
 
-  // SELECTION MODE: Text is selected — wrap it in a styled span
-  const selectedText = range.toString()
-  if (!selectedText) return
+  // SELECTION MODE: Text is selected — use insertHTML for atomic undo + proper spacing
 
-  // Check if selection contains bold or italic by examining the range
-  const fragment = range.cloneContents()
-  const tempDiv = document.createElement('div')
-  tempDiv.appendChild(fragment)
-
-  // Check for bold/italic in the cloned content
-  const hasBold = !!tempDiv.querySelector('b, strong')
-  const hasItalic = !!tempDiv.querySelector('i, em')
-
-  // Also check if the selection is inside bold/italic elements
-  let node = range.commonAncestorContainer
-  if (node.nodeType === Node.TEXT_NODE) {
-    node = node.parentElement!
+  // CHECK: Can we reuse an existing font-size span? (prevents nesting on re-size)
+  let existingFontSpan: HTMLElement | null = null
+  let walkUp: Node | null = range.commonAncestorContainer
+  if (walkUp.nodeType === Node.TEXT_NODE) walkUp = walkUp.parentElement
+  while (walkUp && walkUp instanceof HTMLElement && walkUp.contentEditable !== 'true') {
+    if (walkUp.style.fontSize) {
+      if (walkUp.textContent === range.toString()) {
+        existingFontSpan = walkUp
+      }
+      break
+    }
+    walkUp = walkUp.parentElement
   }
 
-  let isBold = hasBold
-  let isItalic = hasItalic
+  // Unique marker to find the inserted span after insertHTML
+  const markerId = `fs-${Date.now()}`
 
-  // Walk up the tree to check parent elements
-  let current = node as HTMLElement
-  while (current && current.contentEditable !== 'true') {
-    if (current.tagName === 'B' || current.tagName === 'STRONG') {
-      isBold = true
-    }
-    if (current.tagName === 'I' || current.tagName === 'EM') {
-      isItalic = true
-    }
-    current = current.parentElement!
-  }
-
-  // Delete the selection
-  document.execCommand('delete', false)
-
-  // Create the new span with font-size
-  const newSpan = document.createElement('span')
-  newSpan.style.fontSize = size
-
-  // Build the content with preserved formatting
-  let content: Node
-  if (isBold && isItalic) {
-    const bold = document.createElement('b')
-    const italic = document.createElement('i')
-    italic.textContent = selectedText
-    bold.appendChild(italic)
-    content = bold
-  } else if (isBold) {
-    const bold = document.createElement('b')
-    bold.textContent = selectedText
-    content = bold
-  } else if (isItalic) {
-    const italic = document.createElement('i')
-    italic.textContent = selectedText
-    content = italic
+  if (existingFontSpan) {
+    // Reuse: select the entire span node, replace via insertHTML (proper undo)
+    const innerHtml = existingFontSpan.innerHTML
+    const spanRange = document.createRange()
+    spanRange.selectNode(existingFontSpan)
+    selection.removeAllRanges()
+    selection.addRange(spanRange)
+    document.execCommand('insertHTML', false,
+      `<span style="font-size: ${size}" data-fs-marker="${markerId}">${innerHtml}</span>`)
   } else {
-    content = document.createTextNode(selectedText)
+    // New: clone the selection's HTML (preserves spaces, bold, italic, etc.)
+    const fragment = range.cloneContents()
+    const tempDiv = document.createElement('div')
+    tempDiv.appendChild(fragment)
+
+    // Unwrap any existing font-size spans inside the selection to prevent nesting
+    const innerFontSpans = tempDiv.querySelectorAll('span[style]')
+    for (const fs of innerFontSpans) {
+      if (fs instanceof HTMLElement && fs.style.fontSize) {
+        const parent = fs.parentElement
+        if (parent) {
+          while (fs.firstChild) {
+            parent.insertBefore(fs.firstChild, fs)
+          }
+          parent.removeChild(fs)
+        }
+      }
+    }
+
+    const selectedHtml = tempDiv.innerHTML
+    // insertHTML replaces the selection in one atomic undo step
+    document.execCommand('insertHTML', false,
+      `<span style="font-size: ${size}" data-fs-marker="${markerId}">${selectedHtml}</span>`)
   }
 
-  newSpan.appendChild(content)
-
-  // Insert the new span
-  const newRange = selection.getRangeAt(0)
-  newRange.insertNode(newSpan)
-
-  // Move cursor after the span
-  newRange.setStartAfter(newSpan)
-  newRange.setEndAfter(newSpan)
-  selection.removeAllRanges()
-  selection.addRange(newRange)
+  // Find the inserted span via marker and re-select its contents for toolbar detection
+  const insertedSpan = document.querySelector(`[data-fs-marker="${markerId}"]`) as HTMLElement
+  if (insertedSpan) {
+    insertedSpan.removeAttribute('data-fs-marker')
+    const selectRange = document.createRange()
+    selectRange.selectNodeContents(insertedSpan)
+    selection.removeAllRanges()
+    selection.addRange(selectRange)
+  }
 }
 
 function migrateAnnouncements(config: any) {
@@ -1634,8 +1617,11 @@ function migrateAnnouncements(config: any) {
   }
 }
 
-// Wraps any bare text nodes (not inside a font-size span) with the default 1rem font-size
-// This ensures ALL text in the stored HTML/JSON has explicit font-size
+// Comprehensive HTML normalizer for font-size consistency.
+// Runs 3 passes to guarantee clean, flat, explicit font-size in stored HTML:
+//   1. Wrap bare text nodes in default 1rem spans
+//   2. Flatten nested font-size spans (inner wins)
+//   3. Remove empty/orphaned font-size spans
 function wrapBareTextWithFontSize(html: string): string {
   // Treat empty, whitespace-only, or browser-inserted <br> as empty
   if (!html || html.trim() === '' || /^(<br\s*\/?>)+$/i.test(html.trim())) return ''
@@ -1643,15 +1629,14 @@ function wrapBareTextWithFontSize(html: string): string {
   const container = document.createElement('div')
   container.innerHTML = html
 
-  function processNode(parent: HTMLElement) {
+  // === PASS 1: Wrap bare text nodes that aren't inside a font-size span ===
+  function wrapBareText(parent: HTMLElement) {
     const children = Array.from(parent.childNodes)
     for (const node of children) {
       if (node.nodeType === Node.TEXT_NODE) {
         const text = node.textContent || ''
-        // Skip empty or zero-width-space-only text nodes
         if (!text || text.replace(/\u200B/g, '').trim() === '') continue
 
-        // Check if any ancestor already has font-size
         let hasFontSize = false
         let ancestor = node.parentElement
         while (ancestor && ancestor !== container) {
@@ -1663,7 +1648,6 @@ function wrapBareTextWithFontSize(html: string): string {
         }
 
         if (!hasFontSize) {
-          // Wrap this bare text node in a span with default font-size
           const span = document.createElement('span')
           span.style.fontSize = '1rem'
           span.textContent = text
@@ -1671,15 +1655,94 @@ function wrapBareTextWithFontSize(html: string): string {
         }
       } else if (node.nodeType === Node.ELEMENT_NODE) {
         const el = node as HTMLElement
-        // Only recurse into elements that DON'T already have font-size
         if (!el.style.fontSize) {
-          processNode(el)
+          wrapBareText(el)
         }
       }
     }
   }
 
-  processNode(container)
+  // === PASS 2: Flatten nested font-size spans ===
+  // If a font-size span's only meaningful child is another font-size span,
+  // the outer span is redundant (inner font-size wins per CSS cascade).
+  // Example: <span style="font-size:X"><span style="font-size:Y">text</span></span>
+  //       → <span style="font-size:Y">text</span>
+  function flattenNestedFontSizes(parent: HTMLElement) {
+    let changed = true
+    while (changed) {
+      changed = false
+      const spans = parent.querySelectorAll('span[style]')
+      for (const span of spans) {
+        if (!(span instanceof HTMLElement) || !span.style.fontSize) continue
+
+        // Get meaningful children (skip empty text nodes / zero-width spaces)
+        const meaningfulChildren = Array.from(span.childNodes).filter(n => {
+          if (n.nodeType === Node.TEXT_NODE) {
+            return (n.textContent || '').replace(/\u200B/g, '').trim() !== ''
+          }
+          return true
+        })
+
+        // Case: outer font-size span wraps ONLY one inner font-size span
+        if (meaningfulChildren.length === 1 &&
+          meaningfulChildren[0] instanceof HTMLElement &&
+          meaningfulChildren[0].style.fontSize) {
+          // Replace outer with inner
+          span.parentElement?.replaceChild(meaningfulChildren[0], span)
+          changed = true
+          break // Restart since DOM changed
+        }
+
+        // Case: outer font-size span wraps ONLY a <b>/<i>/<strong>/<em> which contains a font-size span
+        if (meaningfulChildren.length === 1 &&
+          meaningfulChildren[0] instanceof HTMLElement &&
+          !meaningfulChildren[0].style.fontSize &&
+          ['B', 'I', 'STRONG', 'EM'].includes(meaningfulChildren[0].tagName)) {
+          const formatEl = meaningfulChildren[0] as HTMLElement
+          const innerMeaningful = Array.from(formatEl.childNodes).filter(n => {
+            if (n.nodeType === Node.TEXT_NODE) {
+              return (n.textContent || '').replace(/\u200B/g, '').trim() !== ''
+            }
+            return true
+          })
+          if (innerMeaningful.length === 1 &&
+            innerMeaningful[0] instanceof HTMLElement &&
+            innerMeaningful[0].style.fontSize) {
+            // <span font-size:X><b><span font-size:Y>text</span></b></span>
+            // → <span font-size:Y><b>text</b></span>
+            const innerSpan = innerMeaningful[0] as HTMLElement
+            // Move the formatting tag inside the inner span
+            const newFormatEl = document.createElement(formatEl.tagName)
+            while (innerSpan.firstChild) {
+              newFormatEl.appendChild(innerSpan.firstChild)
+            }
+            innerSpan.appendChild(newFormatEl)
+            // Replace outer span with inner span
+            span.parentElement?.replaceChild(innerSpan, span)
+            changed = true
+            break
+          }
+        }
+      }
+    }
+  }
+
+  // === PASS 3: Remove empty font-size spans ===
+  function removeEmptyFontSpans(parent: HTMLElement) {
+    const spans = parent.querySelectorAll('span[style]')
+    for (const span of spans) {
+      if (!(span instanceof HTMLElement) || !span.style.fontSize) continue
+      const text = span.textContent || ''
+      if (text.replace(/\u200B/g, '').trim() === '') {
+        span.parentElement?.removeChild(span)
+      }
+    }
+  }
+
+  wrapBareText(container)
+  flattenNestedFontSizes(container)
+  removeEmptyFontSpans(container)
+
   return container.innerHTML
 }
 
@@ -1820,14 +1883,10 @@ function syncToolbarWithField() {
     currentFieldBgMidpoint.value = style.background.midpoint ?? 50
   }
 
-  // Set default size to MD when focusing a field;
-  // updatePromoFormats() (called on mouseup/keyup) will refine if explicit font-size is found
-  promoFormats.value.size = 'md'
-  promoFormats.value.bold = false
-  promoFormats.value.italic = false
-
-  // Auto-apply default font-size at caret so all typed text is explicitly stored in JSON
+  // Detect actual formatting (bold/italic/size) at cursor position after DOM is ready.
+  // Don't set synchronous defaults to avoid a visual "flash" (e.g., MD → XL jump).
   nextTick(() => {
+    updatePromoFormats()
     ensureDefaultFontSize()
   })
 }
