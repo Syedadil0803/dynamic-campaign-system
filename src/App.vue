@@ -262,6 +262,9 @@
                         <button @mousedown.prevent="formatText('size-sm')"
                           :class="activeFormats.size === 'sm' ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
                           class="px-2 py-1 text-xs border rounded transition-colors">SM</button>
+                        <button @mousedown.prevent="formatText('size-md')"
+                          :class="activeFormats.size === 'md' ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
+                          class="px-2 py-1 text-xs border rounded transition-colors">MD</button>
                         <button @mousedown.prevent="formatText('size-lg')"
                           :class="activeFormats.size === 'lg' ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
                           class="px-2 py-1 text-xs border rounded transition-colors">LG</button>
@@ -273,7 +276,7 @@
                           class="px-2 py-1 text-xs border rounded transition-colors">XXL</button>
 
                         <div class="ml-auto text-[10px] text-gray-400 hidden sm:block">
-                          Highlight to format
+                          Click to toggle
                         </div>
                       </div>
                     </div>
@@ -287,7 +290,7 @@
                       <!-- Rich text contenteditable div (when rich text is ON for selected announcement) -->
                       <div v-else id="announcement-richtext-editor" contenteditable="true" @input="onRichTextInput"
                         @mouseup="updateActiveFormats" @keyup="updateActiveFormats"
-                        @keyup.enter.prevent="addAnnouncement"
+                        @focus="nextTick(() => ensureDefaultFontSize())" @keyup.enter.prevent="addAnnouncement"
                         class="flex-1 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md p-3 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400 min-h-[56px] outline-none overflow-auto"
                         :data-placeholder="'Type announcement text...'"></div>
                       <button @click="addAnnouncement" :disabled="!newAnnouncementText?.trim()"
@@ -552,6 +555,9 @@
                         <button @mousedown.prevent="formatPromoText('size-sm')"
                           :class="promoFormats.size === 'sm' ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
                           class="px-2.5 py-1.5 text-xs border rounded transition-colors">SM</button>
+                        <button @mousedown.prevent="formatPromoText('size-md')"
+                          :class="promoFormats.size === 'md' ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
+                          class="px-2.5 py-1.5 text-xs border rounded transition-colors">MD</button>
                         <button @mousedown.prevent="formatPromoText('size-lg')"
                           :class="promoFormats.size === 'lg' ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
                           class="px-2.5 py-1.5 text-xs border rounded transition-colors">LG</button>
@@ -587,10 +593,11 @@
                         <!-- Button Width Toggle (only for button field) -->
                         <template v-if="currentFieldFocus === 'button'">
                           <div class="border-l border-gray-300 h-5 mx-0.5"></div>
-                          <button @click="config.promoCard.buttonFullWidth = !config.promoCard.buttonFullWidth; markChanged()" @mousedown.prevent
+                          <button
+                            @click="config.promoCard.buttonFullWidth = !config.promoCard.buttonFullWidth; markChanged()"
+                            @mousedown.prevent
                             :class="config.promoCard.buttonFullWidth ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
-                            class="px-2.5 py-1.5 text-xs border rounded transition-colors"
-                            title="Toggle Full Width">
+                            class="px-2.5 py-1.5 text-xs border rounded transition-colors" title="Toggle Full Width">
                             {{ config.promoCard.buttonFullWidth ? 'Full' : 'Auto' }}
                           </button>
                         </template>
@@ -706,7 +713,7 @@
                     class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md p-2 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 min-h-[48px] outline-none break-words overflow-wrap-anywhere"
                     :data-placeholder="'Ends in hh mmm sss'"></div>
                   <p class="text-xs text-gray-500 mt-1 dark:text-gray-400">Use h, mm, ss or hh, m, s placeholders.
-                    Select to format.</p>
+                    Click to format.</p>
                 </div>
 
                 <!-- Button Toggle -->
@@ -854,7 +861,7 @@
                       </button>
 
                       <!-- Title -->
-                      <h3 class="text-lg font-bold mb-1 px-2 py-1 rounded break-words" :style="{
+                      <h3 class="text-base font-bold mb-1 px-2 py-1 rounded break-words" :style="{
                         background: getBackgroundStyle(config.promoCard.style.titleStyle.background),
                         color: config.promoCard.style.titleStyle.textColor,
                         textAlign: config.promoCard.style.titleStyle.textAlign || 'center'
@@ -863,13 +870,13 @@
 
                       <!-- Subtitle -->
                       <h4 v-if="config.promoCard.subtitle"
-                        class="text-sm font-medium mb-2 px-2 py-1 rounded break-words" :style="{
+                        class="text-base font-medium mb-2 px-2 py-1 rounded break-words" :style="{
                           background: getBackgroundStyle(config.promoCard.style.subheadingStyle.background),
                           color: config.promoCard.style.subheadingStyle.textColor,
                           textAlign: config.promoCard.style.subheadingStyle.textAlign || 'center'
                         }" v-html="config.promoCard.subtitle">
                       </h4>
-                      <h4 v-else class="text-sm font-medium mb-2 px-2 py-1 rounded break-words" :style="{
+                      <h4 v-else class="text-base font-medium mb-2 px-2 py-1 rounded break-words" :style="{
                         background: getBackgroundStyle(config.promoCard.style.subheadingStyle.background),
                         color: config.promoCard.style.subheadingStyle.textColor,
                         textAlign: config.promoCard.style.subheadingStyle.textAlign || 'center'
@@ -878,7 +885,7 @@
                       </h4>
 
                       <!-- Description -->
-                      <p class="text-sm opacity-90 mb-2 px-2 py-1 rounded break-words" :style="{
+                      <p class="text-base opacity-90 mb-2 px-2 py-1 rounded break-words" :style="{
                         background: getBackgroundStyle(config.promoCard.style.descriptionStyle.background),
                         color: config.promoCard.style.descriptionStyle.textColor,
                         textAlign: config.promoCard.style.descriptionStyle.textAlign || 'left'
@@ -887,7 +894,7 @@
 
                       <!-- Timer Display -->
                       <div v-if="config.promoCard.showTimer && (config.promoCard.startDate || config.promoCard.endDate)"
-                        class="text-xs mb-4 px-2 py-1 rounded break-words" :style="{
+                        class="text-base mb-4 px-2 py-1 rounded break-words" :style="{
                           background: getBackgroundStyle(config.promoCard.style.dateStyle.background),
                           color: config.promoCard.style.dateStyle.textColor,
                           textAlign: config.promoCard.style.dateStyle.textAlign || 'center'
@@ -896,14 +903,12 @@
 
                       <div v-if="config.promoCard.showButton && config.promoCard.buttonText"
                         :class="config.promoCard.buttonFullWidth ? '' : 'flex justify-center'">
-                        <button
-                          :class="config.promoCard.buttonFullWidth ? 'w-full' : ''"
-                          class="py-2 px-4 rounded-lg text-sm font-semibold transition-transform active:scale-95"
-                          :style="{ 
+                        <button :class="config.promoCard.buttonFullWidth ? 'w-full' : ''"
+                          class="py-2 px-4 rounded-lg text-base font-semibold transition-transform active:scale-95"
+                          :style="{
                             background: getBackgroundStyle(config.promoCard.style.buttonStyle.background),
                             color: config.promoCard.style.buttonStyle.textColor
-                          }"
-                          v-html="config.promoCard.buttonText">
+                          }" v-html="config.promoCard.buttonText">
                         </button>
                       </div>
                     </div>
@@ -1279,7 +1284,7 @@ function selectAnnouncement(index: number) {
   newAnnouncementText.value = config.value.announcementBar.announcements[index].text
 
   // Always reset active formats first, then re-compute for the NEW announcement
-  activeFormats.value = { bold: false, italic: false, size: '' }
+  activeFormats.value = { bold: false, italic: false, size: 'md' }
   if (selectedAnnouncementRichText.value) {
     updateActiveFormats()
   }
@@ -1341,7 +1346,7 @@ function toggleRichText() {
         }
       })
     } else {
-      activeFormats.value = { bold: false, italic: false, size: '' }
+      activeFormats.value = { bold: false, italic: false, size: 'md' }
       const div = document.createElement('div')
       div.innerHTML = newAnnouncementText.value
       newAnnouncementText.value = div.textContent || div.innerText || newAnnouncementText.value
@@ -1365,7 +1370,7 @@ function toggleRichText() {
       })
     } else {
       // Switching off rich text - strip HTML tags and show plain text
-      activeFormats.value = { bold: false, italic: false, size: '' }
+      activeFormats.value = { bold: false, italic: false, size: 'md' }
 
       // Strip HTML from the announcement text
       const div = document.createElement('div')
@@ -1409,7 +1414,8 @@ function updateActiveFormats() {
   activeFormats.value.italic = document.queryCommandState('italic')
 
   // Detect font-size by walking up the DOM from the selection's anchor node
-  activeFormats.value.size = ''
+  // Default to 'md' (1rem) when no explicit font-size is set
+  activeFormats.value.size = 'md'
   const selection = window.getSelection()
   if (selection && selection.anchorNode) {
     let node: Node | null = selection.anchorNode
@@ -1420,6 +1426,7 @@ function updateActiveFormats() {
         if (fontSize) {
           if (fontSize === '0.75rem') activeFormats.value.size = 'xs'
           else if (fontSize === '0.875rem') activeFormats.value.size = 'sm'
+          else if (fontSize === '1rem') activeFormats.value.size = 'md'
           else if (fontSize === '1.125rem') activeFormats.value.size = 'lg'
           else if (fontSize === '1.25rem') activeFormats.value.size = 'xl'
           else if (fontSize === '1.5rem') activeFormats.value.size = 'xxl'
@@ -1435,20 +1442,15 @@ function formatText(format: string) {
   const richEditor = document.querySelector('#announcement-richtext-editor') as HTMLDivElement
   if (!richEditor) return
 
-  // Check if text is actually selected (don't apply to everything)
   const selection = window.getSelection()
-  if (!selection || selection.rangeCount === 0 || selection.isCollapsed) {
-    // No text is highlighted - show a brief visual hint
-    return
-  }
+  if (!selection || selection.rangeCount === 0) return
 
-  // Make sure the selection is within our editor
+  // Make sure the cursor/selection is within our editor
   const anchorNode = selection.anchorNode
-  if (!anchorNode || !richEditor.contains(anchorNode)) {
-    return
-  }
+  if (!anchorNode || !richEditor.contains(anchorNode)) return
 
-  // Use execCommand for bold, italic, underline (browser handles combining natively)
+  // Bold/italic: execCommand works both with selection and at caret (toggles for future typing)
+  // Font-size: applyFontSize handles both selected text and caret positioning
   switch (format) {
     case 'bold':
       document.execCommand('bold', false)
@@ -1461,6 +1463,9 @@ function formatText(format: string) {
       break
     case 'size-sm':
       applyFontSize('0.875rem')
+      break
+    case 'size-md':
+      applyFontSize('1rem')
       break
     case 'size-lg':
       applyFontSize('1.125rem')
@@ -1486,13 +1491,48 @@ function formatText(format: string) {
 }
 
 // Apply font size - preserves bold/italic, prevents nesting
+// Works both with selected text AND at caret (inserts a styled span for future typing)
 function applyFontSize(size: string) {
   const selection = window.getSelection()
   if (!selection || selection.rangeCount === 0) return
 
   const range = selection.getRangeAt(0)
-  if (range.collapsed) return
 
+  // CARET MODE: No text selected — insert a styled span so next typed text inherits the size
+  if (range.collapsed) {
+    // Check if we're already inside a span with font-size — if so, just update it
+    let existingSpan: HTMLElement | null = null
+    let walkNode: Node | null = range.startContainer
+    while (walkNode && walkNode !== document.body) {
+      if (walkNode instanceof HTMLElement && walkNode.style.fontSize && walkNode.contentEditable !== 'true') {
+        existingSpan = walkNode
+        break
+      }
+      walkNode = walkNode.parentNode
+    }
+
+    if (existingSpan && existingSpan.textContent === '\u200B') {
+      // We're inside an empty placeholder span — just update its font-size
+      existingSpan.style.fontSize = size
+    } else {
+      // Create a new span with font-size and a zero-width space, place cursor inside
+      const newSpan = document.createElement('span')
+      newSpan.style.fontSize = size
+      const zwsp = document.createTextNode('\u200B')
+      newSpan.appendChild(zwsp)
+      range.insertNode(newSpan)
+
+      // Place cursor after the zero-width space but INSIDE the span
+      const newRange = document.createRange()
+      newRange.setStart(zwsp, 1)
+      newRange.setEnd(zwsp, 1)
+      selection.removeAllRanges()
+      selection.addRange(newRange)
+    }
+    return
+  }
+
+  // SELECTION MODE: Text is selected — wrap it in a styled span
   const selectedText = range.toString()
   if (!selectedText) return
 
@@ -1591,7 +1631,8 @@ function onTimerTextInput(event: Event) {
 function updatePromoFormats() {
   promoFormats.value.bold = document.queryCommandState('bold')
   promoFormats.value.italic = document.queryCommandState('italic')
-  promoFormats.value.size = ''
+  // Default to 'md' (1rem) when no explicit font-size is set
+  promoFormats.value.size = 'md'
   const selection = window.getSelection()
   if (selection && selection.anchorNode) {
     let node: Node | null = selection.anchorNode
@@ -1601,6 +1642,7 @@ function updatePromoFormats() {
         if (fontSize) {
           if (fontSize === '0.75rem') promoFormats.value.size = 'xs'
           else if (fontSize === '0.875rem') promoFormats.value.size = 'sm'
+          else if (fontSize === '1rem') promoFormats.value.size = 'md'
           else if (fontSize === '1.125rem') promoFormats.value.size = 'lg'
           else if (fontSize === '1.25rem') promoFormats.value.size = 'xl'
           else if (fontSize === '1.5rem') promoFormats.value.size = 'xxl'
@@ -1614,8 +1656,10 @@ function updatePromoFormats() {
 
 function formatPromoText(format: string) {
   const selection = window.getSelection()
-  if (!selection || selection.rangeCount === 0 || selection.isCollapsed) return
+  if (!selection || selection.rangeCount === 0) return
 
+  // Bold/italic: execCommand works both at caret (toggles for future typing) and with selection
+  // Font-size: applyFontSize handles both caret and selection modes
   switch (format) {
     case 'bold':
       document.execCommand('bold', false)
@@ -1628,6 +1672,9 @@ function formatPromoText(format: string) {
       break
     case 'size-sm':
       applyFontSize('0.875rem')
+      break
+    case 'size-md':
+      applyFontSize('1rem')
       break
     case 'size-lg':
       applyFontSize('1.125rem')
@@ -1700,6 +1747,36 @@ function syncToolbarWithField() {
     currentFieldBgDirection.value = style.background.direction || 'to right'
     currentFieldBgMidpoint.value = style.background.midpoint ?? 50
   }
+
+  // Set default size to MD when focusing a field;
+  // updatePromoFormats() (called on mouseup/keyup) will refine if explicit font-size is found
+  promoFormats.value.size = 'md'
+  promoFormats.value.bold = false
+  promoFormats.value.italic = false
+
+  // Auto-apply default font-size at caret so all typed text is explicitly stored in JSON
+  nextTick(() => {
+    ensureDefaultFontSize()
+  })
+}
+
+// Ensures cursor is inside a font-size span; if not, inserts one with default 1rem (MD)
+// This guarantees all text gets explicit font-size in the stored HTML/JSON
+function ensureDefaultFontSize() {
+  const selection = window.getSelection()
+  if (!selection || selection.rangeCount === 0) return
+
+  // Walk up from cursor to check if we're already inside a font-size span
+  let node: Node | null = selection.anchorNode
+  while (node && node !== document.body) {
+    if (node instanceof HTMLElement && node.style.fontSize && node.contentEditable !== 'true') {
+      return // Already inside a font-size span — no action needed
+    }
+    node = node.parentNode
+  }
+
+  // Not inside a font-size span — apply default 1rem at caret
+  applyFontSize('1rem')
 }
 
 function updateFieldColors() {
