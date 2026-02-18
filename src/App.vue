@@ -583,6 +583,17 @@
                         <button @click="setFieldAlignment('right')" @mousedown.prevent
                           class="px-2.5 py-1.5 text-xs border rounded transition-colors border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600"
                           title="Align Right">R</button>
+
+                        <!-- Button Width Toggle (only for button field) -->
+                        <template v-if="currentFieldFocus === 'button'">
+                          <div class="border-l border-gray-300 h-5 mx-0.5"></div>
+                          <button @click="config.promoCard.buttonFullWidth = !config.promoCard.buttonFullWidth; markChanged()" @mousedown.prevent
+                            :class="config.promoCard.buttonFullWidth ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
+                            class="px-2.5 py-1.5 text-xs border rounded transition-colors"
+                            title="Toggle Full Width">
+                            {{ config.promoCard.buttonFullWidth ? 'Full' : 'Auto' }}
+                          </button>
+                        </template>
                       </div>
                     </div>
 
@@ -714,43 +725,19 @@
                 <div v-if="config.promoCard.showButton" class="grid grid-cols-2 gap-3">
                   <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Button Text</label>
-                    <input type="text" v-model="config.promoCard.buttonText" @input="markChanged"
-                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100" />
+                    <div id="promo-button-editor" contenteditable="true" @input="onPromoButtonInput"
+                      @mouseup="updatePromoFormats" @keyup="updatePromoFormats"
+                      @focus="currentFieldFocus = 'button'; syncToolbarWithField()"
+                      class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md p-2 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 min-h-[38px] outline-none break-words overflow-wrap-anywhere"
+                      :data-placeholder="'Shop Now'"></div>
                   </div>
+
                   <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Button URL</label>
                     <input type="text" v-model="config.promoCard.buttonUrl" @input="markChanged"
                       class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100" />
                   </div>
                 </div>
-
-                <!-- Button Width Toggle -->
-                <div v-if="config.promoCard.showButton" class="flex items-center justify-between">
-                  <div>
-                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Full Width Button</label>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">Dynamic width adapts to text length</p>
-                  </div>
-                  <button @click="config.promoCard.buttonFullWidth = !config.promoCard.buttonFullWidth; markChanged()"
-                    :class="config.promoCard.buttonFullWidth ? 'bg-indigo-600' : 'bg-gray-200'"
-                    class="relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                    <span :class="config.promoCard.buttonFullWidth ? 'translate-x-5' : 'translate-x-0'"
-                      class="pointer-events-none relative inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200"></span>
-                  </button>
-                </div>
-
-                <div v-if="config.promoCard.showButton" class="grid grid-cols-2 gap-3">
-                  <div>
-                    <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">Button Bg Color</label>
-                    <input type="color" v-model="config.promoCard.style.buttonColor" @input="markChanged"
-                      class="h-9 w-full rounded border border-gray-300 cursor-pointer dark:border-gray-600" />
-                  </div>
-                  <div>
-                    <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">Button Text Color</label>
-                    <input type="color" v-model="config.promoCard.style.buttonTextColor" @input="markChanged"
-                      class="h-9 w-full rounded border border-gray-300 cursor-pointer dark:border-gray-600" />
-                  </div>
-                </div>
-
               </div>
 
               <div class="space-y-4">
@@ -912,8 +899,11 @@
                         <button
                           :class="config.promoCard.buttonFullWidth ? 'w-full' : ''"
                           class="py-2 px-4 rounded-lg text-sm font-semibold transition-transform active:scale-95"
-                          :style="{ backgroundColor: config.promoCard.style.buttonColor, color: config.promoCard.style.buttonTextColor }">
-                          {{ config.promoCard.buttonText }}
+                          :style="{ 
+                            background: getBackgroundStyle(config.promoCard.style.buttonStyle.background),
+                            color: config.promoCard.style.buttonStyle.textColor
+                          }"
+                          v-html="config.promoCard.buttonText">
                         </button>
                       </div>
                     </div>
@@ -1014,7 +1004,7 @@ const promoFormats = ref<ActiveFormats>({
 })
 
 const currentFieldBgType = ref('solid')
-const currentFieldFocus = ref<'title' | 'subtitle' | 'description' | 'timer' | null>(null)
+const currentFieldFocus = ref<'title' | 'subtitle' | 'description' | 'timer' | 'button' | null>(null)
 const currentFieldTextColor = ref('#ffffff')
 const currentFieldBgColor = ref('#111827')
 const currentFieldBgEndColor = ref('#111827')
@@ -1040,6 +1030,11 @@ const syncPromoEditorsFromConfig = () => {
   const descriptionEditor = document.querySelector('#promo-description-editor') as HTMLDivElement
   if (descriptionEditor) {
     descriptionEditor.innerHTML = config.value.promoCard.description || ''
+  }
+
+  const buttonEditor = document.querySelector('#promo-button-editor') as HTMLDivElement
+  if (buttonEditor) {
+    buttonEditor.innerHTML = config.value.promoCard.buttonText || ''
   }
 }
 
@@ -1076,6 +1071,25 @@ onMounted(async () => {
   // Initialize timer text if not set
   if (!config.value.promoCard.timerText) {
     config.value.promoCard.timerText = 'Ends in <strong>hh</strong> mmm sss'
+  }
+
+  // Migrate buttonStyle if not present
+  if (!config.value.promoCard.style.buttonStyle) {
+    config.value.promoCard.style.buttonStyle = {
+      background: {
+        type: 'solid',
+        startColor: '#6366f1',
+        endColor: '#6366f1',
+        midpoint: 50,
+      },
+      textColor: '#ffffff',
+      textAlign: 'center',
+    }
+  }
+
+  // Initialize buttonFullWidth if not set
+  if (config.value.promoCard.buttonFullWidth === undefined) {
+    config.value.promoCard.buttonFullWidth = true
   }
 
   // Check for saved dark mode preference or system preference
@@ -1639,6 +1653,9 @@ function formatPromoText(format: string) {
   } else if (currentFieldFocus.value === 'timer') {
     const editor = document.querySelector('#timer-richtext-editor') as HTMLDivElement
     if (editor) config.value.promoCard.timerText = editor.innerHTML
+  } else if (currentFieldFocus.value === 'button') {
+    const editor = document.querySelector('#promo-button-editor') as HTMLDivElement
+    if (editor) config.value.promoCard.buttonText = editor.innerHTML
   }
 
   markChanged()
@@ -1652,7 +1669,8 @@ function setFieldAlignment(align: 'left' | 'center' | 'right') {
     title: config.value.promoCard.style.titleStyle,
     subtitle: config.value.promoCard.style.subheadingStyle,
     description: config.value.promoCard.style.descriptionStyle,
-    timer: config.value.promoCard.style.dateStyle
+    timer: config.value.promoCard.style.dateStyle,
+    button: config.value.promoCard.style.buttonStyle
   }
 
   const style = styleMap[currentFieldFocus.value]
@@ -1669,7 +1687,8 @@ function syncToolbarWithField() {
     title: config.value.promoCard.style.titleStyle,
     subtitle: config.value.promoCard.style.subheadingStyle,
     description: config.value.promoCard.style.descriptionStyle,
-    timer: config.value.promoCard.style.dateStyle
+    timer: config.value.promoCard.style.dateStyle,
+    button: config.value.promoCard.style.buttonStyle
   }
 
   const style = styleMap[currentFieldFocus.value]
@@ -1690,7 +1709,8 @@ function updateFieldColors() {
     title: config.value.promoCard.style.titleStyle,
     subtitle: config.value.promoCard.style.subheadingStyle,
     description: config.value.promoCard.style.descriptionStyle,
-    timer: config.value.promoCard.style.dateStyle
+    timer: config.value.promoCard.style.dateStyle,
+    button: config.value.promoCard.style.buttonStyle
   }
 
   const style = styleMap[currentFieldFocus.value]
@@ -1708,7 +1728,8 @@ function updateFieldBgType() {
     title: config.value.promoCard.style.titleStyle,
     subtitle: config.value.promoCard.style.subheadingStyle,
     description: config.value.promoCard.style.descriptionStyle,
-    timer: config.value.promoCard.style.dateStyle
+    timer: config.value.promoCard.style.dateStyle,
+    button: config.value.promoCard.style.buttonStyle
   }
 
   const style = styleMap[currentFieldFocus.value]
@@ -1725,7 +1746,8 @@ function updateFieldGradient() {
     title: config.value.promoCard.style.titleStyle,
     subtitle: config.value.promoCard.style.subheadingStyle,
     description: config.value.promoCard.style.descriptionStyle,
-    timer: config.value.promoCard.style.dateStyle
+    timer: config.value.promoCard.style.dateStyle,
+    button: config.value.promoCard.style.buttonStyle
   }
 
   const style = styleMap[currentFieldFocus.value]
@@ -1752,6 +1774,12 @@ function onPromoSubtitleInput(event: Event) {
 function onPromoDescriptionInput(event: Event) {
   const target = event.target as HTMLDivElement
   config.value.promoCard.description = target.innerHTML
+  markChanged()
+}
+
+function onPromoButtonInput(event: Event) {
+  const target = event.target as HTMLDivElement
+  config.value.promoCard.buttonText = target.innerHTML
   markChanged()
 }
 

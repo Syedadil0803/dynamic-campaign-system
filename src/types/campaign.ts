@@ -29,8 +29,6 @@ export interface PromoCard {
     position: 'bottom-right' | 'bottom-left' | 'top-right' | 'top-left';
     background: GradientStyle;
     textColor: string;
-    buttonColor: string;
-    buttonTextColor: string;
     titleStyle: {
       background: GradientStyle;
       textColor: string;
@@ -47,6 +45,11 @@ export interface PromoCard {
       textAlign?: 'left' | 'center' | 'right';
     };
     dateStyle: {
+      background: GradientStyle;
+      textColor: string;
+      textAlign?: 'left' | 'center' | 'right';
+    };
+    buttonStyle: {
       background: GradientStyle;
       textColor: string;
       textAlign?: 'left' | 'center' | 'right';
@@ -116,8 +119,6 @@ export const defaultConfig: CampaignConfig = {
         midpoint: 50,
       },
       textColor: '#111827',
-      buttonColor: '#6366f1',
-      buttonTextColor: '#ffffff',
       titleStyle: {
         background: {
           type: 'solid',
@@ -153,6 +154,16 @@ export const defaultConfig: CampaignConfig = {
           type: 'solid',
           startColor: '#6b7280',
           endColor: '#6b7280',
+          midpoint: 50,
+        },
+        textColor: '#ffffff',
+        textAlign: 'center',
+      },
+      buttonStyle: {
+        background: {
+          type: 'solid',
+          startColor: '#6366f1',
+          endColor: '#6366f1',
           midpoint: 50,
         },
         textColor: '#ffffff',

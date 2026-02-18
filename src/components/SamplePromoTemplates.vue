@@ -58,8 +58,11 @@
             <button
               :class="template.promoCard.buttonFullWidth ? 'w-full' : ''"
               class="py-2 px-4 rounded-lg text-sm font-semibold"
-              :style="{ backgroundColor: template.promoCard.style.buttonColor, color: template.promoCard.style.buttonTextColor }">
-              {{ template.promoCard.buttonText }}
+              :style="{ 
+                background: getBackgroundStyle(template.promoCard.style.buttonStyle.background),
+                color: template.promoCard.style.buttonStyle.textColor
+              }"
+              v-html="template.promoCard.buttonText">
             </button>
           </div>
         </div>
@@ -99,6 +102,7 @@ const samplePromoTemplates = computed<PromoSampleTemplate[]>(() => [
       description: 'Elevate your interiors with refined textures, durable weaves, and a professional finish built for everyday performance.',
       buttonText: 'View Collection',
       buttonUrl: '/collections/professional',
+      buttonFullWidth: false,
       startDate: getISODateWithOffset(0),
       endDate: getISODateWithOffset(12),
       showTimer: true,
@@ -108,8 +112,6 @@ const samplePromoTemplates = computed<PromoSampleTemplate[]>(() => [
         position: 'bottom-right',
         background: { type: 'linear', startColor: '#f8fafc', endColor: '#e2e8f0', direction: 'to bottom right', midpoint: 46 },
         textColor: '#0f172a',
-        buttonColor: '#1e293b',
-        buttonTextColor: '#f8fafc',
         titleStyle: {
           background: { type: 'linear', startColor: '#1e3a8a', endColor: '#334155', direction: 'to right', midpoint: 48 },
           textColor: '#ffffff',
@@ -130,6 +132,11 @@ const samplePromoTemplates = computed<PromoSampleTemplate[]>(() => [
           textColor: '#1e3a8a',
           textAlign: 'left',
         },
+        buttonStyle: {
+          background: { type: 'solid', startColor: '#1e293b', endColor: '#1e293b', midpoint: 50 },
+          textColor: '#f8fafc',
+          textAlign: 'center',
+        },
       },
     },
   },
@@ -143,6 +150,7 @@ const samplePromoTemplates = computed<PromoSampleTemplate[]>(() => [
       description: 'Give your room a full glow-up with premium carpets. Apply <strong>COZY35</strong> before this drop disappears.',
       buttonText: 'Reveal My Offer',
       buttonUrl: '/collections/carpets',
+      buttonFullWidth: true,
       startDate: getISODateWithOffset(0),
       endDate: getISODateWithOffset(7),
       showTimer: true,
@@ -152,8 +160,6 @@ const samplePromoTemplates = computed<PromoSampleTemplate[]>(() => [
         position: 'bottom-right',
         background: { type: 'linear', startColor: '#fff7ed', endColor: '#ffedd5', direction: 'to bottom right', midpoint: 45 },
         textColor: '#1f2937',
-        buttonColor: '#ea580c',
-        buttonTextColor: '#ffffff',
         titleStyle: {
           background: { type: 'linear', startColor: '#7c2d12', endColor: '#c2410c', direction: 'to right', midpoint: 55 },
           textColor: '#ffffff',
@@ -174,6 +180,11 @@ const samplePromoTemplates = computed<PromoSampleTemplate[]>(() => [
           textColor: '#7c2d12',
           textAlign: 'center',
         },
+        buttonStyle: {
+          background: { type: 'solid', startColor: '#ea580c', endColor: '#ea580c', midpoint: 50 },
+          textColor: '#ffffff',
+          textAlign: 'center',
+        },
       },
     },
   },
@@ -187,6 +198,7 @@ const samplePromoTemplates = computed<PromoSampleTemplate[]>(() => [
       description: 'Handcrafted statement pieces with deep texture and heritage finishes. Concierge pricing is now live.',
       buttonText: 'Enter Private Sale',
       buttonUrl: '/collections/luxury',
+      buttonFullWidth: false,
       startDate: getISODateWithOffset(0),
       endDate: getISODateWithOffset(3),
       showTimer: true,
@@ -196,8 +208,6 @@ const samplePromoTemplates = computed<PromoSampleTemplate[]>(() => [
         position: 'bottom-right',
         background: { type: 'linear', startColor: '#0f172a', endColor: '#111827', direction: 'to bottom right', midpoint: 50 },
         textColor: '#f9fafb',
-        buttonColor: '#d4af37',
-        buttonTextColor: '#111827',
         titleStyle: {
           background: { type: 'linear', startColor: '#d97706', endColor: '#facc15', direction: 'to right', midpoint: 60 },
           textColor: '#111827',
@@ -218,6 +228,11 @@ const samplePromoTemplates = computed<PromoSampleTemplate[]>(() => [
           textColor: '#1f2937',
           textAlign: 'center',
         },
+        buttonStyle: {
+          background: { type: 'solid', startColor: '#d4af37', endColor: '#d4af37', midpoint: 50 },
+          textColor: '#111827',
+          textAlign: 'center',
+        },
       },
     },
   },
@@ -231,6 +246,7 @@ const samplePromoTemplates = computed<PromoSampleTemplate[]>(() => [
       description: 'From pastel runners to floral accents, this edit instantly brightens every corner.',
       buttonText: 'Shop The Bloom Edit',
       buttonUrl: '/collections/spring',
+      buttonFullWidth: true,
       startDate: getISODateWithOffset(0),
       endDate: getISODateWithOffset(10),
       showTimer: true,
@@ -240,8 +256,6 @@ const samplePromoTemplates = computed<PromoSampleTemplate[]>(() => [
         position: 'bottom-right',
         background: { type: 'linear', startColor: '#fdf2f8', endColor: '#ecfeff', direction: 'to right', midpoint: 50 },
         textColor: '#1f2937',
-        buttonColor: '#db2777',
-        buttonTextColor: '#ffffff',
         titleStyle: {
           background: { type: 'linear', startColor: '#ec4899', endColor: '#14b8a6', direction: 'to right', midpoint: 50 },
           textColor: '#ffffff',
@@ -262,6 +276,11 @@ const samplePromoTemplates = computed<PromoSampleTemplate[]>(() => [
           textColor: '#0f766e',
           textAlign: 'center',
         },
+        buttonStyle: {
+          background: { type: 'solid', startColor: '#db2777', endColor: '#db2777', midpoint: 50 },
+          textColor: '#ffffff',
+          textAlign: 'center',
+        },
       },
     },
   },
@@ -275,6 +294,7 @@ const samplePromoTemplates = computed<PromoSampleTemplate[]>(() => [
       description: 'After-dark offer for modern homes. Neon accents + deep contrasts = maximum attention.',
       buttonText: 'Activate Flash Deal',
       buttonUrl: '/collections/flash-sale',
+      buttonFullWidth: false,
       startDate: getISODateWithOffset(0),
       endDate: getISODateWithOffset(2),
       showTimer: true,
@@ -284,8 +304,6 @@ const samplePromoTemplates = computed<PromoSampleTemplate[]>(() => [
         position: 'bottom-right',
         background: { type: 'linear', startColor: '#020617', endColor: '#111827', direction: 'to bottom right', midpoint: 55 },
         textColor: '#e5e7eb',
-        buttonColor: '#22d3ee',
-        buttonTextColor: '#082f49',
         titleStyle: {
           background: { type: 'linear', startColor: '#06b6d4', endColor: '#a78bfa', direction: 'to right', midpoint: 50 },
           textColor: '#ffffff',
@@ -306,6 +324,11 @@ const samplePromoTemplates = computed<PromoSampleTemplate[]>(() => [
           textColor: '#083344',
           textAlign: 'center',
         },
+        buttonStyle: {
+          background: { type: 'solid', startColor: '#22d3ee', endColor: '#22d3ee', midpoint: 50 },
+          textColor: '#082f49',
+          textAlign: 'center',
+        },
       },
     },
   },
@@ -319,6 +342,7 @@ const samplePromoTemplates = computed<PromoSampleTemplate[]>(() => [
       description: 'Create a warm sanctuary with earthy layers and plush comfort made for everyday living.',
       buttonText: 'Build My Cozy Space',
       buttonUrl: '/collections/cozy-home',
+      buttonFullWidth: true,
       startDate: getISODateWithOffset(0),
       endDate: getISODateWithOffset(14),
       showTimer: true,
@@ -328,8 +352,6 @@ const samplePromoTemplates = computed<PromoSampleTemplate[]>(() => [
         position: 'bottom-right',
         background: { type: 'linear', startColor: '#fffbeb', endColor: '#fef3c7', direction: 'to bottom right', midpoint: 42 },
         textColor: '#292524',
-        buttonColor: '#92400e',
-        buttonTextColor: '#ffffff',
         titleStyle: {
           background: { type: 'linear', startColor: '#b45309', endColor: '#78350f', direction: 'to right', midpoint: 52 },
           textColor: '#ffffff',
@@ -348,6 +370,11 @@ const samplePromoTemplates = computed<PromoSampleTemplate[]>(() => [
         dateStyle: {
           background: { type: 'radial', startColor: '#fed7aa', endColor: '#f59e0b', midpoint: 40 },
           textColor: '#7c2d12',
+          textAlign: 'center',
+        },
+        buttonStyle: {
+          background: { type: 'solid', startColor: '#92400e', endColor: '#92400e', midpoint: 50 },
+          textColor: '#ffffff',
           textAlign: 'center',
         },
       },
