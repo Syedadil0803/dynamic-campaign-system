@@ -861,7 +861,7 @@
                       </button>
 
                       <!-- Title -->
-                      <h3 class="text-base font-bold mb-1 px-2 py-1 rounded break-words" :style="{
+                      <h3 class="text-base font-normal mb-1 px-2 py-1 rounded break-words" :style="{
                         background: getBackgroundStyle(config.promoCard.style.titleStyle.background),
                         color: config.promoCard.style.titleStyle.textColor,
                         textAlign: config.promoCard.style.titleStyle.textAlign || 'center'
@@ -870,13 +870,13 @@
 
                       <!-- Subtitle -->
                       <h4 v-if="config.promoCard.subtitle"
-                        class="text-base font-medium mb-2 px-2 py-1 rounded break-words" :style="{
+                        class="text-base font-normal mb-2 px-2 py-1 rounded break-words" :style="{
                           background: getBackgroundStyle(config.promoCard.style.subheadingStyle.background),
                           color: config.promoCard.style.subheadingStyle.textColor,
                           textAlign: config.promoCard.style.subheadingStyle.textAlign || 'center'
                         }" v-html="config.promoCard.subtitle">
                       </h4>
-                      <h4 v-else class="text-base font-medium mb-2 px-2 py-1 rounded break-words" :style="{
+                      <h4 v-else class="text-base font-normal mb-2 px-2 py-1 rounded break-words" :style="{
                         background: getBackgroundStyle(config.promoCard.style.subheadingStyle.background),
                         color: config.promoCard.style.subheadingStyle.textColor,
                         textAlign: config.promoCard.style.subheadingStyle.textAlign || 'center'
@@ -885,7 +885,7 @@
                       </h4>
 
                       <!-- Description -->
-                      <p class="text-base opacity-90 mb-2 px-2 py-1 rounded break-words" :style="{
+                      <p class="text-base font-normal mb-2 px-2 py-1 rounded break-words" :style="{
                         background: getBackgroundStyle(config.promoCard.style.descriptionStyle.background),
                         color: config.promoCard.style.descriptionStyle.textColor,
                         textAlign: config.promoCard.style.descriptionStyle.textAlign || 'left'
