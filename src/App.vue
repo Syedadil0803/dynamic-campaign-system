@@ -99,14 +99,17 @@
               <p class="text-sm text-gray-500 mb-3 line-clamp-2 dark:text-gray-400">
                 <span v-if="config.announcementBar.announcements.length === 0">No announcements set</span>
                 <span v-else-if="config.announcementBar.announcements.length === 1">
-                  <span v-if="!config.announcementBar.announcements[0].richText">{{ config.announcementBar.announcements[0].text }}</span>
+                  <span v-if="!config.announcementBar.announcements[0].richText">{{
+                    config.announcementBar.announcements[0].text }}</span>
                   <span v-else v-html="config.announcementBar.announcements[0].text"></span>
                 </span>
                 <span v-else>
-                  <span v-if="!config.announcementBar.announcements[0].richText">{{ config.announcementBar.announcements[0].text }}</span>
+                  <span v-if="!config.announcementBar.announcements[0].richText">{{
+                    config.announcementBar.announcements[0].text }}</span>
                   <span v-else v-html="config.announcementBar.announcements[0].text"></span>
-                  • 
-                  <span v-if="!config.announcementBar.announcements[1].richText">{{ config.announcementBar.announcements[1].text }}</span>
+                  •
+                  <span v-if="!config.announcementBar.announcements[1].richText">{{
+                    config.announcementBar.announcements[1].text }}</span>
                   <span v-else v-html="config.announcementBar.announcements[1].text"></span>
                 </span>
               </p>
@@ -283,7 +286,8 @@
                         placeholder="Type announcement and press Enter..."></textarea>
                       <!-- Rich text contenteditable div (when rich text is ON for selected announcement) -->
                       <div v-else id="announcement-richtext-editor" contenteditable="true" @input="onRichTextInput"
-                        @mouseup="updateActiveFormats" @keyup="updateActiveFormats" @keyup.enter.prevent="addAnnouncement"
+                        @mouseup="updateActiveFormats" @keyup="updateActiveFormats"
+                        @keyup.enter.prevent="addAnnouncement"
                         class="flex-1 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md p-3 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400 min-h-[56px] outline-none overflow-auto"
                         :data-placeholder="'Type announcement text...'"></div>
                       <button @click="addAnnouncement" :disabled="!newAnnouncementText?.trim()"
@@ -295,110 +299,115 @@
 
                   <!-- Style Customization -->
                   <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300">Style
-                    Customization</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300">Style
+                      Customization</label>
 
-                  <!-- Background Type Selector -->
-                  <div class="grid grid-cols-2 gap-4">
-                    <!-- Background Type -->
-                    <div class="relative rounded-md shadow-sm">
-                      <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">Background Type</label>
-                      <select v-model="config.announcementBar.style.background.type" @change="markChanged"
-                        class="block w-full text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md p-2 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
-                        <option value="solid">Solid</option>
-                        <option value="linear">Linear</option>
-                        <option value="radial">Gradient</option>
-                      </select>
-                    </div>
-                    
-                    <!-- Text Color (Always Visible) -->
-                    <div class="relative rounded-md shadow-sm">
-                      <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">Text Color</label>
-                      <input type="color" v-model="config.announcementBar.style.textColor" @input="markChanged"
-                        class="h-10 w-full rounded border border-gray-300 cursor-pointer dark:border-gray-600" />
-                    </div>
-                  </div>
-                  
-                  <!-- Linear Gradient Controls (Full Width Below) -->
-                  <div v-if="config.announcementBar.style.background.type === 'linear'" class="relative rounded-md shadow-sm mt-4">
-                    <div class="grid grid-cols-3 gap-4">
-                      <div class="relative">
-                        <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">Start Color</label>
-                        <input type="color" v-model="config.announcementBar.style.background.startColor"
-                          @input="markChanged"
-                          class="h-10 w-full rounded border border-gray-300 cursor-pointer dark:border-gray-600" />
-                      </div>
-                      <div class="relative">
-                        <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">End Color</label>
-                        <input type="color" v-model="config.announcementBar.style.background.endColor"
-                          @input="markChanged"
-                          class="h-10 w-full rounded border border-gray-300 cursor-pointer dark:border-gray-600" />
-                      </div>
-                      <div class="relative">
-                        <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">Direction</label>
-                        <select v-model="config.announcementBar.style.background.direction" @change="markChanged"
+                    <!-- Background Type Selector -->
+                    <div class="grid grid-cols-2 gap-4">
+                      <!-- Background Type -->
+                      <div class="relative rounded-md shadow-sm">
+                        <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">Background Type</label>
+                        <select v-model="config.announcementBar.style.background.type" @change="markChanged"
                           class="block w-full text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md p-2 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
-                          <option value="to right">To Right →</option>
-                          <option value="to left">To Left ←</option>
-                          <option value="to bottom">To Bottom ↓</option>
-                          <option value="to top">To Top ↑</option>
-                          <option value="to bottom right">To Bottom Right ↘</option>
-                          <option value="to bottom left">To Bottom Left ↙</option>
-                          <option value="to top right">To Top Right ↗</option>
-                          <option value="to top left">To Top Left ↖</option>
+                          <option value="solid">Solid</option>
+                          <option value="linear">Linear</option>
+                          <option value="radial">Gradient</option>
                         </select>
                       </div>
-                    </div>
-                    <div class="mt-4 space-y-2">
-                      <label class="block text-xs text-gray-500 dark:text-gray-400">Balance: {{ config.announcementBar.style.background.midpoint ?? 50 }}%</label>
-                      <input type="range" min="0" max="100" v-model.number="config.announcementBar.style.background.midpoint" @input="markChanged"
-                        class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700" />
-                    </div>
-                  </div>
-                  
-                  <!-- Color Controls (Full Width Below) -->
-                  <div class="grid grid-cols-2 gap-4 mt-4">
-                    <!-- Solid Background -->
-                    <div v-if="config.announcementBar.style.background.type === 'solid'" class="col-span-2">
-                      <div class="grid grid-cols-2 gap-4">
-                        <div class="relative rounded-md shadow-sm">
-                          <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">Background Color</label>
-                          <input type="color" v-model="config.announcementBar.style.background.startColor"
-                            @input="markChanged"
-                            class="h-10 w-full rounded border border-gray-300 cursor-pointer dark:border-gray-600" />
-                        </div>
-                        <div class="relative rounded-md shadow-sm">
-                          <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">Text Color</label>
-                          <input type="color" v-model="config.announcementBar.style.textColor" @input="markChanged"
-                            class="h-10 w-full rounded border border-gray-300 cursor-pointer dark:border-gray-600" />
-                        </div>
+
+                      <!-- Text Color (Always Visible) -->
+                      <div class="relative rounded-md shadow-sm">
+                        <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">Text Color</label>
+                        <input type="color" v-model="config.announcementBar.style.textColor" @input="markChanged"
+                          class="h-10 w-full rounded border border-gray-300 cursor-pointer dark:border-gray-600" />
                       </div>
                     </div>
-                    
-                    <!-- Radial Gradient -->
-                    <div v-if="config.announcementBar.style.background.type === 'radial'" class="col-span-2">
-                      <div class="grid grid-cols-2 gap-4">
-                        <div class="relative rounded-md shadow-sm">
-                          <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">Center Color</label>
+
+                    <!-- Linear Gradient Controls (Full Width Below) -->
+                    <div v-if="config.announcementBar.style.background.type === 'linear'"
+                      class="relative rounded-md shadow-sm mt-4">
+                      <div class="grid grid-cols-3 gap-4">
+                        <div class="relative">
+                          <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">Start Color</label>
                           <input type="color" v-model="config.announcementBar.style.background.startColor"
                             @input="markChanged"
                             class="h-10 w-full rounded border border-gray-300 cursor-pointer dark:border-gray-600" />
                         </div>
-                        <div class="relative rounded-md shadow-sm">
-                          <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">Outer Color</label>
+                        <div class="relative">
+                          <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">End Color</label>
                           <input type="color" v-model="config.announcementBar.style.background.endColor"
                             @input="markChanged"
                             class="h-10 w-full rounded border border-gray-300 cursor-pointer dark:border-gray-600" />
                         </div>
+                        <div class="relative">
+                          <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">Direction</label>
+                          <select v-model="config.announcementBar.style.background.direction" @change="markChanged"
+                            class="block w-full text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md p-2 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
+                            <option value="to right">To Right →</option>
+                            <option value="to left">To Left ←</option>
+                            <option value="to bottom">To Bottom ↓</option>
+                            <option value="to top">To Top ↑</option>
+                            <option value="to bottom right">To Bottom Right ↘</option>
+                            <option value="to bottom left">To Bottom Left ↙</option>
+                            <option value="to top right">To Top Right ↗</option>
+                            <option value="to top left">To Top Left ↖</option>
+                          </select>
+                        </div>
                       </div>
                       <div class="mt-4 space-y-2">
-                        <label class="block text-xs text-gray-500 dark:text-gray-400">Balance: {{ config.announcementBar.style.background.midpoint ?? 50 }}%</label>
-                        <input type="range" min="0" max="100" v-model.number="config.announcementBar.style.background.midpoint" @input="markChanged"
+                        <label class="block text-xs text-gray-500 dark:text-gray-400">Balance: {{
+                          config.announcementBar.style.background.midpoint ?? 50 }}%</label>
+                        <input type="range" min="0" max="100"
+                          v-model.number="config.announcementBar.style.background.midpoint" @input="markChanged"
                           class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700" />
                       </div>
                     </div>
+
+                    <!-- Color Controls (Full Width Below) -->
+                    <div class="grid grid-cols-2 gap-4 mt-4">
+                      <!-- Solid Background -->
+                      <div v-if="config.announcementBar.style.background.type === 'solid'" class="col-span-2">
+                        <div class="grid grid-cols-2 gap-4">
+                          <div class="relative rounded-md shadow-sm">
+                            <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">Background Color</label>
+                            <input type="color" v-model="config.announcementBar.style.background.startColor"
+                              @input="markChanged"
+                              class="h-10 w-full rounded border border-gray-300 cursor-pointer dark:border-gray-600" />
+                          </div>
+                          <div class="relative rounded-md shadow-sm">
+                            <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">Text Color</label>
+                            <input type="color" v-model="config.announcementBar.style.textColor" @input="markChanged"
+                              class="h-10 w-full rounded border border-gray-300 cursor-pointer dark:border-gray-600" />
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Radial Gradient -->
+                      <div v-if="config.announcementBar.style.background.type === 'radial'" class="col-span-2">
+                        <div class="grid grid-cols-2 gap-4">
+                          <div class="relative rounded-md shadow-sm">
+                            <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">Center Color</label>
+                            <input type="color" v-model="config.announcementBar.style.background.startColor"
+                              @input="markChanged"
+                              class="h-10 w-full rounded border border-gray-300 cursor-pointer dark:border-gray-600" />
+                          </div>
+                          <div class="relative rounded-md shadow-sm">
+                            <label class="block text-xs text-gray-500 mb-1 dark:text-gray-400">Outer Color</label>
+                            <input type="color" v-model="config.announcementBar.style.background.endColor"
+                              @input="markChanged"
+                              class="h-10 w-full rounded border border-gray-300 cursor-pointer dark:border-gray-600" />
+                          </div>
+                        </div>
+                        <div class="mt-4 space-y-2">
+                          <label class="block text-xs text-gray-500 dark:text-gray-400">Balance: {{
+                            config.announcementBar.style.background.midpoint ?? 50 }}%</label>
+                          <input type="range" min="0" max="100"
+                            v-model.number="config.announcementBar.style.background.midpoint" @input="markChanged"
+                            class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700" />
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                </div>
 
                 </div>
 
@@ -424,11 +433,10 @@
                   <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Announcements</label>
-                    <div
-                      :class="[
-                        'flex flex-wrap gap-2 mb-4',
-                        config.announcementBar.announcements.length > 2 ? 'max-h-20 overflow-y-auto pr-1' : ''
-                      ]">
+                    <div :class="[
+                      'flex flex-wrap gap-2 mb-4',
+                      config.announcementBar.announcements.length > 2 ? 'max-h-20 overflow-y-auto pr-1' : ''
+                    ]">
                       <div v-for="(announcement, index) in config.announcementBar.announcements" :key="index"
                         class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200 group relative"
                         :class="{ 'ring-1 ring-indigo-300/60 dark:ring-indigo-400/40': selectedAnnouncementIndex === index }">
@@ -521,17 +529,20 @@
               <div class="space-y-4">
                 <!-- Global Text Formatting Toolbar -->
                 <div class="border border-gray-300 rounded-md p-2 bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
-                  <label class="block text-xs font-medium text-gray-700 mb-1.5 dark:text-gray-300">Style Controls</label>
+                  <label class="block text-xs font-medium text-gray-700 mb-1.5 dark:text-gray-300">Style
+                    Controls</label>
                   <div class="space-y-1.5">
                     <!-- Row 1: Text Formatting + Text Color + Alignment -->
                     <div class="flex flex-wrap items-center gap-2">
                       <div class="flex flex-wrap items-center gap-1.5">
                         <button @mousedown.prevent="formatPromoText('bold')"
                           :class="promoFormats.bold ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
-                          class="px-2.5 py-1.5 text-xs font-bold border rounded transition-colors" title="Bold">B</button>
+                          class="px-2.5 py-1.5 text-xs font-bold border rounded transition-colors"
+                          title="Bold">B</button>
                         <button @mousedown.prevent="formatPromoText('italic')"
                           :class="promoFormats.italic ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
-                          class="px-2.5 py-1.5 text-xs italic border rounded transition-colors" title="Italic">I</button>
+                          class="px-2.5 py-1.5 text-xs italic border rounded transition-colors"
+                          title="Italic">I</button>
 
                         <div class="border-l border-gray-300 h-5 mx-0.5"></div>
 
@@ -564,11 +575,14 @@
                         <div class="border-l border-gray-300 h-5 mx-0.5"></div>
 
                         <button @click="setFieldAlignment('left')" @mousedown.prevent
-                          class="px-2.5 py-1.5 text-xs border rounded transition-colors border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600" title="Align Left">L</button>
+                          class="px-2.5 py-1.5 text-xs border rounded transition-colors border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600"
+                          title="Align Left">L</button>
                         <button @click="setFieldAlignment('center')" @mousedown.prevent
-                          class="px-2.5 py-1.5 text-xs border rounded transition-colors border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600" title="Align Center">C</button>
+                          class="px-2.5 py-1.5 text-xs border rounded transition-colors border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600"
+                          title="Align Center">C</button>
                         <button @click="setFieldAlignment('right')" @mousedown.prevent
-                          class="px-2.5 py-1.5 text-xs border rounded transition-colors border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600" title="Align Right">R</button>
+                          class="px-2.5 py-1.5 text-xs border rounded transition-colors border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600"
+                          title="Align Right">R</button>
                       </div>
                     </div>
 
@@ -595,7 +609,8 @@
                           class="h-7 w-10 rounded border border-gray-300 cursor-pointer dark:border-gray-600" />
                       </div>
 
-                      <select v-if="currentFieldBgType === 'linear'" v-model="currentFieldBgDirection" @change="updateFieldGradient"
+                      <select v-if="currentFieldBgType === 'linear'" v-model="currentFieldBgDirection"
+                        @change="updateFieldGradient"
                         class="text-xs border-gray-300 rounded px-2 py-1.5 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
                         <option value="to right">→</option>
                         <option value="to left">←</option>
@@ -608,9 +623,10 @@
                       </select>
 
                       <div v-if="currentFieldBgType !== 'solid'" class="flex-1 flex gap-1.5 items-center min-w-[150px]">
-                        <label class="text-xs text-gray-500 dark:text-gray-400">{{currentFieldBgMidpoint}}%</label>
-                        <input type="range" min="0" max="100" v-model.number="currentFieldBgMidpoint" @input="updateFieldGradient"
-                          class="flex-1 h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700" />
+                        <label class="text-xs text-gray-500 dark:text-gray-400">{{ currentFieldBgMidpoint }}%</label>
+                        <input type="range" min="0" max="100" v-model.number="currentFieldBgMidpoint"
+                          @input="updateFieldGradient"
+                          class="flex-1 h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-500" />
                       </div>
                     </div>
                   </div>
@@ -620,14 +636,16 @@
                   <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Title</label>
                     <div id="promo-title-editor" contenteditable="true" @input="onPromoTitleInput"
-                      @mouseup="updatePromoFormats" @keyup="updatePromoFormats" @focus="currentFieldFocus = 'title'; syncToolbarWithField()"
+                      @mouseup="updatePromoFormats" @keyup="updatePromoFormats"
+                      @focus="currentFieldFocus = 'title'; syncToolbarWithField()"
                       class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md p-2 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 min-h-[38px] outline-none break-words overflow-wrap-anywhere"
                       :data-placeholder="'Get 20% OFF'"></div>
                   </div>
                   <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Subtitle</label>
                     <div id="promo-subtitle-editor" contenteditable="true" @input="onPromoSubtitleInput"
-                      @mouseup="updatePromoFormats" @keyup="updatePromoFormats" @focus="currentFieldFocus = 'subtitle'; syncToolbarWithField()"
+                      @mouseup="updatePromoFormats" @keyup="updatePromoFormats"
+                      @focus="currentFieldFocus = 'subtitle'; syncToolbarWithField()"
                       class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md p-2 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 min-h-[38px] outline-none break-words overflow-wrap-anywhere"
                       :data-placeholder="'Limited time offer'"></div>
                   </div>
@@ -636,7 +654,8 @@
                 <div>
                   <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
                   <div id="promo-description-editor" contenteditable="true" @input="onPromoDescriptionInput"
-                    @mouseup="updatePromoFormats" @keyup="updatePromoFormats" @focus="currentFieldFocus = 'description'; syncToolbarWithField()"
+                    @mouseup="updatePromoFormats" @keyup="updatePromoFormats"
+                    @focus="currentFieldFocus = 'description'; syncToolbarWithField()"
                     class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md p-2 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 min-h-[48px] outline-none break-words overflow-wrap-anywhere"
                     :data-placeholder="'Sign up for our newsletter today!'"></div>
                 </div>
@@ -660,8 +679,7 @@
                   <div>
                     <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Enable Timer</label>
                   </div>
-                  <button @click="toggleTimer"
-                    :class="config.promoCard.showTimer ? 'bg-indigo-600' : 'bg-gray-200'"
+                  <button @click="toggleTimer" :class="config.promoCard.showTimer ? 'bg-indigo-600' : 'bg-gray-200'"
                     class="relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                     <span :class="config.promoCard.showTimer ? 'translate-x-5' : 'translate-x-0'"
                       class="pointer-events-none relative inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200"></span>
@@ -672,10 +690,12 @@
                 <div v-if="config.promoCard.showTimer">
                   <label class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Timer Text</label>
                   <div id="timer-richtext-editor" contenteditable="true" @input="onTimerTextInput"
-                    @mouseup="updatePromoFormats" @keyup="updatePromoFormats" @focus="currentFieldFocus = 'timer'; syncToolbarWithField()"
+                    @mouseup="updatePromoFormats" @keyup="updatePromoFormats"
+                    @focus="currentFieldFocus = 'timer'; syncToolbarWithField()"
                     class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md p-2 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 min-h-[48px] outline-none break-words overflow-wrap-anywhere"
                     :data-placeholder="'Ends in hh mmm sss'"></div>
-                  <p class="text-xs text-gray-500 mt-1 dark:text-gray-400">Use h, mm, ss or hh, m, s placeholders. Select to format.</p>
+                  <p class="text-xs text-gray-500 mt-1 dark:text-gray-400">Use h, mm, ss or hh, m, s placeholders.
+                    Select to format.</p>
                 </div>
 
                 <!-- Button Toggle -->
@@ -743,7 +763,7 @@
                         </select>
                       </div>
                     </div>
-                    
+
                     <!-- Linear Gradient Controls -->
                     <div v-if="config.promoCard.style.background.type === 'linear'" class="grid grid-cols-3 gap-4">
                       <div>
@@ -772,11 +792,13 @@
                       </div>
                     </div>
                     <div v-if="config.promoCard.style.background.type === 'linear'" class="space-y-2">
-                      <label class="block text-xs text-gray-500 dark:text-gray-400">Balance: {{ config.promoCard.style.background.midpoint ?? 50 }}%</label>
-                      <input type="range" min="0" max="100" v-model.number="config.promoCard.style.background.midpoint" @input="markChanged"
+                      <label class="block text-xs text-gray-500 dark:text-gray-400">Balance: {{
+                        config.promoCard.style.background.midpoint ?? 50 }}%</label>
+                      <input type="range" min="0" max="100" v-model.number="config.promoCard.style.background.midpoint"
+                        @input="markChanged"
                         class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700" />
                     </div>
-                    
+
                     <!-- Solid Background Colors -->
                     <div v-if="config.promoCard.style.background.type === 'solid'">
                       <div>
@@ -785,7 +807,7 @@
                           class="h-9 w-full rounded border border-gray-300 cursor-pointer dark:border-gray-600" />
                       </div>
                     </div>
-                    
+
                     <!-- Radial Gradient Colors -->
                     <div v-if="config.promoCard.style.background.type === 'radial'" class="grid grid-cols-2 gap-4">
                       <div>
@@ -800,91 +822,85 @@
                       </div>
                     </div>
                     <div v-if="config.promoCard.style.background.type === 'radial'" class="space-y-2">
-                      <label class="block text-xs text-gray-500 dark:text-gray-400">Balance: {{ config.promoCard.style.background.midpoint ?? 50 }}%</label>
-                      <input type="range" min="0" max="100" v-model.number="config.promoCard.style.background.midpoint" @input="markChanged"
+                      <label class="block text-xs text-gray-500 dark:text-gray-400">Balance: {{
+                        config.promoCard.style.background.midpoint ?? 50 }}%</label>
+                      <input type="range" min="0" max="100" v-model.number="config.promoCard.style.background.midpoint"
+                        @input="markChanged"
                         class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700" />
                     </div>
                   </div>
                 </div>
 
-              <!-- Preview Side -->
-              <div
-                class="bg-gray-100 rounded-lg p-4 relative self-start min-h-[260px] border border-gray-200 bg-[url('https://lib.shadcn.com/placeholder.svg')] bg-center bg-no-repeat bg-contain dark:bg-gray-700 dark:border-gray-600">
+                <!-- Preview Side -->
                 <div
-                  class="absolute inset-0 flex items-center justify-center text-gray-400 text-sm font-medium pointer-events-none dark:text-gray-500">
-                  Website Content Area</div>
+                  class="bg-gray-100 rounded-lg p-4 relative self-start min-h-[260px] border border-gray-200 bg-[url('https://lib.shadcn.com/placeholder.svg')] bg-center bg-no-repeat bg-contain dark:bg-gray-700 dark:border-gray-600">
+                  <div
+                    class="absolute inset-0 flex items-center justify-center text-gray-400 text-sm font-medium pointer-events-none dark:text-gray-500">
+                    Website Content Area</div>
 
-                <!-- The Actual Card Preview -->
-                <div class="relative z-10 w-full min-h-[228px] grid">
-                  <div v-if="config.promoCard.active"
-                    class="relative w-[400px] rounded-xl shadow-2xl p-5 transition-all duration-300 flex flex-col" :class="{
-                      'justify-self-end self-end': config.promoCard.style.position === 'bottom-right',
-                      'justify-self-start self-end': config.promoCard.style.position === 'bottom-left',
-                      'justify-self-end self-start': config.promoCard.style.position === 'top-right',
-                      'justify-self-start self-start': config.promoCard.style.position === 'top-left'
-                    }"
-                    :style="{ background: getBackgroundStyle(config.promoCard.style.background) }">
-                    <button class="absolute top-2 right-2 text-current opacity-60 hover:opacity-100 p-1">
-                      <X class="w-4 h-4" />
-                    </button>
+                  <!-- The Actual Card Preview -->
+                  <div class="relative z-10 w-full min-h-[228px] grid">
+                    <div v-if="config.promoCard.active"
+                      class="relative w-[400px] rounded-xl shadow-2xl p-5 transition-all duration-300 flex flex-col"
+                      :class="{
+                        'justify-self-end self-end': config.promoCard.style.position === 'bottom-right',
+                        'justify-self-start self-end': config.promoCard.style.position === 'bottom-left',
+                        'justify-self-end self-start': config.promoCard.style.position === 'top-right',
+                        'justify-self-start self-start': config.promoCard.style.position === 'top-left'
+                      }" :style="{ background: getBackgroundStyle(config.promoCard.style.background) }">
+                      <button class="absolute top-2 right-2 text-current opacity-60 hover:opacity-100 p-1">
+                        <X class="w-4 h-4" />
+                      </button>
 
-                    <!-- Title -->
-                    <h3 class="text-lg font-bold mb-1 px-2 py-1 rounded break-words"
-                      :style="{ 
-                        background: getBackgroundStyle(config.promoCard.style.titleStyle.background), 
+                      <!-- Title -->
+                      <h3 class="text-lg font-bold mb-1 px-2 py-1 rounded break-words" :style="{
+                        background: getBackgroundStyle(config.promoCard.style.titleStyle.background),
                         color: config.promoCard.style.titleStyle.textColor,
                         textAlign: config.promoCard.style.titleStyle.textAlign || 'center'
-                      }"
-                      v-html="config.promoCard.title || 'Title'">
-                    </h3>
-                    
-                    <!-- Subtitle -->
-                    <h4 v-if="config.promoCard.subtitle" class="text-sm font-medium mb-2 px-2 py-1 rounded break-words"
-                      :style="{ 
-                        background: getBackgroundStyle(config.promoCard.style.subheadingStyle.background), 
-                        color: config.promoCard.style.subheadingStyle.textColor,
-                        textAlign: config.promoCard.style.subheadingStyle.textAlign || 'center'
-                      }"
-                      v-html="config.promoCard.subtitle">
-                    </h4>
-                    <h4 v-else class="text-sm font-medium mb-2 px-2 py-1 rounded break-words"
-                      :style="{ 
-                        background: getBackgroundStyle(config.promoCard.style.subheadingStyle.background), 
+                      }" v-html="config.promoCard.title || 'Title'">
+                      </h3>
+
+                      <!-- Subtitle -->
+                      <h4 v-if="config.promoCard.subtitle"
+                        class="text-sm font-medium mb-2 px-2 py-1 rounded break-words" :style="{
+                          background: getBackgroundStyle(config.promoCard.style.subheadingStyle.background),
+                          color: config.promoCard.style.subheadingStyle.textColor,
+                          textAlign: config.promoCard.style.subheadingStyle.textAlign || 'center'
+                        }" v-html="config.promoCard.subtitle">
+                      </h4>
+                      <h4 v-else class="text-sm font-medium mb-2 px-2 py-1 rounded break-words" :style="{
+                        background: getBackgroundStyle(config.promoCard.style.subheadingStyle.background),
                         color: config.promoCard.style.subheadingStyle.textColor,
                         textAlign: config.promoCard.style.subheadingStyle.textAlign || 'center'
                       }">
-                      Subtitle
-                    </h4>
-                    
-                    <!-- Description -->
-                    <p class="text-sm opacity-90 mb-2 px-2 py-1 rounded break-words"
-                      :style="{ 
-                        background: getBackgroundStyle(config.promoCard.style.descriptionStyle.background), 
+                        Subtitle
+                      </h4>
+
+                      <!-- Description -->
+                      <p class="text-sm opacity-90 mb-2 px-2 py-1 rounded break-words" :style="{
+                        background: getBackgroundStyle(config.promoCard.style.descriptionStyle.background),
                         color: config.promoCard.style.descriptionStyle.textColor,
                         textAlign: config.promoCard.style.descriptionStyle.textAlign || 'left'
-                      }"
-                      v-html="config.promoCard.description || 'Description text goes here.'">
-                    </p>
-                    
-                    <!-- Timer Display -->
-                    <div v-if="config.promoCard.showTimer && (config.promoCard.startDate || config.promoCard.endDate)" 
-                      class="text-xs mb-4 px-2 py-1 rounded break-words"
-                      :style="{ 
-                        background: getBackgroundStyle(config.promoCard.style.dateStyle.background), 
-                        color: config.promoCard.style.dateStyle.textColor,
-                        textAlign: config.promoCard.style.dateStyle.textAlign || 'center'
-                      }"
-                      v-html="getFormattedTimerText()">
-                    </div>
+                      }" v-html="config.promoCard.description || 'Description text goes here.'">
+                      </p>
 
-                    <button v-if="config.promoCard.showButton && config.promoCard.buttonText"
-                      class="w-full py-2 px-4 rounded-lg text-sm font-semibold transition-transform active:scale-95"
-                      :style="{ backgroundColor: config.promoCard.style.buttonColor, color: config.promoCard.style.buttonTextColor }">
-                      {{ config.promoCard.buttonText }}
-                    </button>
+                      <!-- Timer Display -->
+                      <div v-if="config.promoCard.showTimer && (config.promoCard.startDate || config.promoCard.endDate)"
+                        class="text-xs mb-4 px-2 py-1 rounded break-words" :style="{
+                          background: getBackgroundStyle(config.promoCard.style.dateStyle.background),
+                          color: config.promoCard.style.dateStyle.textColor,
+                          textAlign: config.promoCard.style.dateStyle.textAlign || 'center'
+                        }" v-html="getFormattedTimerText()">
+                      </div>
+
+                      <button v-if="config.promoCard.showButton && config.promoCard.buttonText"
+                        class="w-full py-2 px-4 rounded-lg text-sm font-semibold transition-transform active:scale-95"
+                        :style="{ backgroundColor: config.promoCard.style.buttonColor, color: config.promoCard.style.buttonTextColor }">
+                        {{ config.promoCard.buttonText }}
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
               </div>
 
               <SamplePromoTemplates @apply-template="applyPromoTemplate" />
@@ -1038,7 +1054,7 @@ onMounted(async () => {
 
   // Migrate old string announcements to new Announcement objects
   migrateAnnouncements(config.value)
-  
+
   // Initialize timer text if not set
   if (!config.value.promoCard.timerText) {
     config.value.promoCard.timerText = 'Ends in <strong>hh</strong> mmm sss'
@@ -1054,12 +1070,12 @@ onMounted(async () => {
 
   // Apply dark mode class to html element
   updateDarkModeClass()
-  
+
   // Update timer every second
   setInterval(() => {
     currentTime.value = Date.now()
   }, 1000)
-  
+
   // Populate editors after DOM is ready
   await nextTick()
   syncPromoEditorsFromConfig()
@@ -1087,15 +1103,15 @@ const calculateHoursRemaining = () => {
   if (!config.value.promoCard.startDate || !config.value.promoCard.endDate) {
     return '00:00:00'
   }
-  
+
   const now = new Date(currentTime.value)
   const start = new Date(config.value.promoCard.startDate)
   const end = new Date(config.value.promoCard.endDate)
-  
+
   // Set to start of day (midnight)
   start.setHours(0, 0, 0, 0)
   end.setHours(23, 59, 59, 999)
-  
+
   if (now < start) {
     const diff = start.getTime() - now.getTime()
     const hours = Math.floor(diff / (1000 * 60 * 60))
@@ -1103,11 +1119,11 @@ const calculateHoursRemaining = () => {
     const seconds = Math.floor((diff % (1000 * 60)) / 1000)
     return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
   }
-  
+
   if (now > end) {
     return '00:00:00'
   }
-  
+
   const remaining = end.getTime() - now.getTime()
   const hours = Math.floor(remaining / (1000 * 60 * 60))
   const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60))
@@ -1452,20 +1468,20 @@ function applyFontSize(size: string) {
   const fragment = range.cloneContents()
   const tempDiv = document.createElement('div')
   tempDiv.appendChild(fragment)
-  
+
   // Check for bold/italic in the cloned content
   const hasBold = !!tempDiv.querySelector('b, strong')
   const hasItalic = !!tempDiv.querySelector('i, em')
-  
+
   // Also check if the selection is inside bold/italic elements
   let node = range.commonAncestorContainer
   if (node.nodeType === Node.TEXT_NODE) {
     node = node.parentElement!
   }
-  
+
   let isBold = hasBold
   let isItalic = hasItalic
-  
+
   // Walk up the tree to check parent elements
   let current = node as HTMLElement
   while (current && current.contentEditable !== 'true') {
@@ -1477,14 +1493,14 @@ function applyFontSize(size: string) {
     }
     current = current.parentElement!
   }
-  
+
   // Delete the selection
   document.execCommand('delete', false)
-  
+
   // Create the new span with font-size
   const newSpan = document.createElement('span')
   newSpan.style.fontSize = size
-  
+
   // Build the content with preserved formatting
   let content: Node
   if (isBold && isItalic) {
@@ -1504,13 +1520,13 @@ function applyFontSize(size: string) {
   } else {
     content = document.createTextNode(selectedText)
   }
-  
+
   newSpan.appendChild(content)
-  
+
   // Insert the new span
   const newRange = selection.getRangeAt(0)
   newRange.insertNode(newSpan)
-  
+
   // Move cursor after the span
   newRange.setStartAfter(newSpan)
   newRange.setEndAfter(newSpan)
@@ -1613,14 +1629,14 @@ function formatPromoText(format: string) {
 
 function setFieldAlignment(align: 'left' | 'center' | 'right') {
   if (!currentFieldFocus.value) return
-  
+
   const styleMap: Record<string, any> = {
     title: config.value.promoCard.style.titleStyle,
     subtitle: config.value.promoCard.style.subheadingStyle,
     description: config.value.promoCard.style.descriptionStyle,
     timer: config.value.promoCard.style.dateStyle
   }
-  
+
   const style = styleMap[currentFieldFocus.value]
   if (style && 'textAlign' in style) {
     style.textAlign = align
@@ -1630,14 +1646,14 @@ function setFieldAlignment(align: 'left' | 'center' | 'right') {
 
 function syncToolbarWithField() {
   if (!currentFieldFocus.value) return
-  
+
   const styleMap: Record<string, any> = {
     title: config.value.promoCard.style.titleStyle,
     subtitle: config.value.promoCard.style.subheadingStyle,
     description: config.value.promoCard.style.descriptionStyle,
     timer: config.value.promoCard.style.dateStyle
   }
-  
+
   const style = styleMap[currentFieldFocus.value]
   if (style) {
     currentFieldTextColor.value = style.textColor || '#ffffff'
@@ -1651,14 +1667,14 @@ function syncToolbarWithField() {
 
 function updateFieldColors() {
   if (!currentFieldFocus.value) return
-  
+
   const styleMap: Record<string, any> = {
     title: config.value.promoCard.style.titleStyle,
     subtitle: config.value.promoCard.style.subheadingStyle,
     description: config.value.promoCard.style.descriptionStyle,
     timer: config.value.promoCard.style.dateStyle
   }
-  
+
   const style = styleMap[currentFieldFocus.value]
   if (style) {
     style.textColor = currentFieldTextColor.value
@@ -1672,14 +1688,14 @@ function updateFieldColors() {
 
 function updateFieldBgType() {
   if (!currentFieldFocus.value) return
-  
+
   const styleMap: Record<string, any> = {
     title: config.value.promoCard.style.titleStyle,
     subtitle: config.value.promoCard.style.subheadingStyle,
     description: config.value.promoCard.style.descriptionStyle,
     timer: config.value.promoCard.style.dateStyle
   }
-  
+
   const style = styleMap[currentFieldFocus.value]
   if (style) {
     style.background.type = currentFieldBgType.value
@@ -1689,14 +1705,14 @@ function updateFieldBgType() {
 
 function updateFieldGradient() {
   if (!currentFieldFocus.value) return
-  
+
   const styleMap: Record<string, any> = {
     title: config.value.promoCard.style.titleStyle,
     subtitle: config.value.promoCard.style.subheadingStyle,
     description: config.value.promoCard.style.descriptionStyle,
     timer: config.value.promoCard.style.dateStyle
   }
-  
+
   const style = styleMap[currentFieldFocus.value]
   if (style) {
     style.background.endColor = currentFieldBgEndColor.value
