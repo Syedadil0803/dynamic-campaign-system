@@ -6,63 +6,48 @@
       </div>
     </div>
     <div class="mt-3 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-      <div
-        v-for="template in samplePromoTemplates"
-        :key="template.id"
+      <div v-for="template in samplePromoTemplates" :key="template.id"
         @click="emit('apply-template', template.promoCard, template.name)"
         class="group rounded-xl border border-gray-200 bg-white p-3 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:border-gray-300 cursor-pointer dark:border-gray-700 dark:bg-gray-900">
         <div class="mb-2 flex items-center justify-between">
           <p class="text-xs font-semibold tracking-wide text-gray-800 dark:text-gray-200">{{ template.name }}</p>
-          <span class="rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-medium text-gray-700 dark:bg-gray-700 dark:text-gray-200">Click to apply</span>
+          <span
+            class="rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-medium text-gray-700 dark:bg-gray-700 dark:text-gray-200">Click
+            to apply</span>
         </div>
         <div
           class="w-full rounded-xl shadow-xl p-4 transition-all duration-300 flex flex-col group-hover:scale-[1.01] group-hover:shadow-2xl"
           :style="{ background: getBackgroundStyle(template.promoCard.style.background) }">
-          <h3
-            class="text-lg font-bold mb-1 px-2 py-1 rounded break-words"
-            :style="{
-              background: getBackgroundStyle(template.promoCard.style.titleStyle.background),
-              color: template.promoCard.style.titleStyle.textColor,
-              textAlign: template.promoCard.style.titleStyle.textAlign || 'center'
-            }"
-            v-html="template.promoCard.title">
+          <h3 class="text-lg font-bold mb-1 px-2 py-1 rounded break-words" :style="{
+            background: getBackgroundStyle(template.promoCard.style.titleStyle.background),
+            color: template.promoCard.style.titleStyle.textColor,
+            textAlign: template.promoCard.style.titleStyle.textAlign || 'center'
+          }" v-html="template.promoCard.title">
           </h3>
-          <h4
-            class="text-sm font-medium mb-2 px-2 py-1 rounded break-words"
-            :style="{
-              background: getBackgroundStyle(template.promoCard.style.subheadingStyle.background),
-              color: template.promoCard.style.subheadingStyle.textColor,
-              textAlign: template.promoCard.style.subheadingStyle.textAlign || 'center'
-            }"
-            v-html="template.promoCard.subtitle">
+          <h4 class="text-sm font-medium mb-2 px-2 py-1 rounded break-words" :style="{
+            background: getBackgroundStyle(template.promoCard.style.subheadingStyle.background),
+            color: template.promoCard.style.subheadingStyle.textColor,
+            textAlign: template.promoCard.style.subheadingStyle.textAlign || 'center'
+          }" v-html="template.promoCard.subtitle">
           </h4>
-          <p
-            class="text-sm opacity-90 mb-2 px-2 py-1 rounded break-words"
-            :style="{
-              background: getBackgroundStyle(template.promoCard.style.descriptionStyle.background),
-              color: template.promoCard.style.descriptionStyle.textColor,
-              textAlign: template.promoCard.style.descriptionStyle.textAlign || 'left'
-            }"
-            v-html="template.promoCard.description">
+          <p class="text-sm opacity-90 mb-2 px-2 py-1 rounded break-words" :style="{
+            background: getBackgroundStyle(template.promoCard.style.descriptionStyle.background),
+            color: template.promoCard.style.descriptionStyle.textColor,
+            textAlign: template.promoCard.style.descriptionStyle.textAlign || 'left'
+          }" v-html="template.promoCard.description">
           </p>
-          <div
-            class="text-xs mb-4 px-2 py-1 rounded break-words"
-            :style="{
-              background: getBackgroundStyle(template.promoCard.style.dateStyle.background),
-              color: template.promoCard.style.dateStyle.textColor,
-              textAlign: template.promoCard.style.dateStyle.textAlign || 'center'
-            }"
-            v-html="getTemplateTimerPreviewText(template.promoCard.timerText)">
+          <div class="text-xs mb-4 px-2 py-1 rounded break-words" :style="{
+            background: getBackgroundStyle(template.promoCard.style.dateStyle.background),
+            color: template.promoCard.style.dateStyle.textColor,
+            textAlign: template.promoCard.style.dateStyle.textAlign || 'center'
+          }" v-html="getTemplateTimerPreviewText(template.promoCard.timerText)">
           </div>
           <div :class="template.promoCard.buttonFullWidth ? '' : 'flex justify-center'">
-            <button
-              :class="template.promoCard.buttonFullWidth ? 'w-full' : ''"
-              class="py-2 px-4 rounded-lg text-sm font-semibold"
-              :style="{ 
+            <button :class="template.promoCard.buttonFullWidth ? 'w-full' : ''"
+              class="py-2 px-4 rounded-lg text-sm font-semibold" :style="{
                 background: getBackgroundStyle(template.promoCard.style.buttonStyle.background),
                 color: template.promoCard.style.buttonStyle.textColor
-              }"
-              v-html="template.promoCard.buttonText">
+              }" v-html="template.promoCard.buttonText">
             </button>
           </div>
         </div>
@@ -391,9 +376,6 @@ function getTemplateTimerPreviewText(timerText?: string) {
     .replace(/\{m\}/g, '18')
     .replace(/\{ss\}/g, '07')
     .replace(/\{s\}/g, '7')
-    .replace(/hh/g, '23')
-    .replace(/mm/g, '59')
-    .replace(/ss/g, '59')
 }
 
 function getBackgroundStyle(background: any) {

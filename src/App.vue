@@ -505,9 +505,8 @@
                 </div>
                 <div>
                   <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-gray-100">Promo Card</h3>
-                  <p class="mt-1 max-w-2xl text-sm text-gray-500 dark:text-gray-400">Floating widget for special offers
-                    or
-                    lead gen.</p>
+                  <p class="mt-1 max-w-2xl text-sm text-gray-500 dark:text-gray-400">Floating widget for special offers.
+                  </p>
                 </div>
               </div>
               <!-- Toggle Switch -->
@@ -700,12 +699,21 @@
                 <div v-if="config.promoCard.showTimer">
                   <label class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Timer Text</label>
                   <div id="timer-richtext-editor" contenteditable="true" @input="onTimerTextInput"
-                    @mouseup="updatePromoFormats" @keyup="updatePromoFormats"
+                    @mouseup="updatePromoFormats" @keyup="updatePromoFormats" @keydown="onTimerEditorKeydown"
                     @focus="currentFieldFocus = 'timer'; syncToolbarWithField()"
                     class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md p-2 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 min-h-[48px] outline-none break-words overflow-wrap-anywhere"
-                    :data-placeholder="'Ends in hh mmm sss'"></div>
-                  <p class="text-xs text-gray-500 mt-1 dark:text-gray-400">Use h, mm, ss or hh, m, s placeholders.
-                    Click to format.</p>
+                    :data-placeholder="'Ends in hh:mm:ss'"></div>
+                  <p class="text-xs text-gray-500 mt-1 dark:text-gray-400">
+                    <span class="inline-flex items-center gap-1">
+                      <span
+                        class="inline-block px-1 py-0.5 bg-indigo-100 text-indigo-700 rounded text-[10px] font-mono dark:bg-indigo-900 dark:text-indigo-300">hh</span>
+                      <span
+                        class="inline-block px-1 py-0.5 bg-green-100 text-green-700 rounded text-[10px] font-mono dark:bg-green-900 dark:text-green-300">mm</span>
+                      <span
+                        class="inline-block px-1 py-0.5 bg-orange-100 text-orange-700 rounded text-[10px] font-mono dark:bg-orange-900 dark:text-orange-300">ss</span>
+                      are locked placeholders — select them to change style/size.
+                    </span>
+                  </p>
                 </div>
 
                 <!-- Button Toggle -->
@@ -1008,10 +1016,146 @@ const currentFieldBgEndColor = ref('#111827')
 const currentFieldBgDirection = ref('to right')
 const currentFieldBgMidpoint = ref(50)
 
+const TIMER_PLACEHOLDER_TOKENS = ['hhh', 'mmm', 'sss'] as const
+
+const TIMER_EDITOR_COLOR_MAP: Record<string, string> = {
+  hhh: 'background:#e0e7ff;color:#4338ca;border:1px solid #a5b4fc;',
+  mmm: 'background:#dcfce7;color:#15803d;border:1px solid #86efac;',
+  sss: 'background:#ffedd5;color:#c2410c;border:1px solid #fdba74;',
+}
+const TIMER_EDITOR_BASE_STYLE = 'display:inline-block;padding:1px 4px;border-radius:4px;font-family:monospace;font-weight:600;cursor:default;user-select:all;-webkit-user-select:all;'
+const TIMER_SEP_STYLE = 'display:inline;user-select:none;-webkit-user-select:none;'
+
+// --- Clean storage format (compact, no editor chrome) ---
+// e.g. 'Ends in <span data-timer-placeholder="hhh">hh</span>:<span data-timer-placeholder="mmm">mm</span>:<span data-timer-placeholder="sss">ss</span>'
+
+function getDefaultTimerStorageHTML(): string {
+  return `Ends in <span data-timer-placeholder="hhh">hh</span>:<span data-timer-placeholder="mmm">mm</span>:<span data-timer-placeholder="sss">ss</span>`
+}
+
+/** Strip editor visual chrome from HTML, keep only user formatting. For saving to config. */
+function cleanTimerForStorage(editorHTML: string): string {
+  const parser = new DOMParser()
+  const doc = parser.parseFromString(`<div>${editorHTML}</div>`, 'text/html')
+  const container = doc.body.firstElementChild as HTMLElement
+
+  // Clean placeholder spans: keep only user-applied styles
+  container.querySelectorAll('[data-timer-placeholder]').forEach(el => {
+    const htmlEl = el as HTMLElement
+    htmlEl.removeAttribute('contenteditable')
+    // Extract user-applied formatting
+    const userFontSize = htmlEl.style.fontSize || '1rem' // default to md (1rem)
+    const userFontWeight = htmlEl.style.fontWeight
+    const userFontStyle = htmlEl.style.fontStyle
+    // Build minimal style with only user formatting (always include font-size)
+    let style = `font-size:${userFontSize};`
+    // font-weight: 600 is our editor default, bold/700 is user-applied
+    if (userFontWeight && userFontWeight !== '600' && userFontWeight !== 'normal') {
+      style += `font-weight:${userFontWeight};`
+    }
+    if (userFontStyle && userFontStyle !== 'normal') style += `font-style:${userFontStyle};`
+    htmlEl.setAttribute('style', style)
+  })
+
+  // Unwrap separator spans into plain text
+  container.querySelectorAll('[data-timer-separator]').forEach(el => {
+    const text = doc.createTextNode(el.textContent || '')
+    el.replaceWith(text)
+  })
+
+  return container.innerHTML
+}
+
+/** Add editor visual chrome to stored HTML. For loading into the editor. */
+function buildTimerEditorHTML(storedHTML: string): string {
+  if (!storedHTML || !storedHTML.includes('data-timer-placeholder')) {
+    return buildTimerEditorHTML(getDefaultTimerStorageHTML())
+  }
+
+  const parser = new DOMParser()
+  const doc = parser.parseFromString(`<div>${storedHTML}</div>`, 'text/html')
+  const container = doc.body.firstElementChild as HTMLElement
+
+  // Add editor chrome to placeholder spans
+  container.querySelectorAll('[data-timer-placeholder]').forEach(el => {
+    const htmlEl = el as HTMLElement
+    const token = htmlEl.getAttribute('data-timer-placeholder')!
+    htmlEl.setAttribute('contenteditable', 'false')
+    // Preserve user formatting on top of editor base styles
+    const userFontSize = htmlEl.style.fontSize || '1rem' // default to md (1rem)
+    const userFontWeight = htmlEl.style.fontWeight || ''
+    const userFontStyle = htmlEl.style.fontStyle || ''
+    let style = (TIMER_EDITOR_COLOR_MAP[token] || '') + TIMER_EDITOR_BASE_STYLE
+    style += `font-size:${userFontSize};`
+    if (userFontWeight) style += `font-weight:${userFontWeight};`
+    if (userFontStyle) style += `font-style:${userFontStyle};`
+    htmlEl.setAttribute('style', style)
+  })
+
+  // Wrap ':' characters in direct text nodes with separator spans
+  const walker = doc.createTreeWalker(container, NodeFilter.SHOW_TEXT, null)
+  const textNodes: Text[] = []
+  let textNode: Text | null
+  while ((textNode = walker.nextNode() as Text | null)) {
+    // Only process direct children of the container
+    if (textNode.parentNode === container && textNode.textContent && textNode.textContent.includes(':')) {
+      textNodes.push(textNode)
+    }
+  }
+  for (const tn of textNodes) {
+    const parts = tn.textContent!.split(':')
+    if (parts.length > 1) {
+      const fragment = doc.createDocumentFragment()
+      parts.forEach((part, i) => {
+        if (part) fragment.appendChild(doc.createTextNode(part))
+        if (i < parts.length - 1) {
+          const sep = doc.createElement('span')
+          sep.setAttribute('data-timer-separator', '')
+          sep.setAttribute('contenteditable', 'false')
+          sep.setAttribute('style', TIMER_SEP_STYLE)
+          sep.textContent = ':'
+          fragment.appendChild(sep)
+        }
+      })
+      tn.replaceWith(fragment)
+    }
+  }
+
+  return container.innerHTML
+}
+
+function ensureTimerPlaceholders(html: string): string {
+  // If all three placeholders and separators are present, return as-is
+  const hasAllPlaceholders = TIMER_PLACEHOLDER_TOKENS.every(t => html.includes(`data-timer-placeholder="${t}"`))
+  const hasSeparators = html.includes('data-timer-separator')
+  if (hasAllPlaceholders && hasSeparators) return html
+  // Re-inject any missing placeholders
+  // First clean to storage format, then rebuild editor HTML to fix consistency
+  const cleaned = cleanTimerForStorage(html)
+  // Re-inject missing tokens
+  let result = cleaned
+  const missing: string[] = []
+  for (const token of TIMER_PLACEHOLDER_TOKENS) {
+    if (!result.includes(`data-timer-placeholder="${token}"`)) {
+      missing.push(token)
+    }
+  }
+  if (missing.length > 0) {
+    for (let i = 0; i < missing.length; i++) {
+      if (i > 0 || result.trim().length > 0) result += ':'
+      const displayText: Record<string, string> = { hhh: 'hh', mmm: 'mm', sss: 'ss' }
+      result += `<span data-timer-placeholder="${missing[i]}" style="font-size:1rem;">${displayText[missing[i]] || missing[i]}</span>`
+    }
+  }
+  // Rebuild editor HTML from the fixed storage format
+  return buildTimerEditorHTML(result)
+}
+
 const syncPromoEditorsFromConfig = () => {
   const timerEditor = document.querySelector('#timer-richtext-editor') as HTMLDivElement
   if (timerEditor) {
-    timerEditor.innerHTML = config.value.promoCard.timerText || 'Ends in <strong>hh</strong> mmm sss'
+    const stored = config.value.promoCard.timerText
+    timerEditor.innerHTML = buildTimerEditorHTML(stored || '')
   }
 
   const titleEditor = document.querySelector('#promo-title-editor') as HTMLDivElement
@@ -1067,9 +1211,9 @@ onMounted(async () => {
   // Migrate old string announcements to new Announcement objects
   migrateAnnouncements(config.value)
 
-  // Initialize timer text if not set
-  if (!config.value.promoCard.timerText) {
-    config.value.promoCard.timerText = 'Ends in <strong>hh</strong> mmm sss'
+  // Initialize timer text if not set or migrate old format
+  if (!config.value.promoCard.timerText || !config.value.promoCard.timerText.includes('data-timer-placeholder')) {
+    config.value.promoCard.timerText = getDefaultTimerStorageHTML()
   }
 
   // Migrate buttonStyle if not present
@@ -1175,21 +1319,27 @@ const calculateHoursRemaining = () => {
 const getFormattedTimerText = () => {
   const timerValue = calculateHoursRemaining()
   const [hours, minutes, seconds] = timerValue.split(':')
-  const hoursRaw = String(Number(hours) || 0)
-  const minutesRaw = String(Number(minutes) || 0)
-  const secondsRaw = String(Number(seconds) || 0)
-  const template = config.value.promoCard.timerText || 'Ends in <strong>hh</strong> mmm sss'
-  return template
-    .replace(/\{hh\}/g, hours)
-    .replace(/\{h\}/g, hoursRaw)
-    .replace(/\{mm\}/g, minutes)
-    .replace(/\{m\}/g, minutesRaw)
-    .replace(/\{ss\}/g, seconds)
-    .replace(/\{s\}/g, secondsRaw)
-    // Backward compatibility with old templates
-    .replace(/hh/g, hours)
-    .replace(/mm/g, minutes)
-    .replace(/ss/g, seconds)
+  const template = config.value.promoCard.timerText || getDefaultTimerStorageHTML()
+
+  // Parse the stored template to replace placeholder spans with actual values
+  const parser = new DOMParser()
+  const doc = parser.parseFromString(`<div>${template}</div>`, 'text/html')
+  const container = doc.body.firstElementChild as HTMLElement
+
+  const placeholders = container.querySelectorAll('[data-timer-placeholder]')
+  placeholders.forEach(el => {
+    const token = el.getAttribute('data-timer-placeholder')
+    const span = doc.createElement('span')
+    // Copy user-applied styles from stored format
+    const origStyle = (el as HTMLElement).getAttribute('style') || ''
+    if (origStyle) span.setAttribute('style', origStyle)
+
+    if (token === 'hhh') span.textContent = hours + 'h'
+    else if (token === 'mmm') span.textContent = minutes + 'm'
+    else if (token === 'sss') span.textContent = seconds + 's'
+    el.replaceWith(span)
+  })
+  return container.innerHTML
 }
 
 async function handleSave() {
@@ -1219,13 +1369,13 @@ function switchTab(tab: 'dashboard' | 'announcement' | 'promo') {
 const toggleTimer = () => {
   config.value.promoCard.showTimer = !config.value.promoCard.showTimer
   if (config.value.promoCard.showTimer) {
-    if (!config.value.promoCard.timerText) {
-      config.value.promoCard.timerText = 'Ends in <strong>hh</strong> mmm sss'
+    if (!config.value.promoCard.timerText || !config.value.promoCard.timerText.includes('data-timer-placeholder')) {
+      config.value.promoCard.timerText = getDefaultTimerStorageHTML()
     }
     nextTick(() => {
       const timerEditor = document.querySelector('#timer-richtext-editor') as HTMLDivElement
       if (timerEditor) {
-        timerEditor.innerHTML = config.value.promoCard.timerText || 'Ends in <strong>hh</strong> mmm sss'
+        timerEditor.innerHTML = buildTimerEditorHTML(config.value.promoCard.timerText || '')
       }
     })
   }
@@ -1753,34 +1903,135 @@ function normalizePromoCardFontSizes() {
   if (pc.title) pc.title = wrapBareTextWithFontSize(pc.title)
   if (pc.subtitle) pc.subtitle = wrapBareTextWithFontSize(pc.subtitle)
   if (pc.description) pc.description = wrapBareTextWithFontSize(pc.description)
-  if (pc.timerText) pc.timerText = wrapBareTextWithFontSize(pc.timerText)
+  // Timer text placeholders handle their own formatting; don't wrap
+  // if (pc.timerText) pc.timerText = wrapBareTextWithFontSize(pc.timerText)
   if (pc.buttonText) pc.buttonText = wrapBareTextWithFontSize(pc.buttonText)
 }
 
 function onTimerTextInput(event: Event) {
   const target = event.target as HTMLDivElement
-  config.value.promoCard.timerText = wrapBareTextWithFontSize(target.innerHTML)
+  // Ensure all three placeholders are still present; re-inject if accidentally removed
+  const editorHTML = ensureTimerPlaceholders(target.innerHTML)
+  if (editorHTML !== target.innerHTML) {
+    target.innerHTML = editorHTML
+  }
+  // Store clean format (no editor chrome)
+  config.value.promoCard.timerText = cleanTimerForStorage(editorHTML)
   markChanged()
 }
 
+function onTimerEditorKeydown(event: KeyboardEvent) {
+  const sel = window.getSelection()
+  if (!sel || sel.rangeCount === 0) return
+
+  const range = sel.getRangeAt(0)
+  if (event.key !== 'Delete' && event.key !== 'Backspace') return
+
+  const editor = document.querySelector('#timer-richtext-editor') as HTMLDivElement
+  if (!editor) return
+
+  // Collect all protected elements (placeholders + separators)
+  const protectedEls = editor.querySelectorAll('[data-timer-placeholder], [data-timer-separator]')
+
+  // NON-COLLAPSED selection: if any protected element is in the selection, block it
+  if (!range.collapsed) {
+    for (const el of Array.from(protectedEls)) {
+      if (range.intersectsNode(el)) {
+        event.preventDefault()
+        return
+      }
+    }
+    return // selection doesn't touch any protected element — allow deletion
+  }
+
+  // COLLAPSED cursor: only block when cursor is directly adjacent to a protected element
+  const container = range.startContainer
+  const offset = range.startOffset
+
+  if (event.key === 'Backspace') {
+    // Case 1: cursor is directly in the editor div (between child nodes)
+    if (container === editor && offset > 0) {
+      const prevChild = container.childNodes[offset - 1]
+      if (isProtectedTimerNode(prevChild)) {
+        event.preventDefault()
+        return
+      }
+    }
+    // Case 2: cursor is at position 0 of a text node — check previous sibling
+    if (container.nodeType === Node.TEXT_NODE && offset === 0) {
+      const prevSibling = findNonEmptyPrevSibling(container)
+      if (prevSibling && isProtectedTimerNode(prevSibling)) {
+        event.preventDefault()
+        return
+      }
+    }
+  } else if (event.key === 'Delete') {
+    // Case 1: cursor is directly in the editor div (between child nodes)
+    if (container === editor && offset < container.childNodes.length) {
+      const nextChild = container.childNodes[offset]
+      if (isProtectedTimerNode(nextChild)) {
+        event.preventDefault()
+        return
+      }
+    }
+    // Case 2: cursor is at end of a text node — check next sibling
+    if (container.nodeType === Node.TEXT_NODE && offset === (container.textContent?.length ?? 0)) {
+      const nextSibling = findNonEmptyNextSibling(container)
+      if (nextSibling && isProtectedTimerNode(nextSibling)) {
+        event.preventDefault()
+        return
+      }
+    }
+  }
+}
+
+function isProtectedTimerNode(node: Node | null): boolean {
+  if (!node || !(node instanceof HTMLElement)) return false
+  return node.hasAttribute('data-timer-placeholder') || node.hasAttribute('data-timer-separator')
+}
+
+function findNonEmptyPrevSibling(node: Node): Node | null {
+  let prev = node.previousSibling
+  while (prev && prev.nodeType === Node.TEXT_NODE && prev.textContent === '') {
+    prev = prev.previousSibling
+  }
+  return prev
+}
+
+function findNonEmptyNextSibling(node: Node): Node | null {
+  let next = node.nextSibling
+  while (next && next.nodeType === Node.TEXT_NODE && next.textContent === '') {
+    next = next.nextSibling
+  }
+  return next
+}
+
 function updatePromoFormats() {
+  const selection = window.getSelection()
+
+  // If a timer placeholder is selected, read formatting directly from it
+  if (currentFieldFocus.value === 'timer' && selection) {
+    const phSpan = getSelectedTimerPlaceholder(selection)
+    if (phSpan) {
+      const fw = phSpan.style.fontWeight
+      promoFormats.value.bold = (fw === 'bold' || fw === '700')
+      promoFormats.value.italic = (phSpan.style.fontStyle === 'italic')
+      promoFormats.value.size = fontSizeToLabel(phSpan.style.fontSize) || 'md'
+      return
+    }
+  }
+
   promoFormats.value.bold = document.queryCommandState('bold')
   promoFormats.value.italic = document.queryCommandState('italic')
   // Default to 'md' (1rem) when no explicit font-size is set
   promoFormats.value.size = 'md'
-  const selection = window.getSelection()
   if (selection && selection.anchorNode) {
     let node: Node | null = selection.anchorNode
     while (node && node !== document.body) {
       if (node instanceof HTMLElement) {
         const fontSize = node.style.fontSize
         if (fontSize) {
-          if (fontSize === '0.75rem') promoFormats.value.size = 'xs'
-          else if (fontSize === '0.875rem') promoFormats.value.size = 'sm'
-          else if (fontSize === '1rem') promoFormats.value.size = 'md'
-          else if (fontSize === '1.125rem') promoFormats.value.size = 'lg'
-          else if (fontSize === '1.25rem') promoFormats.value.size = 'xl'
-          else if (fontSize === '1.5rem') promoFormats.value.size = 'xxl'
+          promoFormats.value.size = fontSizeToLabel(fontSize) || 'md'
           break
         }
       }
@@ -1789,9 +2040,98 @@ function updatePromoFormats() {
   }
 }
 
+function fontSizeToLabel(fontSize: string): string {
+  const map: Record<string, string> = {
+    '0.75rem': 'xs',
+    '0.875rem': 'sm',
+    '1rem': 'md',
+    '1.125rem': 'lg',
+    '1.25rem': 'xl',
+    '1.5rem': 'xxl',
+  }
+  return map[fontSize] || ''
+}
+
+function getSelectedTimerPlaceholder(selection: Selection): HTMLElement | null {
+  if (!selection || selection.rangeCount === 0) return null
+  const range = selection.getRangeAt(0)
+  // Check if the selection is entirely within (or is) a placeholder span
+  let node: Node | null = range.commonAncestorContainer
+  if (node.nodeType === Node.TEXT_NODE) node = node.parentElement
+  while (node && node instanceof HTMLElement) {
+    if (node.hasAttribute('data-timer-placeholder')) return node
+    // Also check if the parent contains only placeholder(s) in the selection
+    node = node.parentElement
+  }
+  // Check if the selection's anchor or focus is right on a placeholder
+  const anchorNode = selection.anchorNode
+  if (anchorNode && anchorNode.nodeType === Node.ELEMENT_NODE) {
+    const el = anchorNode as HTMLElement
+    const child = el.childNodes[selection.anchorOffset]
+    if (child instanceof HTMLElement && child.hasAttribute('data-timer-placeholder')) return child
+  }
+  // Check if a placeholder is selected via user-select: all (the range startContainer or endContainer)
+  if (range.startContainer instanceof HTMLElement && range.startContainer.hasAttribute('data-timer-placeholder')) {
+    return range.startContainer
+  }
+  // Intersect check
+  const editor = document.querySelector('#timer-richtext-editor')
+  if (editor) {
+    const placeholders = editor.querySelectorAll('[data-timer-placeholder]')
+    for (const ph of Array.from(placeholders)) {
+      if (range.intersectsNode(ph) && selection.toString().trim() === ph.textContent?.trim()) {
+        return ph as HTMLElement
+      }
+    }
+  }
+  return null
+}
+
+function applyFormatToTimerPlaceholder(span: HTMLElement, format: string) {
+  const sizeMap: Record<string, string> = {
+    'size-xs': '0.75rem',
+    'size-sm': '0.875rem',
+    'size-md': '1rem',
+    'size-lg': '1.125rem',
+    'size-xl': '1.25rem',
+    'size-xxl': '1.5rem',
+  }
+
+  if (format === 'bold') {
+    // Toggle bold
+    const current = span.style.fontWeight
+    span.style.fontWeight = (current === 'bold' || current === '700') ? '' : 'bold'
+  } else if (format === 'italic') {
+    // Toggle italic
+    const current = span.style.fontStyle
+    span.style.fontStyle = current === 'italic' ? '' : 'italic'
+  } else if (sizeMap[format]) {
+    span.style.fontSize = sizeMap[format]
+  }
+}
+
 function formatPromoText(format: string) {
   const selection = window.getSelection()
   if (!selection || selection.rangeCount === 0) return
+
+  // Special handling for timer placeholder spans: apply styles directly to the span
+  if (currentFieldFocus.value === 'timer') {
+    const placeholderSpan = getSelectedTimerPlaceholder(selection)
+    if (placeholderSpan) {
+      applyFormatToTimerPlaceholder(placeholderSpan, format)
+      // Re-select the placeholder after formatting
+      const selRange = document.createRange()
+      selRange.selectNode(placeholderSpan)
+      selection.removeAllRanges()
+      selection.addRange(selRange)
+      // Sync back (clean for storage)
+      const editor = document.querySelector('#timer-richtext-editor') as HTMLDivElement
+      if (editor) config.value.promoCard.timerText = cleanTimerForStorage(editor.innerHTML)
+      markChanged()
+      updatePromoFormats()
+      return
+    }
+  }
 
   // Bold/italic: execCommand works both at caret (toggles for future typing) and with selection
   // Font-size: applyFontSize handles both caret and selection modes
@@ -1834,7 +2174,7 @@ function formatPromoText(format: string) {
     if (editor) config.value.promoCard.description = wrapBareTextWithFontSize(editor.innerHTML)
   } else if (currentFieldFocus.value === 'timer') {
     const editor = document.querySelector('#timer-richtext-editor') as HTMLDivElement
-    if (editor) config.value.promoCard.timerText = wrapBareTextWithFontSize(editor.innerHTML)
+    if (editor) config.value.promoCard.timerText = cleanTimerForStorage(editor.innerHTML)
   } else if (currentFieldFocus.value === 'button') {
     const editor = document.querySelector('#promo-button-editor') as HTMLDivElement
     if (editor) config.value.promoCard.buttonText = wrapBareTextWithFontSize(editor.innerHTML)
