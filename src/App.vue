@@ -99,18 +99,12 @@
               <p class="text-sm text-gray-500 mb-3 line-clamp-2 dark:text-gray-400">
                 <span v-if="config.announcementBar.announcements.length === 0">No announcements set</span>
                 <span v-else-if="config.announcementBar.announcements.length === 1">
-                  <span v-if="!config.announcementBar.announcements[0].richText">{{
-                    config.announcementBar.announcements[0].text }}</span>
-                  <span v-else v-html="config.announcementBar.announcements[0].text"></span>
+                  {{ stripHtml(config.announcementBar.announcements[0].text) }}
                 </span>
                 <span v-else>
-                  <span v-if="!config.announcementBar.announcements[0].richText">{{
-                    config.announcementBar.announcements[0].text }}</span>
-                  <span v-else v-html="config.announcementBar.announcements[0].text"></span>
+                  {{ stripHtml(config.announcementBar.announcements[0].text) }}
                   •
-                  <span v-if="!config.announcementBar.announcements[1].richText">{{
-                    config.announcementBar.announcements[1].text }}</span>
-                  <span v-else v-html="config.announcementBar.announcements[1].text"></span>
+                  {{ stripHtml(config.announcementBar.announcements[1].text) }}
                 </span>
               </p>
               <div class="flex items-center text-xs text-gray-400">
@@ -142,10 +136,10 @@
                 </span>
               </div>
               <p class="text-sm text-gray-500 mb-1 font-medium dark:text-gray-400">
-                {{ config.promoCard.title || 'No title set' }}
+                {{ stripHtml(config.promoCard.title) || 'No title set' }}
               </p>
               <p class="text-sm text-gray-400 mb-3 line-clamp-2 dark:text-gray-500">
-                {{ config.promoCard.description || 'No description set' }}
+                {{ stripHtml(config.promoCard.description) || 'No description set' }}
               </p>
               <div class="flex items-center text-xs text-gray-400">
                 <Calendar class="w-3.5 h-3.5 mr-1" />
@@ -239,10 +233,103 @@
                       </div>
                     </div>
 
-                    <!-- Rich Text Toolbar -->
                     <div v-if="selectedAnnouncementRichText"
                       class="mb-2 border border-gray-300 rounded-md p-1.5 bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
                       <div class="flex flex-wrap gap-1 items-center">
+                        <!-- Color picker for announcements -->
+                        <div class="relative flex items-center" ref="annColorPaletteContainer">
+                          <button
+                            class="cursor-pointer flex flex-col items-center px-1.5 py-1 border rounded transition-colors border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600"
+                            title="Text Color" @mousedown.prevent="toggleAnnColorPalette">
+                            <span class="text-xs font-bold leading-none text-gray-700 dark:text-gray-200">A</span>
+                            <span class="block w-4 h-1 rounded-sm mt-0.5"
+                              :style="{ backgroundColor: activeFormats.color }"></span>
+                          </button>
+
+                          <!-- Color Palette Dropdown -->
+                          <div v-if="showAnnColorPalette"
+                            class="absolute top-full left-0 mt-1 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-xl p-2 w-[228px]">
+                            <p class="text-[10px] text-gray-500 dark:text-gray-400 font-medium mb-1.5 px-0.5">Text color
+                            </p>
+                            <div class="grid grid-cols-10 gap-0.5">
+                              <button v-for="c in PRESET_COLORS" :key="c" @mousedown.prevent="applyAnnPresetColor(c)"
+                                class="w-5 h-5 rounded-sm border transition-transform hover:scale-125 hover:z-10 hover:shadow-md"
+                                :class="activeFormats.color === c ? 'ring-2 ring-indigo-500 ring-offset-1 dark:ring-offset-gray-800' : ''"
+                                :style="{ backgroundColor: c, borderColor: c === '#ffffff' ? '#d1d5db' : c }">
+                              </button>
+                            </div>
+                            <div class="border-t border-gray-200 dark:border-gray-600 mt-2 pt-2">
+                              <button v-if="!showAnnCustomColor" @mousedown.stop.prevent="openAnnCustomColorSection"
+                                class="flex items-center gap-2 cursor-pointer group px-0.5 w-full text-left">
+                                <div
+                                  class="w-5 h-5 rounded-sm border border-gray-300 dark:border-gray-500 bg-gradient-to-br from-red-500 via-yellow-400 to-blue-500">
+                                </div>
+                                <span
+                                  class="text-xs text-gray-600 dark:text-gray-300 group-hover:text-indigo-600 dark:group-hover:text-indigo-400">Custom…</span>
+                              </button>
+                              <div v-else class="space-y-2.5">
+                                <div ref="annGradientAreaRef"
+                                  class="relative w-full h-[140px] rounded cursor-crosshair select-none border border-gray-200 dark:border-gray-600"
+                                  :style="{ background: `linear-gradient(to bottom, transparent, #000), linear-gradient(to right, #fff, hsl(${annCpHue}, 100%, 50%))` }"
+                                  @mousedown.prevent="onAnnGradientMouseDown">
+                                  <div
+                                    class="absolute w-3.5 h-3.5 rounded-full border-2 border-white shadow-md pointer-events-none -translate-x-1/2 -translate-y-1/2"
+                                    :style="{ left: annCpSat + '%', top: (100 - annCpVal) + '%', backgroundColor: annCustomColorValue }">
+                                  </div>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                  <div
+                                    class="w-7 h-7 rounded-full border-2 border-gray-300 dark:border-gray-500 shrink-0"
+                                    :style="{ backgroundColor: annCustomColorValue }"></div>
+                                  <div ref="annHueSliderRef"
+                                    class="relative flex-1 h-3 rounded-full cursor-pointer select-none"
+                                    style="background: linear-gradient(to right, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000);"
+                                    @mousedown.prevent="onAnnHueMouseDown">
+                                    <div
+                                      class="absolute w-3.5 h-3.5 rounded-full border-2 border-white shadow-md pointer-events-none -translate-x-1/2 -translate-y-1/2 top-1/2"
+                                      :style="{ left: (annCpHue / 360 * 100) + '%', backgroundColor: `hsl(${annCpHue}, 100%, 50%)` }">
+                                    </div>
+                                  </div>
+                                </div>
+                                <div class="grid grid-cols-4 gap-1.5">
+                                  <div>
+                                    <label class="block text-[9px] text-gray-400 dark:text-gray-500 mb-0.5">Hex</label>
+                                    <input type="text" :value="annCpHex"
+                                      @change="onAnnCpHexChange(($event.target as HTMLInputElement).value)"
+                                      class="w-full text-[11px] px-1.5 py-1 border rounded bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 dark:text-gray-100 font-mono text-center" />
+                                  </div>
+                                  <div>
+                                    <label class="block text-[9px] text-gray-400 dark:text-gray-500 mb-0.5">R</label>
+                                    <input type="number" min="0" max="255" :value="annCpR"
+                                      @change="onAnnCpRgbChange(Number(($event.target as HTMLInputElement).value), annCpG, annCpB)"
+                                      class="w-full text-[11px] px-1.5 py-1 border rounded bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 dark:text-gray-100 text-center" />
+                                  </div>
+                                  <div>
+                                    <label class="block text-[9px] text-gray-400 dark:text-gray-500 mb-0.5">G</label>
+                                    <input type="number" min="0" max="255" :value="annCpG"
+                                      @change="onAnnCpRgbChange(annCpR, Number(($event.target as HTMLInputElement).value), annCpB)"
+                                      class="w-full text-[11px] px-1.5 py-1 border rounded bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 dark:text-gray-100 text-center" />
+                                  </div>
+                                  <div>
+                                    <label class="block text-[9px] text-gray-400 dark:text-gray-500 mb-0.5">B</label>
+                                    <input type="number" min="0" max="255" :value="annCpB"
+                                      @change="onAnnCpRgbChange(annCpR, annCpG, Number(($event.target as HTMLInputElement).value))"
+                                      class="w-full text-[11px] px-1.5 py-1 border rounded bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 dark:text-gray-100 text-center" />
+                                  </div>
+                                </div>
+                                <div class="flex gap-1.5">
+                                  <button @mousedown.prevent="cancelAnnCustomColor"
+                                    class="flex-1 px-2 py-1.5 text-xs rounded border border-gray-300 text-gray-600 hover:bg-gray-100 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors">Cancel</button>
+                                  <button @mousedown.prevent="confirmAnnCustomColor"
+                                    class="flex-1 px-2 py-1.5 text-xs rounded bg-indigo-600 text-white hover:bg-indigo-700 transition-colors font-medium">OK</button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="border-l border-gray-300 h-4 mx-0.5"></div>
+
                         <button @mousedown.prevent="formatText('bold')"
                           :class="activeFormats.bold ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
                           class="px-2 py-1 text-xs font-bold border rounded transition-colors" title="Bold">B</button>
@@ -271,6 +358,7 @@
                           :class="activeFormats.size === 'xxl' ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'"
                           class="px-2 py-1 text-xs border rounded transition-colors">XXL</button>
 
+                        <div class="border-l border-gray-300 h-4 mx-1"></div>
                         <div class="ml-auto text-[10px] text-gray-400 hidden sm:block">
                           Click to toggle
                         </div>
@@ -439,8 +527,8 @@
                       <div v-for="(announcement, index) in config.announcementBar.announcements" :key="index"
                         class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200 group relative"
                         :class="{ 'ring-1 ring-indigo-300/60 dark:ring-indigo-400/40': selectedAnnouncementIndex === index }">
-                        <span @click="selectAnnouncement(index)" class="cursor-pointer flex-1"
-                          v-html="announcement.text"></span>
+                        <span @click="selectAnnouncement(index)" class="cursor-pointer flex-1 truncate max-w-[250px]"
+                          :title="stripHtml(announcement.text)">{{ stripHtml(announcement.text) }}</span>
                         <a v-if="announcement.url" :href="announcement.url" target="_blank"
                           class="ml-1 text-xs underline hover:no-underline" @click.stop>
                           🔗
@@ -563,10 +651,108 @@
                       <div class="w-full sm:w-auto sm:ml-auto flex items-center gap-1.5">
                         <div class="border-l border-gray-300 h-5 mx-0.5"></div>
 
-                        <div class="flex gap-1.5 items-center">
-                          <label class="text-xs text-gray-500 dark:text-gray-400">Text:</label>
-                          <input type="color" v-model="currentFieldTextColor" @input="updateFieldColors"
-                            class="h-7 w-10 rounded border border-gray-300 cursor-pointer dark:border-gray-600" />
+                        <div class="relative flex items-center" ref="colorPaletteContainer">
+                          <button
+                            class="cursor-pointer flex flex-col items-center px-1.5 py-1 border rounded transition-colors border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 dark:border-gray-600"
+                            title="Text Color" @mousedown.prevent="toggleColorPalette">
+                            <span class="text-xs font-bold leading-none text-gray-700 dark:text-gray-200">A</span>
+                            <span class="block w-4 h-1 rounded-sm mt-0.5"
+                              :style="{ backgroundColor: promoFormats.color }"></span>
+                          </button>
+
+                          <!-- Google Docs-style Color Palette Dropdown -->
+                          <div v-if="showColorPalette"
+                            class="absolute top-full left-0 mt-1 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-xl p-2 w-[228px]">
+                            <p class="text-[10px] text-gray-500 dark:text-gray-400 font-medium mb-1.5 px-0.5">Text color
+                            </p>
+                            <div class="grid grid-cols-10 gap-0.5">
+                              <button v-for="c in PRESET_COLORS" :key="c" @mousedown.prevent="applyPresetColor(c)"
+                                class="w-5 h-5 rounded-sm border transition-transform hover:scale-125 hover:z-10 hover:shadow-md"
+                                :class="promoFormats.color === c ? 'ring-2 ring-indigo-500 ring-offset-1 dark:ring-offset-gray-800' : ''"
+                                :style="{ backgroundColor: c, borderColor: c === '#ffffff' ? '#d1d5db' : c }">
+                              </button>
+                            </div>
+                            <div class="border-t border-gray-200 dark:border-gray-600 mt-2 pt-2">
+                              <!-- Default: show "Custom..." button -->
+                              <button v-if="!showCustomColorSection" @mousedown.stop.prevent="openCustomColorSection"
+                                class="flex items-center gap-2 cursor-pointer group px-0.5 w-full text-left">
+                                <div
+                                  class="w-5 h-5 rounded-sm border border-gray-300 dark:border-gray-500 bg-gradient-to-br from-red-500 via-yellow-400 to-blue-500">
+                                </div>
+                                <span
+                                  class="text-xs text-gray-600 dark:text-gray-300 group-hover:text-indigo-600 dark:group-hover:text-indigo-400">Custom…</span>
+                              </button>
+
+                              <!-- Expanded: Full custom color picker -->
+                              <div v-else class="space-y-2.5">
+                                <!-- Saturation/Brightness gradient area -->
+                                <div ref="gradientAreaRef"
+                                  class="relative w-full h-[140px] rounded cursor-crosshair select-none border border-gray-200 dark:border-gray-600"
+                                  :style="{ background: `linear-gradient(to bottom, transparent, #000), linear-gradient(to right, #fff, hsl(${cpHue}, 100%, 50%))` }"
+                                  @mousedown.prevent="onGradientMouseDown">
+                                  <!-- Picker circle -->
+                                  <div
+                                    class="absolute w-3.5 h-3.5 rounded-full border-2 border-white shadow-md pointer-events-none -translate-x-1/2 -translate-y-1/2"
+                                    :style="{ left: cpSat + '%', top: (100 - cpVal) + '%', backgroundColor: customColorValue }">
+                                  </div>
+                                </div>
+
+                                <!-- Preview circle + Hue slider -->
+                                <div class="flex items-center gap-2">
+                                  <div
+                                    class="w-7 h-7 rounded-full border-2 border-gray-300 dark:border-gray-500 shrink-0"
+                                    :style="{ backgroundColor: customColorValue }"></div>
+                                  <!-- Hue slider track -->
+                                  <div ref="hueSliderRef"
+                                    class="relative flex-1 h-3 rounded-full cursor-pointer select-none"
+                                    style="background: linear-gradient(to right, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000);"
+                                    @mousedown.prevent="onHueMouseDown">
+                                    <div
+                                      class="absolute w-3.5 h-3.5 rounded-full border-2 border-white shadow-md pointer-events-none -translate-x-1/2 -translate-y-1/2 top-1/2"
+                                      :style="{ left: (cpHue / 360 * 100) + '%', backgroundColor: `hsl(${cpHue}, 100%, 50%)` }">
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <!-- Hex + RGB inputs -->
+                                <div class="grid grid-cols-4 gap-1.5">
+                                  <div>
+                                    <label class="block text-[9px] text-gray-400 dark:text-gray-500 mb-0.5">Hex</label>
+                                    <input type="text" :value="cpHexInput"
+                                      @change="onCpHexChange(($event.target as HTMLInputElement).value)"
+                                      @keydown.enter="onCpHexChange(($event.target as HTMLInputElement).value)"
+                                      class="w-full text-[11px] px-1.5 py-1 border rounded bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 dark:text-gray-100 font-mono text-center" />
+                                  </div>
+                                  <div>
+                                    <label class="block text-[9px] text-gray-400 dark:text-gray-500 mb-0.5">R</label>
+                                    <input type="number" min="0" max="255" :value="cpR"
+                                      @change="onCpRgbChange(Number(($event.target as HTMLInputElement).value), cpG, cpB)"
+                                      class="w-full text-[11px] px-1.5 py-1 border rounded bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 dark:text-gray-100 text-center" />
+                                  </div>
+                                  <div>
+                                    <label class="block text-[9px] text-gray-400 dark:text-gray-500 mb-0.5">G</label>
+                                    <input type="number" min="0" max="255" :value="cpG"
+                                      @change="onCpRgbChange(cpR, Number(($event.target as HTMLInputElement).value), cpB)"
+                                      class="w-full text-[11px] px-1.5 py-1 border rounded bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 dark:text-gray-100 text-center" />
+                                  </div>
+                                  <div>
+                                    <label class="block text-[9px] text-gray-400 dark:text-gray-500 mb-0.5">B</label>
+                                    <input type="number" min="0" max="255" :value="cpB"
+                                      @change="onCpRgbChange(cpR, cpG, Number(($event.target as HTMLInputElement).value))"
+                                      class="w-full text-[11px] px-1.5 py-1 border rounded bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 dark:text-gray-100 text-center" />
+                                  </div>
+                                </div>
+
+                                <!-- Cancel / OK -->
+                                <div class="flex gap-1.5">
+                                  <button @mousedown.prevent="cancelCustomColor"
+                                    class="flex-1 px-2 py-1.5 text-xs rounded border border-gray-300 text-gray-600 hover:bg-gray-100 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors">Cancel</button>
+                                  <button @mousedown.prevent="confirmCustomColor"
+                                    class="flex-1 px-2 py-1.5 text-xs rounded bg-indigo-600 text-white hover:bg-indigo-700 transition-colors font-medium">OK</button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
                         </div>
 
                         <div class="border-l border-gray-300 h-5 mx-0.5"></div>
@@ -597,6 +783,7 @@
 
                     <!-- Row 2: Background Type + Colors + Gradient Controls -->
                     <div class="flex flex-wrap gap-1.5 items-center">
+                      <span class="text-xs font-medium text-gray-500 dark:text-gray-400">Bg</span>
                       <select v-model="currentFieldBgType" @change="updateFieldBgType"
                         class="text-xs border-gray-300 rounded px-2 py-1.5 border bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
                         <option value="solid">Solid</option>
@@ -685,8 +872,32 @@
 
                 <!-- Timer Toggle -->
                 <div class="flex items-center justify-between">
-                  <div>
+                  <div class="flex items-center gap-1.5">
                     <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Enable Timer</label>
+                    <!-- Tooltip info icon -->
+                    <div class="relative group">
+                      <svg class="w-4 h-4 text-gray-400 dark:text-gray-500 cursor-help" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10" />
+                        <path d="M12 16v-4M12 8h.01" />
+                      </svg>
+                      <div
+                        class="absolute bottom-full left-0 mb-2 w-64 p-2.5 bg-gray-900 dark:bg-gray-700 text-white text-[11px] leading-relaxed rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
+                        <p class="font-semibold mb-1">How the timer works:</p>
+                        <p class="mb-1">Dates are <strong>calendar-based</strong>, not relative to when you set them.
+                        </p>
+                        <ul class="space-y-0.5 list-disc list-inside">
+                          <li><strong>Start date</strong> begins at <strong>12:00 AM</strong> (midnight)</li>
+                          <li><strong>End date</strong> runs until <strong>11:59 PM</strong> (end of day)</li>
+                        </ul>
+                        <p class="mt-1 text-gray-300 dark:text-gray-400">e.g. Start: Feb 19 → End: Feb 21 means the
+                          timer counts down
+                          from now until Feb 21, 11:59 PM.</p>
+                        <div
+                          class="absolute top-full left-4 w-0 h-0 border-l-[6px] border-r-[6px] border-t-[6px] border-l-transparent border-r-transparent border-t-gray-900 dark:border-t-gray-700">
+                        </div>
+                      </div>
+                    </div>
                   </div>
                   <button @click="toggleTimer" :class="config.promoCard.showTimer ? 'bg-indigo-600' : 'bg-gray-200'"
                     class="relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
@@ -952,7 +1163,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch, nextTick } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { loadConfig, saveConfig } from './services/campaignService'
 import type { CampaignConfig, PromoCard } from './types/campaign'
@@ -994,23 +1205,80 @@ type ActiveFormats = {
   bold: boolean
   italic: boolean
   size: string
+  color: string
 }
 
 const activeFormats = ref<ActiveFormats>({
   bold: false,
   italic: false,
-  size: ''
+  size: '',
+  color: '#000000'
 })
+
+// Announcement color picker state
+const showAnnColorPalette = ref(false)
+const showAnnCustomColor = ref(false)
+const annCustomColorValue = ref('#000000')
+const annCpHue = ref(0)
+const annCpSat = ref(100)
+const annCpVal = ref(100)
+const annCpHex = ref('#ff0000')
+const annCpR = ref(255)
+const annCpG = ref(0)
+const annCpB = ref(0)
+const annCpDraggingGradient = ref(false)
+const annCpDraggingHue = ref(false)
+const annGradientAreaRef = ref<HTMLElement | null>(null)
+const annHueSliderRef = ref<HTMLElement | null>(null)
+const annColorPaletteContainer = ref<HTMLElement | null>(null)
+let savedAnnColorRange: Range | null = null
 
 const promoFormats = ref<ActiveFormats>({
   bold: false,
   italic: false,
-  size: ''
+  size: '',
+  color: '#ffffff'
 })
+
+const showColorPalette = ref(false)
+const showCustomColorSection = ref(false)
+const customColorValue = ref('#000000')
+// HSV state for the custom color picker
+const cpHue = ref(0)
+const cpSat = ref(100)
+const cpVal = ref(100)
+const cpHexInput = ref('#ff0000')
+const cpR = ref(255)
+const cpG = ref(0)
+const cpB = ref(0)
+const cpDraggingGradient = ref(false)
+const cpDraggingHue = ref(false)
+const gradientAreaRef = ref<HTMLElement | null>(null)
+const hueSliderRef = ref<HTMLElement | null>(null)
+
+// Google Docs–style preset color grid
+const PRESET_COLORS = [
+  // Row 1 — dark
+  '#000000', '#434343', '#666666', '#999999', '#b7b7b7', '#cccccc', '#d9d9d9', '#efefef', '#f3f3f3', '#ffffff',
+  // Row 2 — vivid
+  '#980000', '#ff0000', '#ff9900', '#ffff00', '#00ff00', '#00ffff', '#4a86e8', '#0000ff', '#9900ff', '#ff00ff',
+  // Row 3 — light
+  '#e6b8af', '#f4cccc', '#fce5cd', '#fff2cc', '#d9ead3', '#d0e0e3', '#c9daf8', '#cfe2f3', '#d9d2e9', '#ead1dc',
+  // Row 4 — medium-light
+  '#dd7e6b', '#ea9999', '#f9cb9c', '#ffe599', '#b6d7a8', '#a2c4c9', '#a4c2f4', '#9fc5e8', '#b4a7d6', '#d5a6bd',
+  // Row 5 — medium
+  '#cc4125', '#e06666', '#f6b26b', '#ffd966', '#93c47d', '#76a5af', '#6d9eeb', '#6fa8dc', '#8e7cc3', '#c27ba0',
+  // Row 6 — dark-medium
+  '#a61c00', '#cc0000', '#e69138', '#f1c232', '#6aa84f', '#45818e', '#3c78d8', '#3d85c6', '#674ea7', '#a64d79',
+  // Row 7 — dark
+  '#85200c', '#990000', '#b45f06', '#bf9000', '#38761d', '#134f5c', '#1155cc', '#0b5394', '#351c75', '#741b47',
+  // Row 8 — very dark
+  '#5b0f00', '#660000', '#783f04', '#7f6000', '#274e13', '#0c343d', '#1c4587', '#073763', '#20124d', '#4c1130'
+]
 
 const currentFieldBgType = ref('solid')
 const currentFieldFocus = ref<'title' | 'subtitle' | 'description' | 'timer' | 'button' | null>(null)
-const currentFieldTextColor = ref('#ffffff')
+// Text color is now inline per-selection via promoFormats.color, not field-level
 const currentFieldBgColor = ref('#111827')
 const currentFieldBgEndColor = ref('#111827')
 const currentFieldBgDirection = ref('to right')
@@ -1047,6 +1315,7 @@ function cleanTimerForStorage(editorHTML: string): string {
     const userFontSize = htmlEl.style.fontSize || '1rem' // default to md (1rem)
     const userFontWeight = htmlEl.style.fontWeight
     const userFontStyle = htmlEl.style.fontStyle
+    const userColor = htmlEl.style.color
     // Build minimal style with only user formatting (always include font-size)
     let style = `font-size:${userFontSize};`
     // font-weight: 600 is our editor default, bold/700 is user-applied
@@ -1054,6 +1323,7 @@ function cleanTimerForStorage(editorHTML: string): string {
       style += `font-weight:${userFontWeight};`
     }
     if (userFontStyle && userFontStyle !== 'normal') style += `font-style:${userFontStyle};`
+    if (userColor) style += `color:${userColor};`
     htmlEl.setAttribute('style', style)
   })
 
@@ -1085,10 +1355,12 @@ function buildTimerEditorHTML(storedHTML: string): string {
     const userFontSize = htmlEl.style.fontSize || '1rem' // default to md (1rem)
     const userFontWeight = htmlEl.style.fontWeight || ''
     const userFontStyle = htmlEl.style.fontStyle || ''
+    const userColor = htmlEl.style.color || ''
     let style = (TIMER_EDITOR_COLOR_MAP[token] || '') + TIMER_EDITOR_BASE_STYLE
     style += `font-size:${userFontSize};`
     if (userFontWeight) style += `font-weight:${userFontWeight};`
     if (userFontStyle) style += `font-style:${userFontStyle};`
+    if (userColor) style += `color:${userColor};`
     htmlEl.setAttribute('style', style)
   })
 
@@ -1264,7 +1536,23 @@ onMounted(async () => {
   // Populate editors after DOM is ready
   await nextTick()
   syncPromoEditorsFromConfig()
+
+  // Listen for clicks outside color palette to close it
+  document.addEventListener('mousedown', handleClickOutsideColorPalette)
+  document.addEventListener('mousedown', handleClickOutsideAnnColorPalette)
 })
+
+onBeforeUnmount(() => {
+  document.removeEventListener('mousedown', handleClickOutsideColorPalette)
+  document.removeEventListener('mousedown', handleClickOutsideAnnColorPalette)
+})
+
+function stripHtml(html: string): string {
+  if (!html) return ''
+  const div = document.createElement('div')
+  div.innerHTML = html
+  return div.textContent || div.innerText || ''
+}
 
 function toggleDarkMode() {
   isDarkMode.value = !isDarkMode.value
@@ -1435,10 +1723,16 @@ function selectAnnouncement(index: number) {
   selectedAnnouncementRichText.value = config.value.announcementBar.announcements[index].richText || false
 
   // Put the announcement text in the input bar for editing
-  newAnnouncementText.value = config.value.announcementBar.announcements[index].text
+  const rawText = config.value.announcementBar.announcements[index].text
+  if (selectedAnnouncementRichText.value) {
+    newAnnouncementText.value = rawText
+  } else {
+    // Strip HTML tags so the plain textarea doesn't show raw HTML
+    newAnnouncementText.value = stripHtml(rawText)
+  }
 
   // Always reset active formats first, then re-compute for the NEW announcement
-  activeFormats.value = { bold: false, italic: false, size: 'md' }
+  activeFormats.value = { bold: false, italic: false, size: 'md', color: '#000000' }
   if (selectedAnnouncementRichText.value) {
     updateActiveFormats()
   }
@@ -1500,7 +1794,7 @@ function toggleRichText() {
         }
       })
     } else {
-      activeFormats.value = { bold: false, italic: false, size: 'md' }
+      activeFormats.value = { bold: false, italic: false, size: 'md', color: '#000000' }
       const div = document.createElement('div')
       div.innerHTML = newAnnouncementText.value
       newAnnouncementText.value = div.textContent || div.innerText || newAnnouncementText.value
@@ -1524,7 +1818,7 @@ function toggleRichText() {
       })
     } else {
       // Switching off rich text - strip HTML tags and show plain text
-      activeFormats.value = { bold: false, italic: false, size: 'md' }
+      activeFormats.value = { bold: false, italic: false, size: 'md', color: '#000000' }
 
       // Strip HTML from the announcement text
       const div = document.createElement('div')
@@ -1558,7 +1852,7 @@ function onRichTextInput(event: Event) {
 // Update active format indicators based on current cursor/selection position
 function updateActiveFormats() {
   if (!selectedAnnouncementRichText.value) {
-    activeFormats.value = { bold: false, italic: false, size: '' }
+    activeFormats.value = { bold: false, italic: false, size: '', color: '#000000' }
     return
   }
 
@@ -1588,6 +1882,26 @@ function updateActiveFormats() {
         }
       }
       node = node.parentNode
+    }
+  }
+
+  // Detect color by walking up the DOM
+  activeFormats.value.color = '#000000'
+  if (selection && selection.anchorNode) {
+    let cNode: Node | null = selection.anchorNode
+    while (cNode && cNode !== document.body) {
+      if (cNode instanceof HTMLElement && cNode.style.color) {
+        activeFormats.value.color = cNode.style.color
+        // Normalize to hex if rgb(...)
+        if (activeFormats.value.color.startsWith('rgb')) {
+          const m = activeFormats.value.color.match(/\d+/g)
+          if (m && m.length >= 3) {
+            activeFormats.value.color = rgbToHexString(+m[0], +m[1], +m[2])
+          }
+        }
+        break
+      }
+      cNode = cNode.parentNode
     }
   }
 }
@@ -1643,6 +1957,161 @@ function formatText(format: string) {
   // Update active format indicators
   updateActiveFormats()
 }
+
+// ---- Announcement Color Picker ----
+function saveAnnSelectionRange() {
+  const sel = window.getSelection()
+  const richEditor = document.querySelector('#announcement-richtext-editor') as HTMLDivElement
+  if (sel && sel.rangeCount > 0 && richEditor && richEditor.contains(sel.anchorNode)) {
+    savedAnnColorRange = sel.getRangeAt(0).cloneRange()
+  }
+}
+
+function toggleAnnColorPalette() {
+  saveAnnSelectionRange()
+  showAnnColorPalette.value = !showAnnColorPalette.value
+  if (showAnnColorPalette.value) {
+    showAnnCustomColor.value = false
+  }
+}
+
+function applyAnnColorToEditor(color: string) {
+  activeFormats.value.color = color
+  const richEditor = document.querySelector('#announcement-richtext-editor') as HTMLDivElement
+  if (!richEditor || !savedAnnColorRange) return
+  applyInlineColor(color, savedAnnColorRange)
+  const updatedHtml = wrapBareTextWithFontSize(richEditor.innerHTML)
+  newAnnouncementText.value = updatedHtml
+  if (selectedAnnouncementIndex.value !== null) {
+    config.value.announcementBar.announcements[selectedAnnouncementIndex.value].text = updatedHtml
+    markChanged()
+  }
+  const sel = window.getSelection()
+  if (sel && sel.rangeCount > 0) {
+    savedAnnColorRange = sel.getRangeAt(0).cloneRange()
+  }
+}
+
+function applyAnnPresetColor(color: string) {
+  applyAnnColorToEditor(color)
+  showAnnColorPalette.value = false
+}
+
+function openAnnCustomColorSection() {
+  const hex = activeFormats.value.color
+  annCustomColorValue.value = hex
+  annCpHex.value = hex
+  const rgb = hexToRgbValues(hex)
+  annCpR.value = rgb.r; annCpG.value = rgb.g; annCpB.value = rgb.b
+  const hsv = rgbToHsv(rgb.r, rgb.g, rgb.b)
+  annCpHue.value = hsv.h; annCpSat.value = hsv.s; annCpVal.value = hsv.v
+  showAnnCustomColor.value = true
+}
+
+function confirmAnnCustomColor() {
+  applyAnnColorToEditor(annCustomColorValue.value)
+  showAnnCustomColor.value = false
+  showAnnColorPalette.value = false
+}
+
+function cancelAnnCustomColor() {
+  showAnnCustomColor.value = false
+}
+
+function syncAnnCpFromHsv() {
+  const rgb = hsvToRgb(annCpHue.value, annCpSat.value, annCpVal.value)
+  annCpR.value = rgb.r; annCpG.value = rgb.g; annCpB.value = rgb.b
+  const hex = rgbToHexString(rgb.r, rgb.g, rgb.b)
+  annCpHex.value = hex
+  annCustomColorValue.value = hex
+}
+
+// Gradient mouse tracking
+function onAnnGradientMouseDown(e: MouseEvent) {
+  annCpDraggingGradient.value = true
+  updateAnnGradientFromEvent(e)
+  document.addEventListener('mousemove', onAnnGradientMouseMove)
+  document.addEventListener('mouseup', onAnnGradientMouseUp)
+}
+function onAnnGradientMouseMove(e: MouseEvent) {
+  if (!annCpDraggingGradient.value) return
+  updateAnnGradientFromEvent(e)
+}
+function onAnnGradientMouseUp() {
+  annCpDraggingGradient.value = false
+  document.removeEventListener('mousemove', onAnnGradientMouseMove)
+  document.removeEventListener('mouseup', onAnnGradientMouseUp)
+}
+function updateAnnGradientFromEvent(e: MouseEvent) {
+  const el = annGradientAreaRef.value
+  if (!el) return
+  const rect = el.getBoundingClientRect()
+  const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width))
+  const y = Math.max(0, Math.min(e.clientY - rect.top, rect.height))
+  annCpSat.value = Math.round((x / rect.width) * 100)
+  annCpVal.value = Math.round(100 - (y / rect.height) * 100)
+  syncAnnCpFromHsv()
+}
+
+// Hue slider mouse tracking
+function onAnnHueMouseDown(e: MouseEvent) {
+  annCpDraggingHue.value = true
+  updateAnnHueFromEvent(e)
+  document.addEventListener('mousemove', onAnnHueMouseMove)
+  document.addEventListener('mouseup', onAnnHueMouseUp)
+}
+function onAnnHueMouseMove(e: MouseEvent) {
+  if (!annCpDraggingHue.value) return
+  updateAnnHueFromEvent(e)
+}
+function onAnnHueMouseUp() {
+  annCpDraggingHue.value = false
+  document.removeEventListener('mousemove', onAnnHueMouseMove)
+  document.removeEventListener('mouseup', onAnnHueMouseUp)
+}
+function updateAnnHueFromEvent(e: MouseEvent) {
+  const el = annHueSliderRef.value
+  if (!el) return
+  const rect = el.getBoundingClientRect()
+  const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width))
+  annCpHue.value = Math.round((x / rect.width) * 360)
+  syncAnnCpFromHsv()
+}
+
+// Hex / RGB input handlers
+function onAnnCpHexChange(val: string) {
+  let hex = val.trim()
+  if (!hex.startsWith('#')) hex = '#' + hex
+  if (/^#[0-9a-fA-F]{6}$/.test(hex) || /^#[0-9a-fA-F]{3}$/.test(hex)) {
+    const rgb = hexToRgbValues(hex)
+    const hsv = rgbToHsv(rgb.r, rgb.g, rgb.b)
+    annCpHue.value = hsv.h; annCpSat.value = hsv.s; annCpVal.value = hsv.v
+    annCpR.value = rgb.r; annCpG.value = rgb.g; annCpB.value = rgb.b
+    const fullHex = rgbToHexString(rgb.r, rgb.g, rgb.b)
+    annCpHex.value = fullHex
+    annCustomColorValue.value = fullHex
+  }
+}
+
+function onAnnCpRgbChange(r: number, g: number, b: number) {
+  r = Math.max(0, Math.min(255, r || 0))
+  g = Math.max(0, Math.min(255, g || 0))
+  b = Math.max(0, Math.min(255, b || 0))
+  annCpR.value = r; annCpG.value = g; annCpB.value = b
+  const hsv = rgbToHsv(r, g, b)
+  annCpHue.value = hsv.h; annCpSat.value = hsv.s; annCpVal.value = hsv.v
+  const hex = rgbToHexString(r, g, b)
+  annCpHex.value = hex
+  annCustomColorValue.value = hex
+}
+
+function handleClickOutsideAnnColorPalette(e: MouseEvent) {
+  if (showAnnColorPalette.value && annColorPaletteContainer.value && !annColorPaletteContainer.value.contains(e.target as Node)) {
+    showAnnColorPalette.value = false
+    showAnnCustomColor.value = false
+  }
+}
+
 
 // Apply font size - preserves bold/italic, prevents nesting
 // Works both with selected text AND at caret (inserts a styled span for future typing)
@@ -2009,6 +2478,12 @@ function findNonEmptyNextSibling(node: Node): Node | null {
 function updatePromoFormats() {
   const selection = window.getSelection()
 
+  // Always keep the latest selection saved for the color picker
+  // (since the color input steals focus, we save here on every mouseup/keyup instead)
+  if (selection && selection.rangeCount > 0) {
+    savedColorRange = selection.getRangeAt(0).cloneRange()
+  }
+
   // If a timer placeholder is selected, read formatting directly from it
   if (currentFieldFocus.value === 'timer' && selection) {
     const phSpan = getSelectedTimerPlaceholder(selection)
@@ -2017,6 +2492,7 @@ function updatePromoFormats() {
       promoFormats.value.bold = (fw === 'bold' || fw === '700')
       promoFormats.value.italic = (phSpan.style.fontStyle === 'italic')
       promoFormats.value.size = fontSizeToLabel(phSpan.style.fontSize) || 'md'
+      promoFormats.value.color = phSpan.style.color || '#ffffff'
       return
     }
   }
@@ -2025,6 +2501,10 @@ function updatePromoFormats() {
   promoFormats.value.italic = document.queryCommandState('italic')
   // Default to 'md' (1rem) when no explicit font-size is set
   promoFormats.value.size = 'md'
+  // Detect text color at cursor via foreColor command or inline style
+  const rawColor = document.queryCommandValue('foreColor')
+  promoFormats.value.color = rawColor ? rgbToHex(rawColor) : '#ffffff'
+
   if (selection && selection.anchorNode) {
     let node: Node | null = selection.anchorNode
     while (node && node !== document.body) {
@@ -2038,6 +2518,21 @@ function updatePromoFormats() {
       node = node.parentNode
     }
   }
+}
+
+// Convert 'rgb(r, g, b)' or hex string to '#rrggbb'
+function rgbToHex(color: string): string {
+  // If already hex, just return
+  if (color.startsWith('#')) return color
+  // Match rgb(r, g, b)
+  const match = color.match(/rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/)
+  if (match) {
+    const r = parseInt(match[1]).toString(16).padStart(2, '0')
+    const g = parseInt(match[2]).toString(16).padStart(2, '0')
+    const b = parseInt(match[3]).toString(16).padStart(2, '0')
+    return `#${r}${g}${b}`
+  }
+  return color
 }
 
 function fontSizeToLabel(fontSize: string): string {
@@ -2105,8 +2600,369 @@ function applyFormatToTimerPlaceholder(span: HTMLElement, format: string) {
     // Toggle italic
     const current = span.style.fontStyle
     span.style.fontStyle = current === 'italic' ? '' : 'italic'
+  } else if (format.startsWith('color-')) {
+    span.style.color = format.slice(6)
   } else if (sizeMap[format]) {
     span.style.fontSize = sizeMap[format]
+  }
+}
+
+// Saved selection range for the color picker (since clicking the input steals focus)
+let savedColorRange: Range | null = null
+
+// Save the current selection before the color picker steals focus
+function saveSelectionForColorPicker() {
+  const selection = window.getSelection()
+  if (selection && selection.rangeCount > 0) {
+    savedColorRange = selection.getRangeAt(0).cloneRange()
+  }
+}
+
+// Toggle the color palette dropdown, saving selection first
+function toggleColorPalette() {
+  // Save current selection before doing anything
+  saveSelectionForColorPicker()
+  showColorPalette.value = !showColorPalette.value
+  // Reset custom section when opening
+  if (showColorPalette.value) {
+    showCustomColorSection.value = false
+  }
+}
+
+// Shared logic to apply a color to the currently-focused promo editor field
+function applyColorToCurrentField(color: string) {
+  promoFormats.value.color = color
+  const editor = getActivePromoEditor()
+  if (!editor || !savedColorRange) return
+
+  // Timer placeholder: apply color directly to the span attribute
+  if (currentFieldFocus.value === 'timer') {
+    let node: Node | null = savedColorRange.commonAncestorContainer
+    if (node.nodeType === Node.TEXT_NODE) node = node.parentElement
+    while (node && node instanceof HTMLElement) {
+      if (node.hasAttribute('data-timer-placeholder')) {
+        node.style.color = color
+        config.value.promoCard.timerText = cleanTimerForStorage(editor.innerHTML)
+        markChanged()
+        return
+      }
+      node = node.parentElement
+    }
+  }
+
+  applyInlineColor(color, savedColorRange)
+  syncActiveEditorToConfig()
+
+  const selection = window.getSelection()
+  if (selection && selection.rangeCount > 0) {
+    savedColorRange = selection.getRangeAt(0).cloneRange()
+  }
+  markChanged()
+}
+
+// Click a preset color swatch — apply instantly and close
+function applyPresetColor(color: string) {
+  applyColorToCurrentField(color)
+  showColorPalette.value = false
+}
+
+// Open the custom color section inside the palette
+function openCustomColorSection() {
+  const hex = promoFormats.value.color
+  customColorValue.value = hex
+  cpHexInput.value = hex
+  const rgb = hexToRgbValues(hex)
+  cpR.value = rgb.r; cpG.value = rgb.g; cpB.value = rgb.b
+  const hsv = rgbToHsv(rgb.r, rgb.g, rgb.b)
+  cpHue.value = hsv.h; cpSat.value = hsv.s; cpVal.value = hsv.v
+  showCustomColorSection.value = true
+}
+
+// Confirm custom color — apply and close
+function confirmCustomColor() {
+  applyColorToCurrentField(customColorValue.value)
+  showCustomColorSection.value = false
+  showColorPalette.value = false
+}
+
+// Cancel custom color — close without applying
+function cancelCustomColor() {
+  showCustomColorSection.value = false
+}
+
+// --- Color conversion helpers ---
+function hexToRgbValues(hex: string): { r: number; g: number; b: number } {
+  hex = hex.replace('#', '')
+  if (hex.length === 3) hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2]
+  return {
+    r: parseInt(hex.substring(0, 2), 16),
+    g: parseInt(hex.substring(2, 4), 16),
+    b: parseInt(hex.substring(4, 6), 16)
+  }
+}
+
+function rgbToHsv(r: number, g: number, b: number): { h: number; s: number; v: number } {
+  r /= 255; g /= 255; b /= 255
+  const max = Math.max(r, g, b), min = Math.min(r, g, b)
+  const d = max - min
+  let h = 0
+  const s = max === 0 ? 0 : (d / max) * 100
+  const v = max * 100
+  if (d !== 0) {
+    if (max === r) h = ((g - b) / d + (g < b ? 6 : 0)) * 60
+    else if (max === g) h = ((b - r) / d + 2) * 60
+    else h = ((r - g) / d + 4) * 60
+  }
+  return { h: Math.round(h), s: Math.round(s), v: Math.round(v) }
+}
+
+function hsvToRgb(h: number, s: number, v: number): { r: number; g: number; b: number } {
+  s /= 100; v /= 100
+  const c = v * s
+  const x = c * (1 - Math.abs((h / 60) % 2 - 1))
+  const m = v - c
+  let r = 0, g = 0, b = 0
+  if (h < 60) { r = c; g = x; b = 0 }
+  else if (h < 120) { r = x; g = c; b = 0 }
+  else if (h < 180) { r = 0; g = c; b = x }
+  else if (h < 240) { r = 0; g = x; b = c }
+  else if (h < 300) { r = x; g = 0; b = c }
+  else { r = c; g = 0; b = x }
+  return {
+    r: Math.round((r + m) * 255),
+    g: Math.round((g + m) * 255),
+    b: Math.round((b + m) * 255)
+  }
+}
+
+function rgbToHexString(r: number, g: number, b: number): string {
+  return '#' + [r, g, b].map(c => Math.max(0, Math.min(255, c)).toString(16).padStart(2, '0')).join('')
+}
+
+// Sync all state from current HSV values
+function syncCpFromHsv() {
+  const rgb = hsvToRgb(cpHue.value, cpSat.value, cpVal.value)
+  cpR.value = rgb.r; cpG.value = rgb.g; cpB.value = rgb.b
+  const hex = rgbToHexString(rgb.r, rgb.g, rgb.b)
+  cpHexInput.value = hex
+  customColorValue.value = hex
+}
+
+// --- Gradient area mouse tracking ---
+function onGradientMouseDown(e: MouseEvent) {
+  cpDraggingGradient.value = true
+  updateGradientFromEvent(e)
+  document.addEventListener('mousemove', onGradientMouseMove)
+  document.addEventListener('mouseup', onGradientMouseUp)
+}
+function onGradientMouseMove(e: MouseEvent) {
+  if (!cpDraggingGradient.value) return
+  updateGradientFromEvent(e)
+}
+function onGradientMouseUp() {
+  cpDraggingGradient.value = false
+  document.removeEventListener('mousemove', onGradientMouseMove)
+  document.removeEventListener('mouseup', onGradientMouseUp)
+}
+function updateGradientFromEvent(e: MouseEvent) {
+  const el = gradientAreaRef.value
+  if (!el) return
+  const rect = el.getBoundingClientRect()
+  const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width))
+  const y = Math.max(0, Math.min(e.clientY - rect.top, rect.height))
+  cpSat.value = Math.round((x / rect.width) * 100)
+  cpVal.value = Math.round(100 - (y / rect.height) * 100)
+  syncCpFromHsv()
+}
+
+// --- Hue slider mouse tracking ---
+function onHueMouseDown(e: MouseEvent) {
+  cpDraggingHue.value = true
+  updateHueFromEvent(e)
+  document.addEventListener('mousemove', onHueMouseMove)
+  document.addEventListener('mouseup', onHueMouseUp)
+}
+function onHueMouseMove(e: MouseEvent) {
+  if (!cpDraggingHue.value) return
+  updateHueFromEvent(e)
+}
+function onHueMouseUp() {
+  cpDraggingHue.value = false
+  document.removeEventListener('mousemove', onHueMouseMove)
+  document.removeEventListener('mouseup', onHueMouseUp)
+}
+function updateHueFromEvent(e: MouseEvent) {
+  const el = hueSliderRef.value
+  if (!el) return
+  const rect = el.getBoundingClientRect()
+  const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width))
+  cpHue.value = Math.round((x / rect.width) * 360)
+  syncCpFromHsv()
+}
+
+// --- Hex / RGB input handlers ---
+function onCpHexChange(val: string) {
+  let hex = val.trim()
+  if (!hex.startsWith('#')) hex = '#' + hex
+  if (/^#[0-9a-fA-F]{6}$/.test(hex) || /^#[0-9a-fA-F]{3}$/.test(hex)) {
+    const rgb = hexToRgbValues(hex)
+    const hsv = rgbToHsv(rgb.r, rgb.g, rgb.b)
+    cpHue.value = hsv.h; cpSat.value = hsv.s; cpVal.value = hsv.v
+    cpR.value = rgb.r; cpG.value = rgb.g; cpB.value = rgb.b
+    const fullHex = rgbToHexString(rgb.r, rgb.g, rgb.b)
+    cpHexInput.value = fullHex
+    customColorValue.value = fullHex
+  }
+}
+
+function onCpRgbChange(r: number, g: number, b: number) {
+  r = Math.max(0, Math.min(255, r || 0))
+  g = Math.max(0, Math.min(255, g || 0))
+  b = Math.max(0, Math.min(255, b || 0))
+  cpR.value = r; cpG.value = g; cpB.value = b
+  const hsv = rgbToHsv(r, g, b)
+  cpHue.value = hsv.h; cpSat.value = hsv.s; cpVal.value = hsv.v
+  const hex = rgbToHexString(r, g, b)
+  cpHexInput.value = hex
+  customColorValue.value = hex
+}
+
+// Close palette on click outside
+const colorPaletteContainer = ref<HTMLElement | null>(null)
+function handleClickOutsideColorPalette(e: MouseEvent) {
+  if (showColorPalette.value && colorPaletteContainer.value && !colorPaletteContainer.value.contains(e.target as Node)) {
+    showColorPalette.value = false
+    showCustomColorSection.value = false
+  }
+}
+
+// Reusable helper: get the editor element for the currently focused promo field
+function getActivePromoEditor(): HTMLDivElement | null {
+  const editorMap: Record<string, string> = {
+    title: '#promo-title-editor',
+    subtitle: '#promo-subtitle-editor',
+    description: '#promo-description-editor',
+    timer: '#timer-richtext-editor',
+    button: '#promo-button-editor',
+  }
+  const selector = currentFieldFocus.value ? editorMap[currentFieldFocus.value] : null
+  return selector ? document.querySelector(selector) as HTMLDivElement | null : null
+}
+
+// Reusable helper: sync the current editor's innerHTML back to the config model
+function syncActiveEditorToConfig() {
+  const editor = getActivePromoEditor()
+  if (!editor) return
+  if (currentFieldFocus.value === 'title') {
+    config.value.promoCard.title = wrapBareTextWithFontSize(editor.innerHTML)
+  } else if (currentFieldFocus.value === 'subtitle') {
+    config.value.promoCard.subtitle = wrapBareTextWithFontSize(editor.innerHTML)
+  } else if (currentFieldFocus.value === 'description') {
+    config.value.promoCard.description = wrapBareTextWithFontSize(editor.innerHTML)
+  } else if (currentFieldFocus.value === 'timer') {
+    config.value.promoCard.timerText = cleanTimerForStorage(editor.innerHTML)
+  } else if (currentFieldFocus.value === 'button') {
+    config.value.promoCard.buttonText = wrapBareTextWithFontSize(editor.innerHTML)
+  }
+  markChanged()
+}
+
+
+// Apply color directly via DOM manipulation — no execCommand/focus dependency
+function applyInlineColor(color: string, range: Range) {
+  // If range is collapsed (caret only, no selection), nothing to color
+  if (range.collapsed) return
+
+  // Clone the selected content
+  const fragment = range.cloneContents()
+  const tempDiv = document.createElement('div')
+  tempDiv.appendChild(fragment)
+
+  // Unwrap any existing color-only font tags (foreColor creates <font> tags) or color spans
+  const fontTags = tempDiv.querySelectorAll('font[color]')
+  for (const ft of fontTags) {
+    const parent = ft.parentElement
+    if (parent) {
+      while (ft.firstChild) parent.insertBefore(ft.firstChild, ft)
+      parent.removeChild(ft)
+    }
+  }
+  // Also unwrap spans that only have color style
+  const colorSpans = tempDiv.querySelectorAll('span')
+  for (const sp of colorSpans) {
+    if (sp.style.color && !sp.style.fontSize && !sp.style.fontWeight && !sp.style.fontStyle
+      && !sp.getAttribute('data-timer-placeholder') && !sp.getAttribute('data-timer-separator')) {
+      const parent = sp.parentElement
+      if (parent) {
+        while (sp.firstChild) parent.insertBefore(sp.firstChild, sp)
+        parent.removeChild(sp)
+      }
+    }
+  }
+
+  // Wrap in a new color span
+  const colorSpan = document.createElement('span')
+  colorSpan.style.color = color
+  colorSpan.innerHTML = tempDiv.innerHTML
+
+  // Delete the original selection and insert the colored version
+  range.deleteContents()
+  range.insertNode(colorSpan)
+
+  // --- Clean up stale/empty color spans left behind ---
+  // Walk up from the inserted span: if a parent is a color-only span that now
+  // contains ONLY our new colorSpan (possibly with empty text nodes), unwrap it.
+  let parent = colorSpan.parentElement
+  while (parent && parent.contentEditable !== 'true' && parent !== document.body) {
+    const isColorOnlySpan = parent.tagName === 'SPAN'
+      && parent.style.color
+      && !parent.style.fontSize
+      && !parent.style.fontWeight
+      && !parent.style.fontStyle
+      && !parent.getAttribute('data-timer-placeholder')
+      && !parent.getAttribute('data-timer-separator')
+
+    if (isColorOnlySpan) {
+      // Check if the parent is effectively empty besides our colorSpan
+      const hasOtherContent = Array.from(parent.childNodes).some(n =>
+        n !== colorSpan && !(n.nodeType === Node.TEXT_NODE && !n.textContent?.trim())
+      )
+      if (!hasOtherContent) {
+        // Unwrap: move colorSpan outside, remove the empty parent
+        const grandparent = parent.parentElement
+        if (grandparent) {
+          grandparent.insertBefore(colorSpan, parent)
+          grandparent.removeChild(parent)
+          parent = colorSpan.parentElement
+          continue
+        }
+      }
+    }
+    break
+  }
+
+  // General cleanup: remove any remaining empty spans in the editor
+  const editor = colorSpan.closest('[contenteditable="true"]')
+  if (editor) {
+    const allSpans = editor.querySelectorAll('span')
+    for (const sp of allSpans) {
+      if (!sp.textContent?.trim() && !sp.querySelector('img, br')
+        && !sp.getAttribute('data-timer-placeholder') && !sp.getAttribute('data-timer-separator')) {
+        sp.remove()
+      }
+    }
+  }
+
+  // Clean up any empty text nodes around the inserted span
+  colorSpan.normalize()
+
+  // Re-select the inserted content
+  const sel = window.getSelection()
+  if (sel) {
+    const newRange = document.createRange()
+    newRange.selectNodeContents(colorSpan)
+    sel.removeAllRanges()
+    sel.addRange(newRange)
   }
 }
 
@@ -2135,6 +2991,7 @@ function formatPromoText(format: string) {
 
   // Bold/italic: execCommand works both at caret (toggles for future typing) and with selection
   // Font-size: applyFontSize handles both caret and selection modes
+  // Color is handled separately by the color palette → applyInlineColor (no execCommand needed)
   switch (format) {
     case 'bold':
       document.execCommand('bold', false)
@@ -2215,7 +3072,6 @@ function syncToolbarWithField() {
 
   const style = styleMap[currentFieldFocus.value]
   if (style) {
-    currentFieldTextColor.value = style.textColor || '#ffffff'
     currentFieldBgColor.value = style.background.startColor || '#111827'
     currentFieldBgType.value = style.background.type || 'solid'
     currentFieldBgEndColor.value = style.background.endColor || '#111827'
@@ -2263,7 +3119,6 @@ function updateFieldColors() {
 
   const style = styleMap[currentFieldFocus.value]
   if (style) {
-    style.textColor = currentFieldTextColor.value
     style.background.startColor = currentFieldBgColor.value
     markChanged()
   }
